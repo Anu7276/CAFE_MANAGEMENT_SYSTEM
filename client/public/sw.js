@@ -4,7 +4,7 @@
  * Invalidates and replaces stale assets on new deployments.
  */
 
-const CACHE_VERSION = 'emerald-kds-v1.2.0';
+const CACHE_VERSION = 'emerald-build-__SW_CACHE_VERSION__';
 const STATIC_CACHE_NAME = `static-${CACHE_VERSION}`;
 const DYNAMIC_CACHE_NAME = `dynamic-${CACHE_VERSION}`;
 
