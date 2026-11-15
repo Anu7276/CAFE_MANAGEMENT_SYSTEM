@@ -1,6 +1,8 @@
 const crypto = require('crypto');
 const Order = require('../models/Order');
 const Item = require('../models/Item');
+const Settings = require('../models/Settings');
+const AuditLog = require('../models/AuditLog');
 const { verifyTableSig } = require('../utils/tableToken');
 
 /**
@@ -10,6 +12,15 @@ const createOrder = async (req, res, next) => {
   try {
     const { table, items, note, paymentMethod, tableSig } = req.body;
     const idempotencyKey = req.headers['idempotency-key'] || req.headers['x-idempotency-key'] || null;
+
+    // 0. Check Master "Accepting Orders" Switch
+    const settings = await Settings.get();
+    if (settings && settings.acceptingOrders === false) {
+      return res.status(403).json({
+        success: false,
+        message: 'The café is currently paused and not accepting new orders. Please check with staff.'
+      });
+    }
 
     // 1. Idempotency Check
     if (idempotencyKey) {
@@ -199,18 +210,52 @@ const getOrderById = async (req, res, next) => {
 };
 
 /**
- * Staff / Admin list all orders with filter
+ * Staff / Admin list all orders with filters, date ranges, and pagination
  */
 const getAllOrders = async (req, res, next) => {
   try {
-    const { status, table, paymentStatus } = req.query;
-    const query = {};
-    if (status) query.status = status;
-    if (table) query.table = table;
-    if (paymentStatus) query.paymentStatus = paymentStatus;
+    const { status, table, paymentStatus, search, startDate, endDate, page = 1, limit = 50 } = req.query;
+    let orders = await Order.find();
 
-    const orders = await Order.find(query);
-    res.json({ success: true, count: orders.length, data: orders });
+    if (status && status !== 'all') {
+      orders = orders.filter(o => o.status === status);
+    }
+    if (table) {
+      orders = orders.filter(o => Number(o.table) === Number(table));
+    }
+    if (paymentStatus && paymentStatus !== 'all') {
+      orders = orders.filter(o => o.paymentStatus === paymentStatus);
+    }
+    if (startDate) {
+      const start = new Date(startDate).getTime();
+      orders = orders.filter(o => new Date(o.createdAt).getTime() >= start);
+    }
+    if (endDate) {
+      const end = new Date(endDate).getTime();
+      orders = orders.filter(o => new Date(o.createdAt).getTime() <= end);
+    }
+    if (search) {
+      const q = String(search).toLowerCase();
+      orders = orders.filter(o =>
+        String(o.orderNumber).includes(q) ||
+        (o.items && o.items.some(i => i.name && i.name.toLowerCase().includes(q))) ||
+        (o.note && o.note.toLowerCase().includes(q))
+      );
+    }
+
+    const totalCount = orders.length;
+    const pageNum = Math.max(1, Number(page));
+    const limitNum = Math.max(1, Math.min(200, Number(limit)));
+    const paginatedOrders = orders.slice((pageNum - 1) * limitNum, pageNum * limitNum);
+
+    res.json({
+      success: true,
+      count: paginatedOrders.length,
+      totalCount,
+      page: pageNum,
+      totalPages: Math.ceil(totalCount / limitNum),
+      data: paginatedOrders
+    });
   } catch (error) {
     next(error);
   }

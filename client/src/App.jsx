@@ -12,6 +12,7 @@ export default function App() {
         <BrowserRouter>
           <Routes>
             <Route path="/" element={<MenuPage />} />
+            <Route path="/t/:tableNumber" element={<MenuPage />} />
             <Route path="/admin" element={<AdminDashboardPage />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>

@@ -19,6 +19,9 @@ const { apiLimiter } = require('./middleware/rateLimiter');
 const authRoutes = require('./routes/authRoutes');
 const itemRoutes = require('./routes/itemRoutes');
 const orderRoutes = require('./routes/orderRoutes');
+const tableRoutes = require('./routes/tableRoutes');
+const reportRoutes = require('./routes/reportRoutes');
+const settingsRoutes = require('./routes/settingsRoutes');
 
 connectDB();
 
@@ -94,10 +97,20 @@ if (process.env.NODE_ENV === 'development') {
   app.use(morgan('dev'));
 }
 
+// Serve static uploads
+const uploadsDir = path.join(__dirname, 'public/uploads');
+if (!fs.existsSync(uploadsDir)) {
+  fs.mkdirSync(uploadsDir, { recursive: true });
+}
+app.use('/uploads', express.static(uploadsDir));
+
 // API Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/items', itemRoutes);
 app.use('/api/orders', orderRoutes);
+app.use('/api/tables', tableRoutes);
+app.use('/api/reports', reportRoutes);
+app.use('/api/settings', settingsRoutes);
 
 // Health check
 app.get('/health', (req, res) => res.json({

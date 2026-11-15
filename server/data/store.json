@@ -50,6 +50,22 @@
   ],
   "items": [
     {
+      "_id": "item_1794761545338",
+      "name": "Artisanal Cinnamon Roll",
+      "category": "desserts",
+      "price": 150,
+      "description": "Freshly baked brioche swirled with Korintje cinnamon and cream cheese glaze.",
+      "image": "",
+      "emoji": "🥐",
+      "isVeg": true,
+      "isAvailable": true,
+      "isDeleted": true,
+      "sizes": [],
+      "createdAt": "2026-11-15T16:52:25.338Z",
+      "updatedAt": "2026-11-15T16:52:25.359Z",
+      "deletedAt": "2026-11-15T16:52:25.358Z"
+    },
+    {
       "_id": "item_cake_1",
       "name": "Strawberry Chocolate Cake",
       "category": "desserts",
@@ -171,6 +187,42 @@
     }
   ],
   "orders": [
+    {
+      "_id": "ord_1794761552368_487395b6",
+      "orderToken": "4fa6b001cc3298510ac946625af24359",
+      "idempotencyKey": "test_idemp_1794761552363",
+      "orderNumber": 1047,
+      "table": 5,
+      "tableSig": "373af7c42ce25b4ef3a231cc26b3a4ad",
+      "items": [
+        {
+          "itemId": "item_cake_1",
+          "name": "Strawberry Chocolate Cake",
+          "price": 260,
+          "size": "",
+          "qty": 2,
+          "lineTotal": 520
+        }
+      ],
+      "subtotal": 520,
+      "tax": 26,
+      "cgst": 13,
+      "sgst": 13,
+      "total": 546,
+      "note": "",
+      "paymentMethod": "counter",
+      "paymentStatus": "pending",
+      "status": "new",
+      "statusHistory": [
+        {
+          "status": "new",
+          "timestamp": "2026-11-15T16:52:32.368Z",
+          "note": "Order placed"
+        }
+      ],
+      "createdAt": "2026-11-15T16:52:32.368Z",
+      "updatedAt": "2026-11-15T16:52:32.368Z"
+    },
     {
       "_id": "ord_1794761070451_814e412a",
       "orderToken": "0ec541b74a5f8d5c25ffd38ed9a4bb6a",
@@ -346,6 +398,38 @@
       "paymentStatus": "paid",
       "status": "new",
       "createdAt": "2026-11-14T12:05:20.501Z"
+    }
+  ],
+  "settings": {
+    "acceptingOrders": true,
+    "cafeName": "Café Emerald",
+    "tagline": "Artisanal Coffee & Gourmet Bakery",
+    "gstin": "27AAAAA0000A1Z5",
+    "fssai": "11522018000452",
+    "address": "Ground Floor, Emerald Heights, MG Road, Pune, MH 411001",
+    "phone": "+91 98765 43210",
+    "currency": "INR",
+    "currencySymbol": "₹",
+    "cgstRate": 2.5,
+    "sgstRate": 2.5,
+    "totalTables": 20,
+    "updatedAt": "2026-11-15T16:52:25.335Z",
+    "updatedBy": "admin@cafeemerald.com"
+  },
+  "auditLogs": [
+    {
+      "_id": "audit_1794761545508_5vu1o",
+      "userId": "usr_admin_1",
+      "userEmail": "admin@cafeemerald.com",
+      "userRole": "owner",
+      "action": "item_created",
+      "entity": "Item",
+      "entityId": "item_1794761545338",
+      "details": {
+        "name": "Artisanal Cinnamon Roll"
+      },
+      "ip": "",
+      "timestamp": "2026-11-15T16:52:25.508Z"
     }
   ]
 }

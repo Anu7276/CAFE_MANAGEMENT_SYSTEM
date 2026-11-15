@@ -102,4 +102,76 @@ const getMe = async (req, res) => {
   });
 };
 
-module.exports = { login, register, logout, getMe };
+const listStaff = async (req, res, next) => {
+  try {
+    const staff = await User.find();
+    res.json({ success: true, count: staff.length, data: staff });
+  } catch (error) {
+    next(error);
+  }
+};
+
+const createStaff = async (req, res, next) => {
+  try {
+    const { name, email, password, role = 'staff' } = req.body;
+    if (!name || !email || !password) {
+      return res.status(400).json({ success: false, message: 'Name, email, and password are required' });
+    }
+
+    const existing = await User.findOne({ email });
+    if (existing) {
+      return res.status(400).json({ success: false, message: 'User with this email already exists' });
+    }
+
+    const newStaff = await User.create({
+      name,
+      email,
+      password,
+      role: role === 'owner' ? 'owner' : 'staff'
+    });
+
+    res.status(201).json({
+      success: true,
+      data: {
+        _id: newStaff._id,
+        name: newStaff.name,
+        email: newStaff.email,
+        role: newStaff.role
+      }
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+const deleteStaff = async (req, res, next) => {
+  try {
+    const target = await User.findById(req.params.id);
+    if (!target) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+
+    if (target.role === 'owner') {
+      return res.status(403).json({ success: false, message: 'Cannot delete the primary owner account' });
+    }
+
+    if (target._id === req.user._id) {
+      return res.status(400).json({ success: false, message: 'You cannot delete your own active account' });
+    }
+
+    await User.findByIdAndDelete(req.params.id);
+    res.json({ success: true, message: 'Staff member removed successfully' });
+  } catch (error) {
+    next(error);
+  }
+};
+
+module.exports = {
+  login,
+  register,
+  logout,
+  getMe,
+  listStaff,
+  createStaff,
+  deleteStaff
+};

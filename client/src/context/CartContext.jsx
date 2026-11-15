@@ -13,6 +13,11 @@ export const CartProvider = ({ children }) => {
   });
 
   const [table, setTable] = useState(() => {
+    const pathMatch = window.location.pathname.match(/\/t\/(\d+)/);
+    if (pathMatch) {
+      localStorage.setItem('emerald_table', pathMatch[1]);
+      return Number(pathMatch[1]);
+    }
     const params = new URLSearchParams(window.location.search);
     const tableParam = params.get('table');
     if (tableParam) {

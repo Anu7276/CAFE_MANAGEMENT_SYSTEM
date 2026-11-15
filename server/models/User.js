@@ -64,6 +64,31 @@ class User {
     return user;
   }
 
+  static async find(query = {}) {
+    const store = readStore();
+    let users = [...(store.users || [])];
+    if (query.role) {
+      users = users.filter(u => u.role === query.role);
+    }
+    return users.map(u => ({
+      _id: u._id,
+      name: u.name,
+      email: u.email,
+      role: u.role,
+      isLocked: this.isLocked(u),
+      createdAt: u.createdAt
+    }));
+  }
+
+  static async findByIdAndDelete(id) {
+    const store = readStore();
+    const index = (store.users || []).findIndex(u => u._id === id);
+    if (index === -1) return null;
+    const removed = store.users.splice(index, 1)[0];
+    writeStore(store);
+    return removed;
+  }
+
   static async comparePassword(candidate, hash) {
     return await bcrypt.compare(candidate, hash);
   }
