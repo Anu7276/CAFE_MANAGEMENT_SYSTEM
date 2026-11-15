@@ -11,6 +11,10 @@ const fs = require('fs');
 const jwt = require('jsonwebtoken');
 require('dotenv').config();
 
+const { validateProductionSecrets } = require('./config/validateSecrets');
+// Enforce strong secrets on startup in production
+validateProductionSecrets();
+
 const { connectDB, getStatus } = require('./config/db');
 const { setupRedisAdapter } = require('./config/redis');
 const { logger, httpLogger } = require('./config/logger');

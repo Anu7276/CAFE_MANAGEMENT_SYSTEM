@@ -1,7 +1,9 @@
 const request = require('supertest');
 const assert = require('assert');
+const bcrypt = require('bcryptjs');
 const { app } = require('../../server');
 const { generateTableSig } = require('../../utils/tableToken');
+const { readStore, writeStore } = require('../../models/storeAdapter');
 
 async function runSupertestSuite() {
   console.log('\n=============================================');
@@ -22,6 +24,39 @@ async function runSupertestSuite() {
       console.error(`     Error: ${err.message}`);
     }
   }
+
+  const testEmail = process.env.ADMIN_EMAIL || 'admin@cafeemerald.com';
+  const testPassword = process.env.ADMIN_PASSWORD || 'DevAdmin@Emerald2026';
+
+  // Ensure test credentials exist in store
+  const store = readStore();
+  if (!store.users) store.users = [];
+  const existingIdx = store.users.findIndex(u => u.email.toLowerCase() === testEmail.toLowerCase());
+  if (existingIdx >= 0) {
+    store.users[existingIdx].passwordHash = bcrypt.hashSync(testPassword, 10);
+    store.users[existingIdx].failedLoginAttempts = 0;
+    store.users[existingIdx].lockUntil = null;
+  } else {
+    store.users.unshift({
+      _id: 'usr_test_admin',
+      name: 'Test Administrator',
+      email: testEmail.toLowerCase(),
+      passwordHash: bcrypt.hashSync(testPassword, 10),
+      role: 'owner',
+      failedLoginAttempts: 0,
+      lockUntil: null
+    });
+  }
+  // Setup business details for invoice tests
+  store.settings = {
+    ...(store.settings || {}),
+    cafeName: 'Café Emerald',
+    gstin: '27AAAAA0000A1Z5',
+    fssai: '11522018000452',
+    address: 'Ground Floor, MG Road, Pune',
+    phone: '+91 98765 43210'
+  };
+  writeStore(store);
 
   let staffToken = '';
   let createdOrderId = '';
@@ -49,7 +84,7 @@ async function runSupertestSuite() {
   await test('POST /api/auth/login succeeds with valid staff credentials', async () => {
     const res = await request(app)
       .post('/api/auth/login')
-      .send({ email: 'admin@cafeemerald.com', password: 'adminpassword123' });
+      .send({ email: testEmail, password: testPassword });
 
     assert.strictEqual(res.statusCode, 200);
     assert.strictEqual(res.body.success, true);

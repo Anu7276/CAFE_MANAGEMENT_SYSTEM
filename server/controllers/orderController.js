@@ -169,6 +169,8 @@ const trackOrder = async (req, res, next) => {
       return res.status(404).json({ success: false, message: 'Order not found' });
     }
 
+    const settings = await Settings.get();
+
     // Return safe customer-facing view
     res.json({
       success: true,
@@ -187,6 +189,9 @@ const trackOrder = async (req, res, next) => {
         note: order.note,
         paymentMethod: order.paymentMethod,
         paymentStatus: order.paymentStatus,
+        gstin: settings.gstin || '',
+        fssai: settings.fssai || '',
+        cafeName: settings.cafeName || 'Café Emerald',
         createdAt: order.createdAt,
         updatedAt: order.updatedAt
       }

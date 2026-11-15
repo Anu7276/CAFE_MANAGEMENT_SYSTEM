@@ -2,12 +2,12 @@ const { readStore, writeStore } = require('./storeAdapter');
 
 const DEFAULT_SETTINGS = {
   acceptingOrders: true,
-  cafeName: 'Café Emerald',
-  tagline: 'Artisanal Coffee & Gourmet Bakery',
-  gstin: '27AAAAA0000A1Z5',
-  fssai: '11522018000452',
-  address: 'Ground Floor, Emerald Heights, MG Road, Pune, MH 411001',
-  phone: '+91 98765 43210',
+  cafeName: process.env.CAFE_NAME || 'Café Emerald',
+  tagline: process.env.CAFE_TAGLINE || 'Artisanal Coffee & Gourmet Bakery',
+  gstin: process.env.CAFE_GSTIN || '',
+  fssai: process.env.CAFE_FSSAI || '',
+  address: process.env.CAFE_ADDRESS || 'MG Road, Pune, Maharashtra 411001',
+  phone: process.env.CAFE_PHONE || '+91 98765 43210',
   currency: 'INR',
   currencySymbol: '₹',
   cgstRate: 2.5,

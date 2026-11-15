@@ -94,7 +94,11 @@ async function runPhase3Tests() {
   assert(invalidAttempt === false, 'Tampered or empty payment verification rejected');
 
   // 5. GST Invoice & KOT Generation
-  const settings = await Settings.get();
+  const settings = {
+    ...(await Settings.get()),
+    gstin: '27AAAAA0000A1Z5',
+    fssai: '11522018000452'
+  };
   const billHtml = generateBillHtml(order, settings);
   assert(billHtml.includes('GSTIN: 27AAAAA0000A1Z5'), 'Customer bill contains valid legal GSTIN');
   assert(billHtml.includes('FSSAI Lic: 11522018000452'), 'Customer bill contains FSSAI license');

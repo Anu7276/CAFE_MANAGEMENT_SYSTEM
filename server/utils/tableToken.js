@@ -1,6 +1,6 @@
 const crypto = require('crypto');
 
-const getSecret = () => process.env.TABLE_TOKEN_SECRET || process.env.JWT_SECRET || 'emerald_table_token_default_secret_key';
+const getSecret = () => process.env.TABLE_SIGNING_SECRET || process.env.TABLE_TOKEN_SECRET || process.env.JWT_SECRET || 'emerald_table_token_default_secret_key';
 
 /**
  * Generate HMAC-SHA256 signature for a table number

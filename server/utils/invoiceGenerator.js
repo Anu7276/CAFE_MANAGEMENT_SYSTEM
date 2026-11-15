@@ -2,12 +2,12 @@
  * Thermal Printer & GST Invoice Generator (80mm standard width)
  */
 
-function generateBillHtml(order, settings) {
-  const gstin = settings.gstin || '27AAAAA0000A1Z5';
-  const fssai = settings.fssai || '11522018000452';
+function generateBillHtml(order, settings = {}) {
+  const gstin = settings.gstin || '';
+  const fssai = settings.fssai || '';
   const cafeName = settings.cafeName || 'CAFÉ EMERALD';
-  const address = settings.address || 'Ground Floor, Emerald Heights, MG Road, Pune, MH 411001';
-  const phone = settings.phone || '+91 98765 43210';
+  const address = settings.address || '';
+  const phone = settings.phone || '';
   const invoiceNo = `INV-EMR-${order.orderNumber}`;
   const orderTime = new Date(order.createdAt).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' });
 

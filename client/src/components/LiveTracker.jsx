@@ -230,7 +230,9 @@ export default function LiveTracker({ orderId, orderToken, initialOrder, onOrder
 
           {/* Legal Compliance Numbers */}
           <div className="mt-3 p-2 rounded-xl bg-black/30 border border-white/5 text-[9px] text-white/40 space-y-0.5">
-            <div>GSTIN: 27AAAAA0000A1Z5 | FSSAI: 11522018000452</div>
+            {(order.gstin || order.fssai) ? (
+              <div>{order.gstin ? `GSTIN: ${order.gstin}` : ''} {order.fssai ? `| FSSAI: ${order.fssai}` : ''}</div>
+            ) : null}
             <div>Invoice Ref: INV-EMR-{order.orderNumber}</div>
           </div>
 

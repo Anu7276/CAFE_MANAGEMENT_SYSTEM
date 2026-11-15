@@ -4,8 +4,8 @@
       "_id": "usr_admin_1",
       "name": "Café Manager",
       "email": "admin@cafeemerald.com",
-      "passwordHash": "$2a$10$p0RZIJRE3apQv5IGn8ETQeQ1m7WfXBDxv/V1EbafMT.vURD.Z6cS.",
-      "role": "admin",
+      "passwordHash": "$2a$10$Iimvf6nbzqz3X.oR1TZ9JeetySdzaAjYrCWF0xttm00h01C2PPH36",
+      "role": "owner",
       "failedLoginAttempts": 1,
       "lockUntil": null
     },
@@ -51,6 +51,22 @@
     }
   ],
   "items": [
+    {
+      "_id": "item_1794769655922",
+      "name": "Artisanal Cinnamon Roll",
+      "category": "desserts",
+      "price": 150,
+      "description": "Freshly baked brioche swirled with Korintje cinnamon and cream cheese glaze.",
+      "image": "",
+      "emoji": "🥐",
+      "isVeg": true,
+      "isAvailable": true,
+      "isDeleted": true,
+      "sizes": [],
+      "createdAt": "2026-11-15T19:07:35.922Z",
+      "updatedAt": "2026-11-15T19:07:35.948Z",
+      "deletedAt": "2026-11-15T19:07:35.947Z"
+    },
     {
       "_id": "item_1794767812610",
       "name": "Artisanal Cinnamon Roll",
@@ -253,6 +269,121 @@
     }
   ],
   "orders": [
+    {
+      "_id": "ord_1794769659257_a9a6b4de",
+      "orderToken": "a8592fde7ea76144724fae17cc7eec31",
+      "idempotencyKey": "supertest_idemp_1794769659246",
+      "orderNumber": 1062,
+      "table": 3,
+      "tableSig": "4622fb8e9dbf2cc81a9af17254e16552",
+      "items": [
+        {
+          "itemId": "item_cake_1",
+          "name": "Strawberry Chocolate Cake",
+          "category": "desserts",
+          "emoji": "🍰",
+          "price": 260,
+          "size": "",
+          "qty": 2,
+          "lineTotal": 520
+        }
+      ],
+      "subtotal": 520,
+      "tax": 26,
+      "cgst": 13,
+      "sgst": 13,
+      "total": 546,
+      "note": "Supertest barista note",
+      "paymentMethod": "cash",
+      "paymentStatus": "paid",
+      "status": "preparing",
+      "statusHistory": [
+        {
+          "status": "new",
+          "timestamp": "2026-11-15T19:07:39.257Z",
+          "note": "Order placed"
+        },
+        {
+          "status": "preparing",
+          "timestamp": "2026-11-15T19:07:39.306Z",
+          "note": "Status changed to preparing"
+        }
+      ],
+      "createdAt": "2026-11-15T19:07:39.257Z",
+      "updatedAt": "2026-11-15T19:07:39.333Z",
+      "paidAt": "2026-11-15T19:07:39.332Z"
+    },
+    {
+      "_id": "ord_1794769656336_0219b772",
+      "orderToken": "775c808e12724d330f63c21bfeec083c",
+      "idempotencyKey": null,
+      "orderNumber": 1061,
+      "table": 4,
+      "tableSig": null,
+      "items": [
+        {
+          "itemId": "item_coldcoffee_4",
+          "name": "Cold Coffee",
+          "price": 210,
+          "qty": 2
+        }
+      ],
+      "subtotal": 420,
+      "tax": 21,
+      "cgst": 10.5,
+      "sgst": 10.5,
+      "total": 441,
+      "note": "",
+      "paymentMethod": "cash",
+      "paymentStatus": "paid",
+      "status": "new",
+      "statusHistory": [
+        {
+          "status": "new",
+          "timestamp": "2026-11-15T19:07:36.336Z",
+          "note": "Order placed"
+        }
+      ],
+      "createdAt": "2026-11-15T19:07:36.336Z",
+      "updatedAt": "2026-11-15T19:07:36.342Z",
+      "paidAt": "2026-11-15T19:07:36.339Z"
+    },
+    {
+      "_id": "ord_1794769655592_332d9faa",
+      "orderToken": "c3eec876e3811eedd3bed03cb2a1332b",
+      "idempotencyKey": "test_idemp_1794769655588",
+      "orderNumber": 1060,
+      "table": 5,
+      "tableSig": "373af7c42ce25b4ef3a231cc26b3a4ad",
+      "items": [
+        {
+          "itemId": "item_cake_1",
+          "name": "Strawberry Chocolate Cake",
+          "price": 260,
+          "size": "",
+          "qty": 2,
+          "lineTotal": 520
+        }
+      ],
+      "subtotal": 520,
+      "tax": 26,
+      "cgst": 13,
+      "sgst": 13,
+      "total": 546,
+      "note": "",
+      "paymentMethod": "counter",
+      "paymentStatus": "pending",
+      "status": "new",
+      "statusHistory": [
+        {
+          "status": "new",
+          "timestamp": "2026-11-15T19:07:35.592Z",
+          "note": "Order placed"
+        }
+      ],
+      "createdAt": "2026-11-15T19:07:35.592Z",
+      "updatedAt": "2026-11-15T19:07:35.592Z"
+    },
     {
       "_id": "ord_1794767815716_0debf735",
       "orderToken": "73ccddb000475d4b9e78d07525ceb20c",
@@ -926,17 +1057,62 @@
     "tagline": "Artisanal Coffee & Gourmet Bakery",
     "gstin": "27AAAAA0000A1Z5",
     "fssai": "11522018000452",
-    "address": "Ground Floor, Emerald Heights, MG Road, Pune, MH 411001",
+    "address": "Ground Floor, MG Road, Pune",
     "phone": "+91 98765 43210",
     "currency": "INR",
     "currencySymbol": "₹",
     "cgstRate": 2.5,
     "sgstRate": 2.5,
     "totalTables": 20,
-    "updatedAt": "2026-11-15T18:36:52.607Z",
+    "updatedAt": "2026-11-15T19:07:35.917Z",
     "updatedBy": "admin@cafeemerald.com"
   },
   "auditLogs": [
+    {
+      "_id": "audit_1794769659338_6zsdd",
+      "userId": "usr_admin_1",
+      "userEmail": "admin@cafeemerald.com",
+      "userRole": "owner",
+      "action": "order_marked_paid",
+      "entity": "Order",
+      "entityId": "ord_1794769659257_a9a6b4de",
+      "details": {
+        "paymentMethod": "cash",
+        "total": 546
+      },
+      "ip": "127.0.0.1",
+      "timestamp": "2026-11-15T19:07:39.338Z"
+    },
+    {
+      "_id": "audit_1794769659311_5q45r",
+      "userId": "usr_admin_1",
+      "userEmail": "admin@cafeemerald.com",
+      "userRole": "owner",
+      "action": "order_status_updated",
+      "entity": "Order",
+      "entityId": "ord_1794769659257_a9a6b4de",
+      "details": {
+        "from": "new",
+        "to": "preparing",
+        "orderNumber": 1062
+      },
+      "ip": "127.0.0.1",
+      "timestamp": "2026-11-15T19:07:39.311Z"
+    },
+    {
+      "_id": "audit_1794769656064_0l1al",
+      "userId": "usr_admin_1",
+      "userEmail": "admin@cafeemerald.com",
+      "userRole": "owner",
+      "action": "item_created",
+      "entity": "Item",
+      "entityId": "item_1794769655922",
+      "details": {
+        "name": "Artisanal Cinnamon Roll"
+      },
+      "ip": "",
+      "timestamp": "2026-11-15T19:07:36.064Z"
+    },
     {
       "_id": "audit_1794767815799_uirdp",
       "userId": "usr_admin_1",

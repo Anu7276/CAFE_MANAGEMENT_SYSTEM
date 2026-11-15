@@ -50,8 +50,8 @@ export default function AdminDashboardPage() {
   // Auth state
   const [currentUser, setCurrentUser] = useState(null);
   const [authChecking, setAuthChecking] = useState(true);
-  const [loginEmail, setLoginEmail] = useState('admin@cafeemerald.com');
-  const [loginPassword, setLoginPassword] = useState('adminpassword123');
+  const [loginEmail, setLoginEmail] = useState('');
+  const [loginPassword, setLoginPassword] = useState('');
   const [loginError, setLoginError] = useState('');
   const [loginLoading, setLoginLoading] = useState(false);
 
@@ -335,6 +335,9 @@ export default function AdminDashboardPage() {
     }
   };
 
+  const [settingsSaving, setSettingsSaving] = useState(false);
+  const [settingsSuccess, setSettingsSuccess] = useState('');
+
   const handleToggleAcceptingOrders = async () => {
     if (!settings) return;
     try {
@@ -342,6 +345,32 @@ export default function AdminDashboardPage() {
       setSettings(res.data.data);
     } catch (err) {
       alert('Failed to update store master switch');
+    }
+  };
+
+  const handleSaveBusinessSettings = async (e) => {
+    e.preventDefault();
+    if (!settings) return;
+    setSettingsSaving(true);
+    setSettingsSuccess('');
+    try {
+      const res = await api.patch('/settings', {
+        cafeName: settings.cafeName,
+        tagline: settings.tagline,
+        gstin: settings.gstin,
+        fssai: settings.fssai,
+        address: settings.address,
+        phone: settings.phone,
+        cgstRate: Number(settings.cgstRate) || 2.5,
+        sgstRate: Number(settings.sgstRate) || 2.5
+      });
+      setSettings(res.data.data);
+      setSettingsSuccess('Business details and tax settings updated successfully!');
+      setTimeout(() => setSettingsSuccess(''), 4000);
+    } catch (err) {
+      alert(err.response?.data?.message || 'Failed to update business settings');
+    } finally {
+      setSettingsSaving(false);
     }
   };
 
@@ -1088,47 +1117,121 @@ export default function AdminDashboardPage() {
               </button>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
-              <div>
-                <label className="text-[11px] font-bold text-white/50 uppercase block mb-1">Café Name</label>
-                <input
-                  type="text"
-                  value={settings.cafeName}
-                  disabled
-                  className="w-full bg-black/40 border border-white/10 rounded-xl px-3 py-2 text-white/80"
-                />
+            <form onSubmit={handleSaveBusinessSettings} className="space-y-4">
+              <div className="flex items-center justify-between pb-2 border-b border-white/10">
+                <h4 className="text-sm font-bold text-white">Legal & Store Information</h4>
+                {settingsSuccess && (
+                  <span className="text-xs font-semibold text-mintGreen bg-mintGreen/10 px-2.5 py-1 rounded-full border border-mintGreen/20">
+                    ✓ {settingsSuccess}
+                  </span>
+                )}
               </div>
 
-              <div>
-                <label className="text-[11px] font-bold text-white/50 uppercase block mb-1">GSTIN Number</label>
-                <input
-                  type="text"
-                  value={settings.gstin}
-                  disabled
-                  className="w-full bg-black/40 border border-white/10 rounded-xl px-3 py-2 text-white/80"
-                />
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+                <div>
+                  <label className="text-[11px] font-bold text-white/60 uppercase block mb-1">Café Name</label>
+                  <input
+                    type="text"
+                    required
+                    value={settings.cafeName || ''}
+                    onChange={(e) => setSettings({ ...settings, cafeName: e.target.value })}
+                    className="w-full bg-black/40 border border-white/10 rounded-xl px-3 py-2 text-white focus:border-mintGreen outline-none"
+                    placeholder="Café Emerald"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-[11px] font-bold text-white/60 uppercase block mb-1">Tagline / Slogan</label>
+                  <input
+                    type="text"
+                    value={settings.tagline || ''}
+                    onChange={(e) => setSettings({ ...settings, tagline: e.target.value })}
+                    className="w-full bg-black/40 border border-white/10 rounded-xl px-3 py-2 text-white focus:border-mintGreen outline-none"
+                    placeholder="Artisanal Coffee & Bakery"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-[11px] font-bold text-white/60 uppercase block mb-1">GSTIN Number</label>
+                  <input
+                    type="text"
+                    value={settings.gstin || ''}
+                    onChange={(e) => setSettings({ ...settings, gstin: e.target.value })}
+                    className="w-full bg-black/40 border border-white/10 rounded-xl px-3 py-2 text-white focus:border-mintGreen outline-none font-mono"
+                    placeholder="Enter 15-digit GSTIN"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-[11px] font-bold text-white/60 uppercase block mb-1">FSSAI License</label>
+                  <input
+                    type="text"
+                    value={settings.fssai || ''}
+                    onChange={(e) => setSettings({ ...settings, fssai: e.target.value })}
+                    className="w-full bg-black/40 border border-white/10 rounded-xl px-3 py-2 text-white focus:border-mintGreen outline-none font-mono"
+                    placeholder="Enter 14-digit FSSAI Number"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-[11px] font-bold text-white/60 uppercase block mb-1">Contact Phone</label>
+                  <input
+                    type="text"
+                    value={settings.phone || ''}
+                    onChange={(e) => setSettings({ ...settings, phone: e.target.value })}
+                    className="w-full bg-black/40 border border-white/10 rounded-xl px-3 py-2 text-white focus:border-mintGreen outline-none"
+                    placeholder="+91 98765 43210"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-[11px] font-bold text-white/60 uppercase block mb-1">Address / Location</label>
+                  <input
+                    type="text"
+                    value={settings.address || ''}
+                    onChange={(e) => setSettings({ ...settings, address: e.target.value })}
+                    className="w-full bg-black/40 border border-white/10 rounded-xl px-3 py-2 text-white focus:border-mintGreen outline-none"
+                    placeholder="Full café physical address"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-[11px] font-bold text-white/60 uppercase block mb-1">CGST Rate (%)</label>
+                  <input
+                    type="number"
+                    step="0.1"
+                    min="0"
+                    max="14"
+                    value={settings.cgstRate ?? 2.5}
+                    onChange={(e) => setSettings({ ...settings, cgstRate: e.target.value })}
+                    className="w-full bg-black/40 border border-white/10 rounded-xl px-3 py-2 text-white focus:border-mintGreen outline-none"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-[11px] font-bold text-white/60 uppercase block mb-1">SGST Rate (%)</label>
+                  <input
+                    type="number"
+                    step="0.1"
+                    min="0"
+                    max="14"
+                    value={settings.sgstRate ?? 2.5}
+                    onChange={(e) => setSettings({ ...settings, sgstRate: e.target.value })}
+                    className="w-full bg-black/40 border border-white/10 rounded-xl px-3 py-2 text-white focus:border-mintGreen outline-none"
+                  />
+                </div>
               </div>
 
-              <div>
-                <label className="text-[11px] font-bold text-white/50 uppercase block mb-1">FSSAI License</label>
-                <input
-                  type="text"
-                  value={settings.fssai}
-                  disabled
-                  className="w-full bg-black/40 border border-white/10 rounded-xl px-3 py-2 text-white/80"
-                />
+              <div className="pt-2">
+                <button
+                  type="submit"
+                  disabled={settingsSaving}
+                  className="px-6 py-2.5 rounded-full bg-mintGreen text-[#071a12] font-bold text-xs hover:bg-[#88e7bd] transition disabled:opacity-50"
+                >
+                  {settingsSaving ? 'Saving...' : 'Save Business Settings'}
+                </button>
               </div>
-
-              <div>
-                <label className="text-[11px] font-bold text-white/50 uppercase block mb-1">GST Rate Split</label>
-                <input
-                  type="text"
-                  value="5% Total (2.5% CGST + 2.5% SGST)"
-                  disabled
-                  className="w-full bg-black/40 border border-white/10 rounded-xl px-3 py-2 text-white/80"
-                />
-              </div>
-            </div>
+            </form>
           </div>
         )}
       </main>

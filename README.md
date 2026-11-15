@@ -298,8 +298,8 @@ The client runs on **`http://localhost:5173`**.
 
 - **Customer QR Menu**: [http://localhost:5173/t/1?sig=...](http://localhost:5173)
 - **Admin & Kitchen KDS**: [http://localhost:5173/admin](http://localhost:5173/admin)
-  - **Email:** `admin@cafeemerald.com`
-  - **Password:** `adminpassword123`
+  - **Email:** `ADMIN_EMAIL` (default: `admin@cafeemerald.com`)
+  - **Password:** `ADMIN_PASSWORD` (default: `DevAdmin@Emerald2026` in dev, strictly set in prod)
 
 ---
 

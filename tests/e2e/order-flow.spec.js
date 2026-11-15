@@ -47,7 +47,7 @@ test.describe('End-to-End Café Emerald Order Flow', () => {
     const emailInput = staffPage.locator('input[type="email"]');
     if (await emailInput.isVisible()) {
       await emailInput.fill('admin@cafeemerald.com');
-      await staffPage.locator('input[type="password"]').fill('adminpassword123');
+      await staffPage.locator('input[type="password"]').fill(process.env.ADMIN_PASSWORD || 'DevAdmin@Emerald2026');
       await staffPage.locator('button[type="submit"]').click();
     }
 

@@ -15,9 +15,9 @@ const defaultData = {
     {
       _id: 'usr_admin_1',
       name: 'Café Manager',
-      email: 'admin@cafeemerald.com',
-      passwordHash: bcrypt.hashSync('adminpassword123', 10),
-      role: 'admin'
+      email: process.env.ADMIN_EMAIL || 'admin@cafeemerald.com',
+      passwordHash: bcrypt.hashSync(process.env.ADMIN_PASSWORD || 'DevAdmin@Emerald2026', 10),
+      role: 'owner'
     }
   ],
   categories: [
