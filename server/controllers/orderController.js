@@ -4,6 +4,8 @@ const Item = require('../models/Item');
 const Settings = require('../models/Settings');
 const AuditLog = require('../models/AuditLog');
 const { verifyTableSig } = require('../utils/tableToken');
+const { validateStatusTransition } = require('../utils/orderStateMachine');
+const { generateBillHtml, generateKotHtml } = require('../utils/invoiceGenerator');
 
 /**
  * Server-side price calculation and order creation with idempotency and signed table token verification.
@@ -276,14 +278,29 @@ const updateOrderStatus = async (req, res, next) => {
       });
     }
 
+    const existingOrder = await Order.findById(req.params.id);
+    if (!existingOrder) {
+      return res.status(404).json({ success: false, message: 'Order not found' });
+    }
+
+    // Strict State Machine Verification
+    const transitionCheck = validateStatusTransition(
+      existingOrder.status,
+      status,
+      req.user?.role || 'staff'
+    );
+
+    if (!transitionCheck.valid) {
+      return res.status(400).json({
+        success: false,
+        message: transitionCheck.error
+      });
+    }
+
     const order = await Order.findByIdAndUpdate(req.params.id, {
       status,
       statusNote: note
     });
-
-    if (!order) {
-      return res.status(404).json({ success: false, message: 'Order not found' });
-    }
 
     const io = req.app.get('io');
     if (io) {
@@ -299,7 +316,146 @@ const updateOrderStatus = async (req, res, next) => {
       });
     }
 
+    await AuditLog.logAction({
+      userId: req.user?._id,
+      userEmail: req.user?.email,
+      userRole: req.user?.role,
+      action: 'order_status_updated',
+      entity: 'Order',
+      entityId: order._id,
+      details: { from: existingOrder.status, to: status, orderNumber: order.orderNumber },
+      ip: req.ip
+    });
+
     res.json({ success: true, data: order });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * Staff / Admin mark order as paid (cash / counter)
+ */
+const markOrderPaid = async (req, res, next) => {
+  try {
+    const { paymentMethod = 'cash' } = req.body;
+    const order = await Order.findById(req.params.id);
+    if (!order) {
+      return res.status(404).json({ success: false, message: 'Order not found' });
+    }
+
+    const updated = await Order.findByIdAndUpdate(req.params.id, {
+      paymentStatus: 'paid',
+      paymentMethod,
+      paidAt: new Date().toISOString()
+    });
+
+    const io = req.app.get('io');
+    if (io) {
+      io.to('admin_kds').emit('order:updated', updated);
+      io.to(`order_${order.orderToken}`).emit('order:status', {
+        orderNumber: order.orderNumber,
+        orderToken: order.orderToken,
+        status: updated.status,
+        paymentStatus: 'paid',
+        paymentMethod
+      });
+    }
+
+    await AuditLog.logAction({
+      userId: req.user?._id,
+      userEmail: req.user?.email,
+      userRole: req.user?.role,
+      action: 'order_marked_paid',
+      entity: 'Order',
+      entityId: order._id,
+      details: { paymentMethod, total: order.total },
+      ip: req.ip
+    });
+
+    res.json({
+      success: true,
+      message: 'Order successfully marked as paid',
+      data: updated
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * Get structured legal GST invoice data
+ */
+const getInvoiceData = async (req, res, next) => {
+  try {
+    const order = await Order.findById(req.params.id);
+    if (!order) {
+      return res.status(404).json({ success: false, message: 'Order not found' });
+    }
+
+    const settings = await Settings.get();
+    res.json({
+      success: true,
+      data: {
+        invoiceNumber: `INV-EMR-${order.orderNumber}`,
+        cafeName: settings.cafeName,
+        gstin: settings.gstin,
+        fssai: settings.fssai,
+        address: settings.address,
+        phone: settings.phone,
+        sacCode: '996331',
+        orderNumber: order.orderNumber,
+        orderToken: order.orderToken,
+        table: order.table,
+        createdAt: order.createdAt,
+        items: order.items,
+        subtotal: order.subtotal,
+        cgst: order.cgst || (order.tax / 2),
+        sgst: order.sgst || (order.tax / 2),
+        tax: order.tax,
+        total: order.total,
+        paymentMethod: order.paymentMethod,
+        paymentStatus: order.paymentStatus,
+        paidAt: order.paidAt || null
+      }
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * Generate 80mm printable customer thermal receipt
+ */
+const printBill = async (req, res, next) => {
+  try {
+    const order = await Order.findById(req.params.id);
+    if (!order) {
+      return res.status(404).send('<h3>Order not found</h3>');
+    }
+
+    const settings = await Settings.get();
+    const html = generateBillHtml(order, settings);
+    res.setHeader('Content-Type', 'text/html');
+    res.send(html);
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * Generate 80mm printable Kitchen Order Ticket (KOT)
+ */
+const printKot = async (req, res, next) => {
+  try {
+    const order = await Order.findById(req.params.id);
+    if (!order) {
+      return res.status(404).send('<h3>Order not found</h3>');
+    }
+
+    const html = generateKotHtml(order);
+    res.setHeader('Content-Type', 'text/html');
+    res.send(html);
   } catch (error) {
     next(error);
   }
@@ -310,5 +466,9 @@ module.exports = {
   trackOrder,
   getOrderById,
   getAllOrders,
-  updateOrderStatus
+  updateOrderStatus,
+  markOrderPaid,
+  getInvoiceData,
+  printBill,
+  printKot
 };

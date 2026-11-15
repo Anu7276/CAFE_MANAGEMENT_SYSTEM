@@ -5,7 +5,11 @@ const {
   trackOrder,
   getOrderById,
   getAllOrders,
-  updateOrderStatus
+  updateOrderStatus,
+  markOrderPaid,
+  getInvoiceData,
+  printBill,
+  printKot
 } = require('../controllers/orderController');
 const { protect, requireRole } = require('../middleware/auth');
 const { orderLimiter } = require('../middleware/rateLimiter');
@@ -21,5 +25,9 @@ router.get('/track/:token', trackOrder);
 router.get('/', protect, requireRole(['owner', 'staff']), getAllOrders);
 router.get('/:id', protect, requireRole(['owner', 'staff']), getOrderById);
 router.patch('/:id/status', protect, requireRole(['owner', 'staff']), validateBody(updateOrderStatusSchema), updateOrderStatus);
+router.patch('/:id/mark-paid', protect, requireRole(['owner', 'staff']), markOrderPaid);
+router.get('/:id/invoice', protect, requireRole(['owner', 'staff']), getInvoiceData);
+router.get('/:id/print/bill', protect, requireRole(['owner', 'staff']), printBill);
+router.get('/:id/print/kot', protect, requireRole(['owner', 'staff']), printKot);
 
 module.exports = router;

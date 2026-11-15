@@ -232,6 +232,15 @@ export default function AdminDashboardPage() {
     }
   };
 
+  const handleMarkPaid = async (orderId, paymentMethod = 'cash') => {
+    try {
+      const res = await api.patch(`/orders/${orderId}/mark-paid`, { paymentMethod });
+      setOrders((prev) => prev.map((o) => (o._id === orderId ? res.data.data : o)));
+    } catch (err) {
+      alert(err.response?.data?.message || 'Failed to mark order as paid');
+    }
+  };
+
   const toggleItemAvailability = async (item) => {
     try {
       const res = await api.patch(`/items/${item._id}/availability`, { isAvailable: !item.isAvailable });
@@ -507,27 +516,50 @@ export default function AdminDashboardPage() {
                     className="bg-[#0b241a] rounded-2xl border border-white/10 p-4 flex flex-col justify-between shadow-lg"
                   >
                     <div>
-                      <div className="flex items-center justify-between pb-2 border-b border-white/10 mb-3">
+                      <div className="flex items-center justify-between pb-2 border-b border-white/10 mb-2">
                         <div>
                           <span className="text-xs text-mintGreen font-extrabold block">Table {order.table}</span>
                           <h4 className="text-base font-extrabold text-white">#{order.orderNumber}</h4>
                         </div>
-                        <span
-                          className={`px-2 py-0.5 rounded-full text-[10px] font-extrabold uppercase ${
-                            order.status === 'new'
-                              ? 'bg-amber-500/20 text-amber-300'
-                              : order.status === 'preparing'
-                              ? 'bg-blue-500/20 text-blue-300'
-                              : order.status === 'ready'
-                              ? 'bg-mintGreen/20 text-mintGreen'
-                              : 'bg-white/10 text-white/60'
-                          }`}
-                        >
-                          {order.status}
-                        </span>
+                        <div className="text-right">
+                          <span
+                            className={`px-2 py-0.5 rounded-full text-[10px] font-extrabold uppercase block mb-1 ${
+                              order.status === 'new'
+                                ? 'bg-amber-500/20 text-amber-300'
+                                : order.status === 'preparing'
+                                ? 'bg-blue-500/20 text-blue-300'
+                                : order.status === 'ready'
+                                ? 'bg-mintGreen/20 text-mintGreen'
+                                : 'bg-white/10 text-white/60'
+                            }`}
+                          >
+                            {order.status}
+                          </span>
+                          <span className="text-xs font-bold text-mintGreen">₹{order.total}</span>
+                        </div>
                       </div>
 
-                      <div className="space-y-1.5 text-xs text-white/90 mb-4 max-h-48 overflow-y-auto">
+                      {/* Payment Status Pill */}
+                      <div className="flex items-center justify-between mb-3 px-2 py-1 rounded-lg bg-black/30 border border-white/5 text-[10px]">
+                        <span className="text-white/60">Payment:</span>
+                        {order.paymentStatus === 'paid' ? (
+                          <span className="font-extrabold text-emerald-300">
+                            ✓ PAID ({order.paymentMethod?.toUpperCase() || 'CASH'})
+                          </span>
+                        ) : (
+                          <div className="flex items-center gap-1.5">
+                            <span className="font-extrabold text-amber-300">PENDING</span>
+                            <button
+                              onClick={() => handleMarkPaid(order._id, 'cash')}
+                              className="px-1.5 py-0.5 rounded bg-emerald-500/20 hover:bg-emerald-500/40 text-mintGreen font-bold text-[9px] transition"
+                            >
+                              Mark Cash Paid
+                            </button>
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="space-y-1.5 text-xs text-white/90 mb-3 max-h-36 overflow-y-auto">
                         {order.items.map((it, idx) => (
                           <div key={idx} className="flex justify-between items-center">
                             <span>
@@ -543,6 +575,22 @@ export default function AdminDashboardPage() {
                           📝 {order.note}
                         </div>
                       )}
+
+                      {/* Print Ticket & Bill Shortcuts */}
+                      <div className="flex gap-1.5 mb-3">
+                        <button
+                          onClick={() => window.open(`/api/orders/${order._id}/print/bill`, '_blank')}
+                          className="flex-1 py-1 rounded-lg bg-white/5 hover:bg-white/15 text-white/80 hover:text-white text-[10px] font-semibold flex items-center justify-center gap-1 transition"
+                        >
+                          <Printer className="w-3 h-3" /> Bill
+                        </button>
+                        <button
+                          onClick={() => window.open(`/api/orders/${order._id}/print/kot`, '_blank')}
+                          className="flex-1 py-1 rounded-lg bg-white/5 hover:bg-white/15 text-white/80 hover:text-white text-[10px] font-semibold flex items-center justify-center gap-1 transition"
+                        >
+                          <Printer className="w-3 h-3" /> KOT
+                        </button>
+                      </div>
                     </div>
 
                     <div className="pt-3 border-t border-white/10 flex items-center gap-1.5">

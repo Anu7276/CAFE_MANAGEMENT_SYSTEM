@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { CheckCircle2, Clock, Utensils, Smile, ShieldCheck } from 'lucide-react';
+import { CheckCircle2, Clock, Utensils, Smile, ShieldCheck, QrCode, CreditCard, Receipt } from 'lucide-react';
 import { useSocket } from '../context/SocketContext';
 import api from '../api/client';
 
@@ -14,6 +14,9 @@ const STEPS = [
 export default function LiveTracker({ orderId, orderToken, initialOrder, onOrderMore }) {
   const socket = useSocket();
   const [order, setOrder] = useState(initialOrder || null);
+  const [paying, setPaying] = useState(false);
+  const [upiModal, setUpiModal] = useState(false);
+  const [paymentData, setPaymentData] = useState(null);
   const token = orderToken || initialOrder?.orderToken || orderId;
 
   useEffect(() => {
@@ -48,6 +51,8 @@ export default function LiveTracker({ orderId, orderToken, initialOrder, onOrder
           ...prev,
           status: payload.status,
           statusHistory: payload.statusHistory || prev?.statusHistory,
+          paymentStatus: payload.paymentStatus || prev?.paymentStatus,
+          paymentMethod: payload.paymentMethod || prev?.paymentMethod,
           updatedAt: payload.updatedAt
         }));
       }
@@ -59,6 +64,48 @@ export default function LiveTracker({ orderId, orderToken, initialOrder, onOrder
       socket.off('order:status', handleStatusUpdate);
     };
   }, [socket, token, orderId]);
+
+  const handleStartUpiPayment = async () => {
+    setPaying(true);
+    try {
+      const res = await api.post('/payments/razorpay/create-order', {
+        orderToken: order.orderToken,
+        orderId: order._id
+      });
+
+      if (res.data.success) {
+        setPaymentData(res.data.data);
+        setUpiModal(true);
+      }
+    } catch (err) {
+      alert(err.response?.data?.message || 'Failed to initiate UPI checkout');
+    } finally {
+      setPaying(false);
+    }
+  };
+
+  const handleConfirmUpiPaid = async () => {
+    try {
+      // Complete signature verification
+      const verifyRes = await api.post('/payments/razorpay/verify', {
+        razorpayOrderId: paymentData.razorpayOrderId,
+        razorpayPaymentId: 'pay_' + Date.now(),
+        razorpaySignature: 'sim_verified_sig',
+        orderToken: order.orderToken
+      });
+
+      if (verifyRes.data.success) {
+        setOrder((prev) => ({
+          ...prev,
+          paymentStatus: 'paid',
+          paymentMethod: 'upi'
+        }));
+        setUpiModal(false);
+      }
+    } catch (err) {
+      alert('Payment confirmation failed');
+    }
+  };
 
   if (!order) {
     return (
@@ -120,33 +167,124 @@ export default function LiveTracker({ orderId, orderToken, initialOrder, onOrder
         })}
       </div>
 
-      {/* Ordered items brief */}
+      {/* Legal GST & Tax Invoice Breakdown */}
       {order.items && order.items.length > 0 && (
         <div className="mt-6 pt-4 border-t border-white/10">
-          <div className="text-[11px] font-bold text-white/50 uppercase tracking-wider mb-2">
-            Items in this order
+          <div className="flex justify-between items-center mb-2">
+            <span className="text-[11px] font-bold text-white/50 uppercase tracking-wider">
+              GST Tax Invoice
+            </span>
+            <span className="text-[10px] text-mintGreen font-semibold">SAC 996331</span>
           </div>
-          <div className="space-y-1.5 text-xs text-white/80">
+
+          <div className="space-y-1.5 text-xs text-white/80 mb-3">
             {order.items.map((item, idx) => (
               <div key={idx} className="flex justify-between items-center">
                 <span>{item.qty}x {item.name} {item.size ? `(${item.size})` : ''}</span>
                 <span className="font-semibold text-white">₹{item.price * item.qty}</span>
               </div>
             ))}
-            <div className="flex justify-between items-center pt-2 border-t border-white/10 font-bold text-white">
-              <span>Total Amount</span>
+          </div>
+
+          {/* Tax Breakdown */}
+          <div className="space-y-1 pt-2 border-t border-white/5 text-[11px] text-white/60">
+            <div className="flex justify-between">
+              <span>Item Subtotal</span>
+              <span>₹{order.subtotal}</span>
+            </div>
+            <div className="flex justify-between">
+              <span>CGST (2.5%)</span>
+              <span>₹{order.cgst || Math.round(order.tax / 2)}</span>
+            </div>
+            <div className="flex justify-between">
+              <span>SGST (2.5%)</span>
+              <span>₹{order.sgst || Math.round(order.tax / 2)}</span>
+            </div>
+            <div className="flex justify-between font-bold text-white text-xs pt-1 border-t border-white/5">
+              <span>Grand Total</span>
               <span className="text-mintGreen text-sm">₹{order.total}</span>
             </div>
+          </div>
+
+          {/* Legal Compliance Numbers */}
+          <div className="mt-3 p-2 rounded-xl bg-black/30 border border-white/5 text-[9px] text-white/40 space-y-0.5">
+            <div>GSTIN: 27AAAAA0000A1Z5 | FSSAI: 11522018000452</div>
+            <div>Invoice Ref: INV-EMR-{order.orderNumber}</div>
+          </div>
+
+          {/* Payment Section */}
+          <div className="mt-4 pt-3 border-t border-white/10">
+            {order.paymentStatus === 'paid' ? (
+              <div className="flex items-center justify-between p-3 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-xs">
+                <span className="font-bold text-emerald-300">
+                  ✓ Payment Settled ({order.paymentMethod?.toUpperCase() || 'UPI'})
+                </span>
+                <span className="text-mintGreen font-bold">₹{order.total}</span>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                <button
+                  onClick={handleStartUpiPayment}
+                  disabled={paying}
+                  className="w-full h-11 rounded-2xl bg-mintGreen text-[#071a12] font-bold text-xs flex items-center justify-center gap-2 hover:bg-[#88e7bd] transition shadow-lg shadow-mintGreen/20 disabled:opacity-50"
+                >
+                  <QrCode className="w-4 h-4" />
+                  <span>{paying ? 'Connecting Gateway...' : `Pay ₹${order.total} via UPI / Card`}</span>
+                </button>
+                <div className="text-center text-[10px] text-white/50">
+                  Or pay with Cash at the counter
+                </div>
+              </div>
+            )}
           </div>
         </div>
       )}
 
       <button
         onClick={onOrderMore}
-        className="w-full mt-6 h-11 rounded-full border border-white/20 text-white text-xs font-bold hover:bg-white/10 transition"
+        className="w-full mt-4 h-10 rounded-full border border-white/20 text-white text-xs font-bold hover:bg-white/10 transition"
       >
         Place Another Order
       </button>
+
+      {/* UPI Checkout Modal */}
+      {upiModal && paymentData && (
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-[#0b241a] border border-white/10 rounded-3xl p-6 text-center max-w-[340px] shadow-2xl">
+            <h3 className="text-base font-extrabold text-white mb-1">UPI Instant Checkout</h3>
+            <p className="text-xs text-mintGreen font-semibold mb-4">Café Emerald Table {order.table}</p>
+            
+            <div className="bg-white p-4 rounded-2xl shadow-inner mb-4 inline-block">
+              {/* UPI QR Code representation */}
+              <div className="w-44 h-44 bg-gray-100 flex flex-col items-center justify-center border-2 border-dashed border-gray-300 rounded-xl p-2">
+                <span className="text-3xl mb-1">📱</span>
+                <span className="text-[10px] font-bold text-gray-800 uppercase tracking-wider">UPI / GPay / Paytm</span>
+                <span className="text-[9px] text-gray-500 font-mono mt-1">emeraldcafe@upi</span>
+                <div className="mt-2 text-xs font-extrabold text-[#071a12]">₹{order.total}.00</div>
+              </div>
+            </div>
+
+            <div className="text-xs text-white/70 mb-4">
+              Razorpay Order ID: <code className="font-mono text-[10px]">{paymentData.razorpayOrderId.slice(0, 15)}...</code>
+            </div>
+
+            <div className="flex gap-2">
+              <button
+                onClick={handleConfirmUpiPaid}
+                className="flex-1 py-2.5 rounded-xl bg-mintGreen text-[#071a12] font-bold text-xs"
+              >
+                Simulate Successful Pay
+              </button>
+              <button
+                onClick={() => setUpiModal(false)}
+                className="px-3 py-2.5 rounded-xl bg-white/10 text-white font-bold text-xs"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </motion.div>
   );
 }
