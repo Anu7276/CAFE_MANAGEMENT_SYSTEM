@@ -3,12 +3,24 @@ const generateToken = require('../utils/generateToken');
 
 const setTokenCookie = (res, token) => {
   const isProd = process.env.NODE_ENV === 'production';
-  res.cookie('emerald_token', token, {
+  const cookieDomain = process.env.COOKIE_DOMAIN; // e.g. '.yourcafe.com' for sibling subdomains
+
+  const cookieOptions = {
     httpOnly: true,
     secure: isProd,
-    sameSite: isProd ? 'none' : 'lax',
     maxAge: 30 * 24 * 60 * 60 * 1000 // 30 days
-  });
+  };
+
+  // Sibling subdomain mode: SameSite=Lax scoped to parent domain
+  // Fallback mode (different TLDs like vercel.app and onrender.com): SameSite=None, Secure=true
+  if (cookieDomain) {
+    cookieOptions.domain = cookieDomain.startsWith('.') ? cookieDomain : `.${cookieDomain}`;
+    cookieOptions.sameSite = 'lax';
+  } else {
+    cookieOptions.sameSite = isProd ? 'none' : 'lax';
+  }
+
+  res.cookie('emerald_token', token, cookieOptions);
 };
 
 const login = async (req, res, next) => {
@@ -89,11 +101,21 @@ const register = async (req, res, next) => {
 };
 
 const logout = async (req, res) => {
-  res.clearCookie('emerald_token', {
+  const isProd = process.env.NODE_ENV === 'production';
+  const cookieDomain = process.env.COOKIE_DOMAIN;
+  const clearOptions = {
     httpOnly: true,
-    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
-    secure: process.env.NODE_ENV === 'production'
-  });
+    secure: isProd
+  };
+
+  if (cookieDomain) {
+    clearOptions.domain = cookieDomain.startsWith('.') ? cookieDomain : `.${cookieDomain}`;
+    clearOptions.sameSite = 'lax';
+  } else {
+    clearOptions.sameSite = isProd ? 'none' : 'lax';
+  }
+
+  res.clearCookie('emerald_token', clearOptions);
   res.json({ success: true, message: 'Logged out successfully' });
 };
 

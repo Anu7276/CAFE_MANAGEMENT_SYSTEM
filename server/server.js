@@ -40,30 +40,46 @@ const server = http.createServer(app);
 // Production Configuration: Trust Reverse Proxy (Render, Railway, Nginx, Cloudflare)
 app.set('trust proxy', Number(process.env.TRUST_PROXY || 1));
 
-// Allowed origins for strict CORS
+// Allowed origins for CORS (supporting sibling subdomains e.g. order.yourcafe.com and api.yourcafe.com)
 const allowedOrigins = [
   process.env.CLIENT_URL,
+  process.env.PUBLIC_URL,
   'http://localhost:5173',
   'http://localhost:3000',
   'http://127.0.0.1:5173',
   'http://127.0.0.1:3000'
 ].filter(Boolean);
 
+const isAllowedOrigin = (origin) => {
+  if (!origin) return true; // Server-to-server, curl, mobile native
+  if (process.env.NODE_ENV !== 'production') {
+    return allowedOrigins.includes(origin) || origin.startsWith('http://localhost:') || origin.startsWith('http://127.0.0.1:');
+  }
+
+  const prodOrigins = [process.env.CLIENT_URL, process.env.PUBLIC_URL].filter(Boolean);
+  if (prodOrigins.includes(origin)) return true;
+
+  // Sibling subdomain check: allow *.yourcafe.com if COOKIE_DOMAIN is set
+  const cookieDomain = process.env.COOKIE_DOMAIN;
+  if (cookieDomain) {
+    try {
+      const url = new URL(origin);
+      const cleanDomain = cookieDomain.startsWith('.') ? cookieDomain.slice(1) : cookieDomain;
+      if (url.hostname === cleanDomain || url.hostname.endsWith(`.${cleanDomain}`)) {
+        return true;
+      }
+    } catch {}
+  }
+
+  return false;
+};
+
 const corsOptions = {
   origin: (origin, callback) => {
-    // In production, lock CORS strictly to CLIENT_URL
-    if (process.env.NODE_ENV === 'production') {
-      const prodOrigins = [process.env.CLIENT_URL].filter(Boolean);
-      if (!origin || prodOrigins.includes(origin)) {
-        return callback(null, true);
-      }
-      return callback(new Error('Blocked by CORS policy in production: Origin not allowed'));
-    }
-    // In development/test, allow local dev hosts and curl/server requests
-    if (!origin || allowedOrigins.includes(origin)) {
+    if (isAllowedOrigin(origin)) {
       return callback(null, true);
     }
-    return callback(new Error('Blocked by CORS policy'));
+    return callback(new Error('Blocked by CORS policy: Origin not allowed'));
   },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
@@ -74,17 +90,10 @@ const corsOptions = {
 const io = new Server(server, {
   cors: {
     origin: (origin, callback) => {
-      if (process.env.NODE_ENV === 'production') {
-        const prodOrigins = [process.env.CLIENT_URL].filter(Boolean);
-        if (!origin || prodOrigins.includes(origin)) {
-          return callback(null, true);
-        }
-        return callback(new Error('Blocked by Socket CORS in production'));
-      }
-      if (!origin || allowedOrigins.includes(origin)) {
+      if (isAllowedOrigin(origin)) {
         return callback(null, true);
       }
-      return callback(new Error('Blocked by CORS'));
+      return callback(new Error('Blocked by Socket.io CORS'));
     },
     credentials: true,
     methods: ['GET', 'POST', 'PATCH']
@@ -93,7 +102,24 @@ const io = new Server(server, {
 app.set('io', io);
 setupRedisAdapter(io);
 
-// Security & Parsing Middlewares with updated Helmet CSP for Cloudinary & Razorpay
+// Security & Parsing Middlewares with updated Helmet CSP for Cloudinary, Razorpay & Sibling Subdomains
+const cspConnectSrc = [
+  "'self'",
+  "ws:",
+  "wss:",
+  "https://api.razorpay.com",
+  "https://lumberjack.razorpay.com",
+  "https://*.razorpay.com",
+  "https://res.cloudinary.com",
+  process.env.CLIENT_URL || "http://localhost:5173"
+];
+
+if (process.env.COOKIE_DOMAIN) {
+  const cleanDomain = process.env.COOKIE_DOMAIN.startsWith('.') ? process.env.COOKIE_DOMAIN.slice(1) : process.env.COOKIE_DOMAIN;
+  cspConnectSrc.push(`https://*.${cleanDomain}`);
+  cspConnectSrc.push(`wss://*.${cleanDomain}`);
+}
+
 app.use(helmet({
   crossOriginResourcePolicy: { policy: "cross-origin" },
   contentSecurityPolicy: {
@@ -104,16 +130,7 @@ app.use(helmet({
       styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
       fontSrc: ["'self'", "https://fonts.gstatic.com"],
       imgSrc: ["'self'", "data:", "https://images.unsplash.com", "https://res.cloudinary.com"],
-      connectSrc: [
-        "'self'",
-        "ws:",
-        "wss:",
-        "https://api.razorpay.com",
-        "https://lumberjack.razorpay.com",
-        "https://*.razorpay.com",
-        "https://res.cloudinary.com",
-        process.env.CLIENT_URL || "http://localhost:5173"
-      ]
+      connectSrc: cspConnectSrc
     }
   }
 }));

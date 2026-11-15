@@ -39,6 +39,7 @@ JWT_SECRET=<AUTO_GENERATED_32_CHAR_HEX>
 TABLE_SIGNING_SECRET=<AUTO_GENERATED_32_CHAR_HEX>
 CLIENT_URL=https://order.cafeemerald.com
 PUBLIC_URL=https://order.cafeemerald.com
+COOKIE_DOMAIN=.cafeemerald.com
 ADMIN_EMAIL=owner@cafeemerald.com
 ADMIN_PASSWORD=<STRONG_PASSWD_MIN_8_CHARS>
 CLOUDINARY_CLOUD_NAME=your_cloud_name
