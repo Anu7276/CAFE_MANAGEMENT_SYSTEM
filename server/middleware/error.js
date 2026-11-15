@@ -1,12 +1,18 @@
 const errorHandler = (err, req, res, next) => {
   const statusCode = res.statusCode === 200 ? 500 : res.statusCode;
-  const message = err.message || 'Internal Server Error';
+  const isProd = process.env.NODE_ENV === 'production';
 
-  res.status(statusCode).json({
+  const response = {
     success: false,
-    message,
-    stack: process.env.NODE_ENV === 'production' ? null : err.stack
-  });
+    message: isProd && statusCode === 500 ? 'Internal Server Error' : (err.message || 'An unexpected error occurred')
+  };
+
+  // Expose error stacks only in development and test environments
+  if (!isProd && err.stack) {
+    response.stack = err.stack;
+  }
+
+  res.status(statusCode).json(response);
 };
 
 module.exports = { errorHandler };

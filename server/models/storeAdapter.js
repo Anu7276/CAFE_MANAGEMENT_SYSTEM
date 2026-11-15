@@ -168,6 +168,9 @@ const defaultData = {
 };
 
 function readStore() {
+  if (process.env.NODE_ENV === 'production' && !process.env.ALLOW_DEV_STORE_IN_PROD) {
+    throw new Error('FATAL: Local store.json fallback is strictly disabled in production. Connect to MongoDB via MONGO_URI.');
+  }
   try {
     if (!fs.existsSync(STORE_FILE)) {
       fs.writeFileSync(STORE_FILE, JSON.stringify(defaultData, null, 2), 'utf8');
@@ -181,6 +184,9 @@ function readStore() {
 }
 
 function writeStore(data) {
+  if (process.env.NODE_ENV === 'production' && !process.env.ALLOW_DEV_STORE_IN_PROD) {
+    throw new Error('FATAL: Writing to store.json is strictly disabled in production.');
+  }
   try {
     fs.writeFileSync(STORE_FILE, JSON.stringify(data, null, 2), 'utf8');
   } catch (err) {

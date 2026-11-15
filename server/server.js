@@ -35,6 +35,9 @@ connectDB();
 const app = express();
 const server = http.createServer(app);
 
+// Production Configuration: Trust Reverse Proxy (Render, Railway, Nginx, Cloudflare)
+app.set('trust proxy', Number(process.env.TRUST_PROXY || 1));
+
 // Allowed origins for strict CORS
 const allowedOrigins = [
   process.env.CLIENT_URL,
@@ -46,8 +49,16 @@ const allowedOrigins = [
 
 const corsOptions = {
   origin: (origin, callback) => {
-    // Allow requests with no origin (like mobile apps, curl, server-to-server)
-    if (!origin || allowedOrigins.includes(origin) || process.env.NODE_ENV !== 'production') {
+    // In production, lock CORS strictly to CLIENT_URL
+    if (process.env.NODE_ENV === 'production') {
+      const prodOrigins = [process.env.CLIENT_URL].filter(Boolean);
+      if (!origin || prodOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+      return callback(new Error('Blocked by CORS policy in production: Origin not allowed'));
+    }
+    // In development/test, allow local dev hosts and curl/server requests
+    if (!origin || allowedOrigins.includes(origin)) {
       return callback(null, true);
     }
     return callback(new Error('Blocked by CORS policy'));
@@ -61,7 +72,14 @@ const corsOptions = {
 const io = new Server(server, {
   cors: {
     origin: (origin, callback) => {
-      if (!origin || allowedOrigins.includes(origin) || process.env.NODE_ENV !== 'production') {
+      if (process.env.NODE_ENV === 'production') {
+        const prodOrigins = [process.env.CLIENT_URL].filter(Boolean);
+        if (!origin || prodOrigins.includes(origin)) {
+          return callback(null, true);
+        }
+        return callback(new Error('Blocked by Socket CORS in production'));
+      }
+      if (!origin || allowedOrigins.includes(origin)) {
         return callback(null, true);
       }
       return callback(new Error('Blocked by CORS'));
@@ -73,17 +91,27 @@ const io = new Server(server, {
 app.set('io', io);
 setupRedisAdapter(io);
 
-// Security & Parsing Middlewares
+// Security & Parsing Middlewares with updated Helmet CSP for Cloudinary & Razorpay
 app.use(helmet({
   crossOriginResourcePolicy: { policy: "cross-origin" },
   contentSecurityPolicy: {
     directives: {
       defaultSrc: ["'self'"],
-      scriptSrc: ["'self'", "'unsafe-inline'"],
+      scriptSrc: ["'self'", "'unsafe-inline'", "https://checkout.razorpay.com"],
+      frameSrc: ["'self'", "https://api.razorpay.com", "https://checkout.razorpay.com"],
       styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
       fontSrc: ["'self'", "https://fonts.gstatic.com"],
       imgSrc: ["'self'", "data:", "https://images.unsplash.com", "https://res.cloudinary.com"],
-      connectSrc: ["'self'", "ws:", "wss:", "http://localhost:*", "https://*"]
+      connectSrc: [
+        "'self'",
+        "ws:",
+        "wss:",
+        "https://api.razorpay.com",
+        "https://lumberjack.razorpay.com",
+        "https://*.razorpay.com",
+        "https://res.cloudinary.com",
+        process.env.CLIENT_URL || "http://localhost:5173"
+      ]
     }
   }
 }));
