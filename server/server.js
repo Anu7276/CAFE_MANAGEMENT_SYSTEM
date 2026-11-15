@@ -174,6 +174,29 @@ app.get('/health', (req, res) => res.json({
   timestamp: new Date().toISOString()
 }));
 
+// Build telemetry and version metadata
+const BUILD_TIME = process.env.BUILD_TIME || new Date().toISOString();
+let GIT_SHA = process.env.GIT_SHA || process.env.RENDER_GIT_COMMIT || process.env.VERCEL_GIT_COMMIT_SHA || 'unknown';
+try {
+  if (GIT_SHA === 'unknown') {
+    const { execSync } = require('child_process');
+    GIT_SHA = execSync('git rev-parse --short HEAD', { encoding: 'utf8' }).trim();
+  }
+} catch {}
+
+app.get('/api/version', (req, res) => {
+  res.json({
+    success: true,
+    name: 'cafe-emerald-api',
+    version: '1.0.0',
+    gitSha: GIT_SHA,
+    buildTime: BUILD_TIME,
+    nodeEnv: process.env.NODE_ENV || 'development',
+    uptime: Math.floor(process.uptime()),
+    timestamp: new Date().toISOString()
+  });
+});
+
 // Readiness check (Readiness probe)
 app.get('/ready', (req, res) => {
   const isDbReady = getStatus();

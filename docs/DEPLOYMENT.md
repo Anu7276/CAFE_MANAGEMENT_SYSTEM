@@ -124,6 +124,76 @@ Webhooks notify the server instantly if a payment completes via external UPI app
 
 Once deployed, run the included smoke test script to verify all core workflows in under 10 seconds:
 ```bash
-node scripts/smoke-test.js --url https://api.cafeemerald.com --email owner@cafeemerald.com --password YourPassword
+node scripts/smoke-test.js --url https://api.cafeemerald.com --email owner@cafeemerald.com --password YourPassword --allow-prod
 ```
-See below for details on the automated verification suite.
+The smoke test checks `/health`, tests DB price calculation integrity, KDS acceptance, cash mark-paid, thermal bill printing, KOT tickets, and automatically deletes its test order post-run.
+
+---
+
+## 6. Staging Deployment Checklist
+
+Before routing live customer traffic or presenting to investors, walk through this checklist on the staging environment:
+
+- [ ] **DNS & Subdomains Setup**:
+  - `order.<yourdomain>.com` points to Vercel (CNAME `cname.vercel-dns.com`).
+  - `api.<yourdomain>.com` points to Render/Railway service.
+- [ ] **Cookie Domain Configured**:
+  - `COOKIE_DOMAIN` is set to `.<yourdomain>.com` (leading dot).
+  - Verify that logging in on `order.<yourdomain>.com` transmits `SameSite=Lax` cookies with `domain=.<yourdomain>.com`.
+- [ ] **CORS & CSP Allowed Origins**:
+  - `CLIENT_URL` matches `https://order.<yourdomain>.com`.
+  - Connect-src allows API and WebSocket origins without console CSP warnings.
+- [ ] **Razorpay Webhook Endpoint**:
+  - Webhook URL configured in Razorpay Dashboard: `https://api.<yourdomain>.com/api/payments/webhook`.
+  - `RAZORPAY_WEBHOOK_SECRET` matches the webhook secret in the server environment.
+- [ ] **Version Telemetry Verification**:
+  - Curl or browse `GET https://api.<yourdomain>.com/api/version`.
+  - Response must return status `200` with the deployed `gitSha`, `buildTime`, and `nodeEnv: "production"`.
+- [ ] **Service Worker Update Test**:
+  - Push a test commit and verify that the Kitchen tablet KDS displays the "Update Available" toast prompt.
+
+---
+
+## 7. 🚨 Before Going Live (Production Runbook)
+
+Do not switch customer QR stands or activate marketing until every item in this section is completed:
+
+### 1. MongoDB Atlas Dedicated Backup Tier (M10+)
+* **Requirement**: Never run production dining rooms on free-tier Atlas (`M0` / `M2`).
+* **Action**:
+  1. Upgrade cluster to **M10 Dedicated** or higher in the MongoDB Atlas dashboard.
+  2. Enable **Continuous Cloud Backups (PITR)** with 7-day or 35-day retention.
+  3. Set up an alert policy for cluster disk space > 80% and RAM utilization > 75%.
+  4. Review `docs/MONGODB_BACKUP.md` for daily snapshot export procedures.
+
+### 2. Paid Render / Railway Instance (Eliminate Cold Starts)
+* **Requirement**: Free hosting tiers spin down after 15 minutes of inactivity. When a diner scans a table QR stand, a cold start takes 40–60 seconds, resulting in abandoned orders.
+* **Action**:
+  1. Upgrade `cafe-emerald-server` to **Starter** ($7/mo) or **Standard** plan on Render.
+  2. Ensure minimum 1 instance is continuously running (zero spin-down).
+  3. Verify ping latency via UptimeRobot or BetterStack (`/health` probe every 60s).
+
+### 3. Razorpay Business KYC & Live Credentials
+* **Requirement**: Online UPI payments will fail in live mode if merchant KYC is unverified.
+* **Action**:
+  1. Complete merchant bank account verification, upload FSSAI license & GSTIN certificate in Razorpay Dashboard.
+  2. Switch dashboard toggle from **Test Mode** to **Live Mode**.
+  3. Generate Live API Keys (`RAZORPAY_KEY_ID` starting with `rzp_live_...`).
+  4. Verify that public policy links are active and accessible:
+     - Privacy Policy: `https://order.<yourdomain>.com/privacy`
+     - Terms of Service: `https://order.<yourdomain>.com/terms`
+     - Refund & Cancellation: `https://order.<yourdomain>.com/refunds`
+  5. Perform one live ₹1 transaction via Google Pay / PhonePe at counter Table 1 and verify instant receipt.
+
+### 4. Replace Placeholder Business & Tax Details
+* **Requirement**: Invoices must display the legal entity name and official GST registration under Indian Law.
+* **Action**:
+  1. Log in to Admin Panel (`https://order.<yourdomain>.com/admin`) with owner credentials.
+  2. Navigate to **Settings** tab.
+  3. Replace default values with real business information:
+     - **Café Name**: Your registered legal trade name.
+     - **GSTIN**: 15-character statutory GST identification number.
+     - **FSSAI License**: 14-digit food safety registration number.
+     - **Official Address & Phone**: Physical café location and customer grievance number.
+  4. Test print a customer bill: confirm that thermal invoice header and SAC 996331 match official business records.
+

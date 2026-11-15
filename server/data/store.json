@@ -4,7 +4,7 @@
       "_id": "usr_admin_1",
       "name": "Café Manager",
       "email": "admin@cafeemerald.com",
-      "passwordHash": "$2a$10$nxMLKBaIxF5Y95lCADAyOuJH1qr/mRQYH3ABEDMJJPe3m612hI3Iu",
+      "passwordHash": "$2a$10$FGTW3cF6Now7zoGfXgxGRuMfXQkxM3gjntOXIcGbGc.hyLPJNN5By",
       "role": "owner",
       "failedLoginAttempts": 1,
       "lockUntil": null
@@ -51,6 +51,22 @@
     }
   ],
   "items": [
+    {
+      "_id": "item_1794772160792",
+      "name": "Artisanal Cinnamon Roll",
+      "category": "desserts",
+      "price": 150,
+      "description": "Freshly baked brioche swirled with Korintje cinnamon and cream cheese glaze.",
+      "image": "",
+      "emoji": "🥐",
+      "isVeg": true,
+      "isAvailable": true,
+      "isDeleted": true,
+      "sizes": [],
+      "createdAt": "2026-11-15T19:49:20.792Z",
+      "updatedAt": "2026-11-15T19:49:20.811Z",
+      "deletedAt": "2026-11-15T19:49:20.810Z"
+    },
     {
       "_id": "item_1794772023424",
       "name": "Artisanal Cinnamon Roll",
@@ -462,6 +478,127 @@
   ],
   "orders": [
     {
+      "_id": "ord_1794772172745_53b03e37",
+      "orderToken": "9124be3d42002fa74a1b2a882f4f1999",
+      "idempotencyKey": "supertest_idemp_1794772172730",
+      "orderNumber": 1052,
+      "table": 12,
+      "tableSig": "9e230ecde3d03c2077a3c5a7cfc5647f",
+      "items": [
+        {
+          "itemId": "item_cake_1",
+          "name": "Strawberry Chocolate Cake",
+          "category": "desserts",
+          "emoji": "🍰",
+          "price": 260,
+          "size": "",
+          "qty": 2,
+          "lineTotal": 520
+        }
+      ],
+      "subtotal": 520,
+      "tax": 26,
+      "cgst": 13,
+      "sgst": 13,
+      "total": 546,
+      "note": "Supertest barista note",
+      "paymentMethod": "cash",
+      "paymentStatus": "paid",
+      "status": "preparing",
+      "isTest": false,
+      "invoiceNumber": "CE/2026-27/000172",
+      "statusHistory": [
+        {
+          "status": "new",
+          "timestamp": "2026-11-15T19:49:32.745Z",
+          "note": "Order placed"
+        },
+        {
+          "status": "preparing",
+          "timestamp": "2026-11-15T19:49:32.772Z",
+          "note": "Status changed to preparing"
+        }
+      ],
+      "createdAt": "2026-11-15T19:49:32.745Z",
+      "updatedAt": "2026-11-15T19:49:32.791Z",
+      "paidAt": "2026-11-15T19:49:32.790Z"
+    },
+    {
+      "_id": "ord_1794772161151_717f58d3",
+      "orderToken": "df30c7461f22c50fd2905c06f942a7ef",
+      "idempotencyKey": null,
+      "orderNumber": 1051,
+      "table": 4,
+      "tableSig": null,
+      "items": [
+        {
+          "itemId": "item_coldcoffee_4",
+          "name": "Cold Coffee",
+          "price": 210,
+          "qty": 2
+        }
+      ],
+      "subtotal": 420,
+      "tax": 21,
+      "cgst": 10.5,
+      "sgst": 10.5,
+      "total": 441,
+      "note": "",
+      "paymentMethod": "cash",
+      "paymentStatus": "paid",
+      "status": "new",
+      "isTest": false,
+      "invoiceNumber": null,
+      "statusHistory": [
+        {
+          "status": "new",
+          "timestamp": "2026-11-15T19:49:21.151Z",
+          "note": "Order placed"
+        }
+      ],
+      "createdAt": "2026-11-15T19:49:21.151Z",
+      "updatedAt": "2026-11-15T19:49:21.153Z",
+      "paidAt": "2026-11-15T19:49:21.151Z"
+    },
+    {
+      "_id": "ord_1794772160395_1886d170",
+      "orderToken": "fb768b49c25e96a87a415df145318bba",
+      "idempotencyKey": "test_idemp_1794772160393",
+      "orderNumber": 1050,
+      "table": 5,
+      "tableSig": "373af7c42ce25b4ef3a231cc26b3a4ad",
+      "items": [
+        {
+          "itemId": "item_cake_1",
+          "name": "Strawberry Chocolate Cake",
+          "price": 260,
+          "size": "",
+          "qty": 2,
+          "lineTotal": 520
+        }
+      ],
+      "subtotal": 520,
+      "tax": 26,
+      "cgst": 13,
+      "sgst": 13,
+      "total": 546,
+      "note": "",
+      "paymentMethod": "counter",
+      "paymentStatus": "pending",
+      "status": "new",
+      "isTest": false,
+      "invoiceNumber": null,
+      "statusHistory": [
+        {
+          "status": "new",
+          "timestamp": "2026-11-15T19:49:20.395Z",
+          "note": "Order placed"
+        }
+      ],
+      "createdAt": "2026-11-15T19:49:20.395Z",
+      "updatedAt": "2026-11-15T19:49:20.395Z"
+    },
+    {
       "_id": "ord_1794772029784_46f2a752",
       "orderToken": "75d8c789da1081530ef0d8274b61ed17",
       "idempotencyKey": "supertest_idemp_1794772029766",
@@ -792,10 +929,55 @@
     "cgstRate": 2.5,
     "sgstRate": 2.5,
     "totalTables": 20,
-    "updatedAt": "2026-11-15T19:47:03.416Z",
+    "updatedAt": "2026-11-15T19:49:20.787Z",
     "updatedBy": "admin@cafeemerald.com"
   },
   "auditLogs": [
+    {
+      "_id": "audit_1794772172794_0gty6",
+      "userId": "usr_admin_1",
+      "userEmail": "admin@cafeemerald.com",
+      "userRole": "owner",
+      "action": "order_marked_paid",
+      "entity": "Order",
+      "entityId": "ord_1794772172745_53b03e37",
+      "details": {
+        "paymentMethod": "cash",
+        "total": 546
+      },
+      "ip": "127.0.0.1",
+      "timestamp": "2026-11-15T19:49:32.794Z"
+    },
+    {
+      "_id": "audit_1794772172774_64mxa",
+      "userId": "usr_admin_1",
+      "userEmail": "admin@cafeemerald.com",
+      "userRole": "owner",
+      "action": "order_status_updated",
+      "entity": "Order",
+      "entityId": "ord_1794772172745_53b03e37",
+      "details": {
+        "from": "new",
+        "to": "preparing",
+        "orderNumber": 1052
+      },
+      "ip": "127.0.0.1",
+      "timestamp": "2026-11-15T19:49:32.774Z"
+    },
+    {
+      "_id": "audit_1794772160921_okayb",
+      "userId": "usr_admin_1",
+      "userEmail": "admin@cafeemerald.com",
+      "userRole": "owner",
+      "action": "item_created",
+      "entity": "Item",
+      "entityId": "item_1794772160792",
+      "details": {
+        "name": "Artisanal Cinnamon Roll"
+      },
+      "ip": "",
+      "timestamp": "2026-11-15T19:49:20.921Z"
+    },
     {
       "_id": "audit_1794772029835_otpcv",
       "userId": "usr_admin_1",
@@ -1546,6 +1728,6 @@
     }
   ],
   "invoiceSequences": {
-    "2026-27": 147
+    "2026-27": 172
   }
 }
