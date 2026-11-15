@@ -8,7 +8,7 @@ function generateBillHtml(order, settings = {}) {
   const cafeName = settings.cafeName || 'CAFÉ EMERALD';
   const address = settings.address || '';
   const phone = settings.phone || '';
-  const invoiceNo = `INV-EMR-${order.orderNumber}`;
+  const invoiceNo = order.invoiceNumber || `CE/2026-27/${String(order.orderNumber || 1000).padStart(6, '0')}`;
   const orderTime = new Date(order.createdAt).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' });
 
   const itemsRows = order.items.map((item, idx) => `

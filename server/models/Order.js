@@ -76,6 +76,7 @@ class Order {
       paymentStatus: data.paymentStatus || 'pending',
       status: data.status || 'new',
       isTest: Boolean(data.isTest),
+      invoiceNumber: data.invoiceNumber || null,
       statusHistory: data.statusHistory || [
         { status: data.status || 'new', timestamp: new Date().toISOString(), note: 'Order placed' }
       ],

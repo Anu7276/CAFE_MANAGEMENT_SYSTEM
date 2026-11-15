@@ -3,6 +3,7 @@ const Order = require('../models/Order');
 const Item = require('../models/Item');
 const Settings = require('../models/Settings');
 const AuditLog = require('../models/AuditLog');
+const InvoiceSequence = require('../models/InvoiceSequence');
 const { verifyTableSig } = require('../utils/tableToken');
 const { validateStatusTransition } = require('../utils/orderStateMachine');
 const { generateBillHtml, generateKotHtml } = require('../utils/invoiceGenerator');
@@ -138,9 +139,16 @@ const createOrder = async (req, res, next) => {
     const requirePrePayment = Boolean(settings.requirePaymentBeforeKds) && isUpiOrder;
     const initialStatus = requirePrePayment ? 'payment_pending' : 'new';
 
+    // Generate atomic, gap-free GST invoice number per financial year (CE/YYYY-YY/000001)
+    const isTestOrder = Boolean(req.body.isTest);
+    const invoiceNumber = isTestOrder
+      ? `TEST-${Date.now().toString().slice(-6)}`
+      : await InvoiceSequence.claimNext();
+
     const order = await Order.create({
       orderToken,
       idempotencyKey,
+      invoiceNumber,
       table: tableNumber,
       tableSig: providedSig || (isSigValid ? 'valid' : 'dev_unsigned'),
       items: validatedItems,
@@ -153,7 +161,7 @@ const createOrder = async (req, res, next) => {
       paymentMethod: paymentMethod || 'counter',
       paymentStatus: 'pending',
       status: initialStatus,
-      isTest: Boolean(req.body.isTest)
+      isTest: isTestOrder
     });
 
     // 4. Scoped Socket.IO room broadcast (No global leaks)
@@ -442,10 +450,12 @@ const getInvoiceData = async (req, res, next) => {
     }
 
     const settings = await Settings.get();
+    const invoiceNumber = order.invoiceNumber || (await InvoiceSequence.getOrAssignForOrder(order));
+
     res.json({
       success: true,
       data: {
-        invoiceNumber: `INV-EMR-${order.orderNumber}`,
+        invoiceNumber,
         cafeName: settings.cafeName,
         gstin: settings.gstin,
         fssai: settings.fssai,

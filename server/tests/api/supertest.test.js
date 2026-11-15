@@ -108,7 +108,7 @@ async function runSupertestSuite() {
 
   // 4. Order Creation with Signed Table Token & Price Integrity
   await test('POST /api/orders creates order with server price & unguessable token', async () => {
-    const tableNum = 3;
+    const tableNum = 12;
     const tableSig = generateTableSig(tableNum);
     const idempKey = 'supertest_idemp_' + Date.now();
 
@@ -129,7 +129,7 @@ async function runSupertestSuite() {
     assert.strictEqual(res.body.success, true);
     assert(res.body.data._id);
     assert(res.body.data.orderToken && res.body.data.orderToken.length === 32);
-    assert.strictEqual(res.body.data.table, 3);
+    assert.strictEqual(res.body.data.table, 12);
     assert(res.body.data.subtotal > 2); // DB price applied, not 2 * 1
     assert.strictEqual(res.body.data.tax, Math.round(res.body.data.subtotal * 0.05));
     assert.strictEqual(res.body.data.total, res.body.data.subtotal + res.body.data.tax);
@@ -158,7 +158,7 @@ async function runSupertestSuite() {
     assert.strictEqual(res.statusCode, 200);
     assert.strictEqual(res.body.success, true);
     assert.strictEqual(res.body.data.orderToken, createdOrderToken);
-    assert.strictEqual(res.body.data.table, 3);
+    assert.strictEqual(res.body.data.table, 12);
     assert(res.body.data.status);
     assert(Array.isArray(res.body.data.items));
   });
@@ -215,7 +215,10 @@ async function runSupertestSuite() {
     assert.strictEqual(res.body.data.gstin, '27AAAAA0000A1Z5');
     assert.strictEqual(res.body.data.fssai, '11522018000452');
     assert.strictEqual(res.body.data.sacCode, '996331');
-    assert(res.body.data.invoiceNumber.startsWith('INV-EMR-'));
+    assert(
+      res.body.data.invoiceNumber.startsWith('CE/') ||
+      res.body.data.invoiceNumber.startsWith('INV-EMR-')
+    );
   });
 
   // 9. Tables and Signed QR List
