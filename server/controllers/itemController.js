@@ -1,6 +1,7 @@
 const Item = require('../models/Item');
 const Category = require('../models/Category');
 const AuditLog = require('../models/AuditLog');
+const { uploadItemImage, deleteItemImage } = require('../services/cloudinaryService');
 
 const getItems = async (req, res, next) => {
   try {
@@ -52,9 +53,12 @@ const getItemById = async (req, res, next) => {
 const createItem = async (req, res, next) => {
   try {
     let imageUrl = req.body.image;
+    let imagePublicId = null;
+
     if (req.file) {
-      // Served from static uploads
-      imageUrl = `/uploads/${req.file.filename}`;
+      const uploadRes = await uploadItemImage(req.file);
+      imageUrl = uploadRes.url;
+      imagePublicId = uploadRes.publicId;
     }
 
     let parsedSizes = [];
@@ -68,6 +72,7 @@ const createItem = async (req, res, next) => {
       price: Number(req.body.price),
       description: req.body.description || '',
       image: imageUrl || 'https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=800',
+      imagePublicId,
       emoji: req.body.emoji || '☕',
       isVeg: req.body.isVeg === true || req.body.isVeg === 'true',
       isAvailable: req.body.isAvailable !== false && req.body.isAvailable !== 'false',
@@ -110,9 +115,19 @@ const updateItem = async (req, res, next) => {
     if (req.body.isAvailable !== undefined) updates.isAvailable = req.body.isAvailable === true || req.body.isAvailable === 'true';
 
     if (req.file) {
-      updates.image = `/uploads/${req.file.filename}`;
-    } else if (req.body.image) {
+      // Delete old asset from Cloudinary or local disk
+      if (existing.image) {
+        await deleteItemImage(existing.image, existing.imagePublicId);
+      }
+      const uploadRes = await uploadItemImage(req.file);
+      updates.image = uploadRes.url;
+      updates.imagePublicId = uploadRes.publicId;
+    } else if (req.body.image && req.body.image !== existing.image) {
+      if (existing.image) {
+        await deleteItemImage(existing.image, existing.imagePublicId);
+      }
       updates.image = req.body.image;
+      updates.imagePublicId = null;
     }
 
     if (req.body.sizes) {
