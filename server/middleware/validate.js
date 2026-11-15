@@ -45,7 +45,8 @@ const createOrderSchema = z.object({
   tableSig: z.string().optional(),
   items: z.array(orderItemInputSchema).min(1, 'Order must contain at least 1 item'),
   note: z.string().max(300, 'Note cannot exceed 300 characters').optional().default(''),
-  paymentMethod: z.enum(['counter', 'upi', 'card']).default('counter')
+  paymentMethod: z.enum(['counter', 'upi', 'card']).default('counter'),
+  isTest: z.boolean().optional().default(false)
 });
 
 const updateOrderStatusSchema = z.object({

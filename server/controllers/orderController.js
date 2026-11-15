@@ -132,7 +132,8 @@ const createOrder = async (req, res, next) => {
       total,
       note: note ? String(note).slice(0, 300) : '',
       paymentMethod: paymentMethod || 'counter',
-      paymentStatus: 'pending'
+      paymentStatus: 'pending',
+      isTest: Boolean(req.body.isTest)
     });
 
     // 4. Scoped Socket.IO room broadcast (No global leaks)
@@ -221,8 +222,13 @@ const getOrderById = async (req, res, next) => {
  */
 const getAllOrders = async (req, res, next) => {
   try {
-    const { status, table, paymentStatus, search, startDate, endDate, page = 1, limit = 50 } = req.query;
+    const { status, table, paymentStatus, search, startDate, endDate, includeTest, page = 1, limit = 50 } = req.query;
     let orders = await Order.find();
+
+    // Exclude test orders unless explicitly requested by staff query (?includeTest=true)
+    if (includeTest !== 'true') {
+      orders = orders.filter(o => !o.isTest);
+    }
 
     if (status && status !== 'all') {
       orders = orders.filter(o => o.status === status);
@@ -466,6 +472,42 @@ const printKot = async (req, res, next) => {
   }
 };
 
+/**
+ * Staff / Admin delete order (used for smoke test cleanup and test order removal)
+ */
+const deleteOrder = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const order = await Order.findById(id);
+    if (!order) {
+      return res.status(404).json({ success: false, message: 'Order not found' });
+    }
+
+    const deleted = await Order.findByIdAndDelete(order._id);
+
+    // Audit log
+    await AuditLog.create({
+      action: 'ORDER_DELETED',
+      userId: req.user?._id || 'system',
+      userEmail: req.user?.email || 'staff',
+      details: {
+        orderId: order._id,
+        orderNumber: order.orderNumber,
+        isTest: order.isTest,
+        total: order.total
+      }
+    });
+
+    res.json({
+      success: true,
+      message: 'Order deleted successfully',
+      data: { _id: order._id, orderNumber: order.orderNumber }
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   createOrder,
   trackOrder,
@@ -475,5 +517,6 @@ module.exports = {
   markOrderPaid,
   getInvoiceData,
   printBill,
-  printKot
+  printKot,
+  deleteOrder
 };

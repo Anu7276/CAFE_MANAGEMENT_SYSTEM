@@ -5,7 +5,10 @@ const Order = require('../models/Order');
  */
 const getSalesSummary = async (req, res, next) => {
   try {
-    const orders = await Order.find();
+    let orders = await Order.find();
+
+    // Strictly exclude test orders from sales totals and reports
+    orders = orders.filter(o => !o.isTest);
 
     const now = new Date();
     const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();

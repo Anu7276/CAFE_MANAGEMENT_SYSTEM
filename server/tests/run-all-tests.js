@@ -12,6 +12,7 @@ const testSuites = [
   { name: 'Phase 4: Realtime Reliability Suite', file: path.resolve(__dirname, '../test-phase4-realtime.js') },
   { name: 'Phase 5: Unit Tests (Pricing & State Machine)', file: path.resolve(__dirname, 'unit/pricing-and-state.test.js') },
   { name: 'Production Unit: Cookie Domain & Subdomains', file: path.resolve(__dirname, 'unit/cookie-domain.test.js') },
+  { name: 'Production Unit: Smoke Test Guard & isTest Exclusions', file: path.resolve(__dirname, 'unit/smoke-test-guard.test.js') },
   { name: 'Phase 5: Supertest REST API Integration', file: path.resolve(__dirname, 'api/supertest.test.js') }
 ];
 

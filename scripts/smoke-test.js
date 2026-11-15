@@ -106,10 +106,17 @@ async function runSmokeTests() {
   let staffToken = null;
 
   // Step 1: Liveness Check (/health)
-  await step('Liveness Probe: GET /health returns 200 healthy', async () => {
+  await step('Liveness Probe: GET /health returns 200 healthy and validates env guards', async () => {
     const res = await request({ path: '/health' });
     if (res.status !== 200 || res.data?.status !== 'healthy') {
       throw new Error(`Unexpected /health response: HTTP ${res.status}`);
+    }
+    const isProd = res.data?.env === 'production';
+    const allowProd = args.includes('--allow-prod');
+    if (isProd && !allowProd) {
+      throw new Error(
+        'SAFETY GUARD: Server reports NODE_ENV=production. Smoke test refused without --allow-prod flag.'
+      );
     }
   });
 
@@ -139,6 +146,7 @@ async function runSmokeTests() {
     const orderPayload = {
       table: tableNum,
       tableSig,
+      isTest: true,
       items: [
         {
           itemId: sampleItem._id,
@@ -147,7 +155,7 @@ async function runSmokeTests() {
         }
       ],
       paymentMethod: 'counter',
-      note: 'Automated Post-Deploy Smoke Test'
+      note: 'Automated Post-Deploy Smoke Test (isTest: true)'
     };
 
     const res = await request({
@@ -247,6 +255,21 @@ async function runSmokeTests() {
       throw new Error(`KOT ticket failed to render: HTTP ${res.status}`);
     }
   });
+
+  // Step 10: Cleanup Test Order
+  if (createdOrder?._id) {
+    await step('Cleanup: DELETE /api/orders/:id purges test order from system', async () => {
+      const res = await request({
+        path: `/api/orders/${createdOrder._id}`,
+        method: 'DELETE',
+        headers: staffToken ? { 'Authorization': `Bearer ${staffToken}` } : {}
+      });
+
+      if (res.status !== 200 || !res.data?.success) {
+        throw new Error(`Failed to delete test order: HTTP ${res.status} - ${JSON.stringify(res.data)}`);
+      }
+    });
+  }
 
   const totalTime = Date.now() - startTime;
   const passedCount = results.filter(r => r.passed).length;

@@ -75,6 +75,7 @@ class Order {
       paymentMethod: data.paymentMethod || 'counter',
       paymentStatus: data.paymentStatus || 'pending',
       status: 'new',
+      isTest: Boolean(data.isTest),
       statusHistory: [
         { status: 'new', timestamp: new Date().toISOString(), note: 'Order placed' }
       ],
@@ -85,6 +86,16 @@ class Order {
     store.orders.unshift(newOrder);
     writeStore(store);
     return newOrder;
+  }
+
+  static async findByIdAndDelete(id) {
+    const store = readStore();
+    if (!store.orders) return null;
+    const index = store.orders.findIndex(o => o._id === id || String(o.orderNumber) === String(id) || o.orderToken === id);
+    if (index === -1) return null;
+    const deleted = store.orders.splice(index, 1)[0];
+    writeStore(store);
+    return deleted;
   }
 
   static async findByIdAndUpdate(id, updates) {
