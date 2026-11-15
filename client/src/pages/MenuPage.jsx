@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { Search, ShoppingBag, Globe } from 'lucide-react';
 import api from '../api/client';
 import { useCart } from '../context/CartContext';
@@ -242,6 +243,23 @@ export default function MenuPage() {
             )}
           </div>
         </div>
+
+        {/* Customer Legal & Trust Footer */}
+        <footer className="mt-16 border-t border-white/10 pt-8 pb-20 lg:pb-12 text-center text-xs text-white/50 space-y-4">
+          <div className="flex flex-wrap justify-center items-center gap-6 text-white/70 font-medium">
+            <Link to="/privacy" className="hover:text-mintGreen transition">Privacy Policy</Link>
+            <span className="text-white/20">•</span>
+            <Link to="/terms" className="hover:text-mintGreen transition">Terms of Service</Link>
+            <span className="text-white/20">•</span>
+            <Link to="/refunds" className="hover:text-mintGreen transition">Refund & Cancellation</Link>
+          </div>
+          <div className="space-y-1">
+            <p className="font-semibold text-white/80">Café Emerald — Artisanal Coffee & Gourmet Bakery</p>
+            <p>GST Registered Food Services • SAC Code: 996331</p>
+            <p>MG Road, Pune, Maharashtra 411001 • Contact: +91 98765 43210</p>
+            <p className="text-[10px] text-white/30 pt-2">Secure digital payments processed via Razorpay (UPI, Cards & NetBanking)</p>
+          </div>
+        </footer>
       </main>
 
       {/* Floating Mobile Cart Bar */}
