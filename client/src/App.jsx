@@ -4,6 +4,7 @@ import { CartProvider } from './context/CartContext';
 import { SocketProvider } from './context/SocketContext';
 import { I18nProvider } from './context/I18nContext';
 import ErrorBoundary from './components/ErrorBoundary';
+import UpdatePrompt from './components/UpdatePrompt';
 import MenuPage from './pages/MenuPage';
 import AdminDashboardPage from './pages/AdminDashboardPage';
 
@@ -20,6 +21,7 @@ export default function App() {
                 <Route path="/admin" element={<AdminDashboardPage />} />
                 <Route path="*" element={<Navigate to="/" replace />} />
               </Routes>
+              <UpdatePrompt />
             </BrowserRouter>
           </CartProvider>
         </SocketProvider>
