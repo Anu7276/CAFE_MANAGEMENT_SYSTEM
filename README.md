@@ -86,14 +86,16 @@ flowchart TD
     CP --> INV
     CP --> REPORTS
 
-    ORDERS <--> SIO
-    AUTH <--> SIO
+    ORDERS --> SIO
+    AUTH --> SIO
     SIO <--> REDIS
     SIO --> ROOM1
     SIO --> ROOM2
 
-    SERVICES -->|"Production"| MONGO
-    SERVICES -.->|"Dev Fallback Only"| DEVSTORE
+    ORDERS -->|"Production"| MONGO
+    AUTH -->|"Production"| MONGO
+    ITEMS -->|"Production"| MONGO
+    ORDERS -.->|"Dev Fallback Only"| DEVSTORE
 ```
 
 ---
@@ -103,29 +105,29 @@ flowchart TD
 ```mermaid
 sequenceDiagram
     autonumber
-    actor Customer as Customer (Table 3)
+    actor Customer as Customer Table 3
     participant Client as React Client
     participant Server as Express Server
     participant DB as Database Catalog
 
     Note over Customer,Client: Customer scans physical table QR code
     Customer->>Client: Open /t/3?sig=3b72c9...
-    Client->>Client: Extract table=3 & sig; store in session
-    Customer->>Client: Adds item to cart & clicks Checkout
+    Client->>Client: Extract table=3 and sig, save to session
+    Customer->>Client: Add items to cart and click Checkout
     Client->>Client: Generate UUID Idempotency-Key
-    Client->>Server: POST /api/orders { table: 3, tableSig: '3b72c9...', items: [{ id, qty, price: 1 }] }
+    Client->>Server: POST /api/orders with signed table token and items
     
-    Server->>Server: Verify table signature timingSafeEqual(sig, HMAC(table))
-    Server->>Server: Check Idempotency-Key (Return existing if replayed)
-    Server->>DB: Fetch authentic items by ID (Ignore client-sent price: 1)
-    Server->>Server: Calculate subtotal + 2.5% CGST + 2.5% SGST = Total
+    Server->>Server: Verify table signature with timingSafeEqual
+    Server->>Server: Check Idempotency-Key in cache
+    Server->>DB: Fetch authentic items by ID, ignore client price
+    Server->>Server: Calculate subtotal + CGST (2.5%) + SGST (2.5%) = Total
     Server->>Server: Generate crypto-random 32-char orderToken
-    Server->>DB: Save Order with unguessable orderToken
-    Server->>Client: 201 Created { orderToken: 'f8a9...', total: 273 }
+    Server->>DB: Persist order with unguessable orderToken
+    Server->>Client: 201 Created with orderToken and verified total
     
-    Note over Customer,Server: Live Status Tracking (No sequential ID leaks)
-    Client->>Server: Socket emit 'join:order' ('f8a9...')
-    Server->>Client: Realtime status push on state transition
+    Note over Customer,Server: Live Status Tracking (Unguessable token room)
+    Client->>Server: Socket emit join:order with orderToken
+    Server->>Client: Realtime status push on order transition
 ```
 
 ---
@@ -341,7 +343,8 @@ flowchart LR
         UPSTASH[("Upstash Redis (Socket Pub/Sub)")]
     end
 
-    Trigger --> CI
+    P1 --> LINT
+    P2 --> LINT
     LINT --> TEST --> BUILD --> DOCKER
     DOCKER -->|"Continuous Deploy"| VERCEL
     DOCKER -->|"Continuous Deploy"| RENDER
@@ -400,10 +403,10 @@ The customer ordering interface supports seamless, zero-reload internationalizat
 flowchart LR
     USER["Customer Selects Language (EN / हिं / ગુજ)"]
     CTX["I18nContext State Provider"]
-    STORE[("localStorage ('cafe_language')")]
+    STORE[("localStorage: cafe_language")]
     VIEWS["React Components (MenuPage, CartDrawer, DishCard, LiveTracker)"]
 
-    USER -->|"changeLanguage('hi')"| CTX
+    USER -->|"changeLanguage"| CTX
     CTX -->|"Persist Choice"| STORE
     CTX -->|"Reactive Re-render (Zero Page Reload)"| VIEWS
 ```
