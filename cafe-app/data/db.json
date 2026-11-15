@@ -1,0 +1,709 @@
+{
+  "secret": "879661195b2b6d08dfedad4c5d37dd1e2e0cb257a80e71587a4712dfd4dd50be",
+  "counters": {
+    "order": 1046
+  },
+  "admin": {
+    "username": "admin",
+    "salt": "8c986c083cd78c3f",
+    "hash": "7f109e7088454c414159ad8a974466373f0d1eff51f6cb131c4c0c8aed6fd07c"
+  },
+  "settings": {
+    "cafeName": "[YOUR CAFE]",
+    "tagline": "Good Coffee. Good Mood.",
+    "taxPercent": 5,
+    "acceptingOrders": true,
+    "publicUrl": "",
+    "currency": "₹"
+  },
+  "categories": [
+    {
+      "id": "coffee",
+      "name": "Coffee",
+      "emoji": "☕"
+    },
+    {
+      "id": "cold",
+      "name": "Cold",
+      "emoji": "🧋"
+    },
+    {
+      "id": "snacks",
+      "name": "Snacks",
+      "emoji": "🍔"
+    },
+    {
+      "id": "desserts",
+      "name": "Desserts",
+      "emoji": "🧁"
+    }
+  ],
+  "items": [
+    {
+      "id": "straw_choc_cake_id",
+      "name": "Strawberry Chocolate Cake",
+      "category": "desserts",
+      "price": 260,
+      "description": "These are the best Brownies! Delicious strawberry Cake, Made with dark chocolate, fresh raspberries & milk Chocolate, they are super fudgy and crazy good!",
+      "image": "https://images.unsplash.com/photo-1606313564200-e75d5e30476c?w=800&auto=format&fit=crop&q=85",
+      "emoji": "🍓",
+      "isVeg": true,
+      "isAvailable": true,
+      "sizes": [
+        {
+          "name": "1 Slice",
+          "extra": 0
+        },
+        {
+          "name": "2 Slices",
+          "extra": 240
+        }
+      ],
+      "createdAt": "2026-11-14T11:03:27.664Z"
+    },
+    {
+      "id": "f87ca2b96b55",
+      "name": "Cappuccino",
+      "category": "coffee",
+      "price": 180,
+      "description": "Espresso with steamed milk and a thick velvety foam.",
+      "image": "https://images.unsplash.com/photo-1534778101976-62847782c213?w=1000&auto=format&fit=crop&q=85",
+      "emoji": "☕",
+      "isVeg": true,
+      "isAvailable": true,
+      "sizes": [
+        {
+          "name": "Tall",
+          "extra": 0
+        },
+        {
+          "name": "Grande",
+          "extra": 30
+        },
+        {
+          "name": "Venti",
+          "extra": 60
+        }
+      ],
+      "createdAt": "2026-11-14T10:45:15.242Z"
+    },
+    {
+      "id": "7b6278709761",
+      "name": "Latte",
+      "category": "coffee",
+      "price": 190,
+      "description": "Smooth espresso with plenty of steamed milk.",
+      "image": "https://images.unsplash.com/photo-1570968915860-54d5c301fa9f?w=1000&auto=format&fit=crop&q=85",
+      "emoji": "🥛",
+      "isVeg": true,
+      "isAvailable": true,
+      "sizes": [
+        {
+          "name": "Tall",
+          "extra": 0
+        },
+        {
+          "name": "Grande",
+          "extra": 30
+        },
+        {
+          "name": "Venti",
+          "extra": 60
+        }
+      ],
+      "createdAt": "2026-11-14T10:45:15.243Z"
+    },
+    {
+      "id": "0569930b23d0",
+      "name": "Espresso",
+      "category": "coffee",
+      "price": 130,
+      "description": "A short, strong, classic shot.",
+      "image": "https://images.unsplash.com/photo-1510591509098-f4fdc6d0ff04?w=1000&auto=format&fit=crop&q=85",
+      "emoji": "☕",
+      "isVeg": true,
+      "isAvailable": true,
+      "sizes": [],
+      "createdAt": "2026-11-14T10:45:15.243Z"
+    },
+    {
+      "id": "292237e840d4",
+      "name": "Filter Coffee",
+      "category": "coffee",
+      "price": 110,
+      "description": "South-Indian style decoction coffee.",
+      "image": "https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?w=1000&auto=format&fit=crop&q=85",
+      "emoji": "☕",
+      "isVeg": true,
+      "isAvailable": true,
+      "sizes": [],
+      "createdAt": "2026-11-14T10:45:15.243Z"
+    },
+    {
+      "id": "e7ef0fdb7042",
+      "name": "Cold Coffee",
+      "category": "cold",
+      "price": 210,
+      "description": "Iced, lightly sweet.",
+      "image": "https://images.unsplash.com/photo-1517701550927-30cf4ba1dba5?w=1000&auto=format&fit=crop&q=85",
+      "emoji": "🧋",
+      "isVeg": true,
+      "isAvailable": true,
+      "sizes": [
+        {
+          "name": "Tall",
+          "extra": 0
+        },
+        {
+          "name": "Grande",
+          "extra": 30
+        },
+        {
+          "name": "Venti",
+          "extra": 60
+        }
+      ],
+      "createdAt": "2026-11-14T10:45:15.243Z"
+    },
+    {
+      "id": "432c034430a4",
+      "name": "Iced Lemon Tea",
+      "category": "cold",
+      "price": 160,
+      "description": "Chilled black tea with fresh lemon.",
+      "image": "https://images.unsplash.com/photo-1556679343-c7306c1976bc?w=1000&auto=format&fit=crop&q=85",
+      "emoji": "🍹",
+      "isVeg": true,
+      "isAvailable": true,
+      "sizes": [],
+      "createdAt": "2026-11-14T10:45:15.243Z"
+    },
+    {
+      "id": "9b9b8bf1a720",
+      "name": "Mango Smoothie",
+      "category": "cold",
+      "price": 220,
+      "description": "Alphonso mango blended with thick Greek yoghurt and a touch of organic honey.",
+      "image": "https://images.unsplash.com/photo-1553530666-ba11a7da3888?w=1000&auto=format&fit=crop&q=85",
+      "emoji": "🥭",
+      "isVeg": true,
+      "isAvailable": true,
+      "sizes": [
+        {
+          "name": "Tall",
+          "extra": 0
+        },
+        {
+          "name": "Grande",
+          "extra": 30
+        },
+        {
+          "name": "Venti",
+          "extra": 60
+        }
+      ],
+      "createdAt": "2026-11-14T10:45:15.243Z"
+    },
+    {
+      "id": "a369819dc476",
+      "name": "Veg Sandwich",
+      "category": "snacks",
+      "price": 150,
+      "description": "Grilled with cucumber, tomato, cheese and mint chutney.",
+      "image": "https://images.unsplash.com/photo-1528735602780-2552fd46c7af?w=1000&auto=format&fit=crop&q=85",
+      "emoji": "🥪",
+      "isVeg": true,
+      "isAvailable": true,
+      "sizes": [],
+      "createdAt": "2026-11-14T10:45:15.243Z"
+    },
+    {
+      "id": "0f2b04b19599",
+      "name": "Chicken Burger",
+      "category": "snacks",
+      "price": 240,
+      "description": "Crispy chicken patty, lettuce and house sauce.",
+      "image": "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=1000&auto=format&fit=crop&q=85",
+      "emoji": "🍔",
+      "isVeg": false,
+      "isAvailable": true,
+      "sizes": [],
+      "createdAt": "2026-11-14T10:45:15.243Z"
+    },
+    {
+      "id": "1a6db46e3e14",
+      "name": "French Fries",
+      "category": "snacks",
+      "price": 120,
+      "description": "Salted, crispy and hot.",
+      "image": "https://images.unsplash.com/photo-1576107232684-1279f3908594?w=1000&auto=format&fit=crop&q=85",
+      "emoji": "🍟",
+      "isVeg": true,
+      "isAvailable": true,
+      "sizes": [],
+      "createdAt": "2026-11-14T10:45:15.243Z"
+    },
+    {
+      "id": "c47751124ee4",
+      "name": "Brownie",
+      "category": "desserts",
+      "price": 150,
+      "description": "Warm chocolate brownie with a gooey centre.",
+      "image": "https://images.unsplash.com/photo-1606313564200-e75d5e30476c?w=1000&auto=format&fit=crop&q=85",
+      "emoji": "🍫",
+      "isVeg": true,
+      "isAvailable": true,
+      "sizes": [],
+      "createdAt": "2026-11-14T10:45:15.244Z"
+    },
+    {
+      "id": "672cd1c4a4f6",
+      "name": "Blueberry Muffin",
+      "category": "desserts",
+      "price": 110,
+      "description": "Baked fresh every morning.",
+      "image": "https://images.unsplash.com/photo-1586985289688-ca3cf47d3e6e?w=1000&auto=format&fit=crop&q=85",
+      "emoji": "🧁",
+      "isVeg": true,
+      "isAvailable": true,
+      "sizes": [],
+      "createdAt": "2026-11-14T10:45:15.244Z"
+    }
+  ],
+  "tables": [
+    {
+      "number": 1,
+      "label": "",
+      "active": true
+    },
+    {
+      "number": 2,
+      "label": "",
+      "active": true
+    },
+    {
+      "number": 3,
+      "label": "",
+      "active": true
+    },
+    {
+      "number": 5,
+      "label": "",
+      "active": true
+    },
+    {
+      "number": 6,
+      "label": "",
+      "active": true
+    },
+    {
+      "number": 7,
+      "label": "",
+      "active": true
+    },
+    {
+      "number": 8,
+      "label": "",
+      "active": true
+    }
+  ],
+  "orders": [
+    {
+      "id": "da2c82fbab9b",
+      "number": 1001,
+      "table": 1,
+      "items": [
+        {
+          "itemId": "f87ca2b96b55",
+          "name": "Cappuccino",
+          "size": "",
+          "unitPrice": 180,
+          "qty": 1,
+          "isVeg": true
+        }
+      ],
+      "note": "",
+      "subtotal": 180,
+      "taxPercent": 5,
+      "tax": 9,
+      "total": 189,
+      "status": "served",
+      "paymentMethod": "counter",
+      "paymentStatus": "unpaid",
+      "createdAt": "2026-11-14T10:45:43.221Z",
+      "history": [
+        {
+          "status": "new",
+          "at": "2026-11-14T10:45:43.221Z"
+        },
+        {
+          "status": "preparing",
+          "at": "2026-11-14T10:47:06.461Z"
+        },
+        {
+          "status": "ready",
+          "at": "2026-11-14T10:51:19.540Z"
+        },
+        {
+          "status": "served",
+          "at": "2026-11-14T10:51:22.585Z"
+        }
+      ]
+    },
+    {
+      "id": "9aa1a40ca6d6",
+      "number": 1002,
+      "table": 1,
+      "items": [
+        {
+          "itemId": "7b6278709761",
+          "name": "Latte",
+          "size": "",
+          "unitPrice": 190,
+          "qty": 1,
+          "isVeg": true
+        }
+      ],
+      "note": "",
+      "subtotal": 190,
+      "taxPercent": 5,
+      "tax": 10,
+      "total": 200,
+      "status": "rejected",
+      "paymentMethod": "upi",
+      "paymentStatus": "unpaid",
+      "createdAt": "2026-11-14T10:45:56.153Z",
+      "history": [
+        {
+          "status": "new",
+          "at": "2026-11-14T10:45:56.153Z"
+        },
+        {
+          "status": "rejected",
+          "at": "2026-11-14T10:46:08.437Z",
+          "reason": "Cancelled by customer"
+        }
+      ]
+    },
+    {
+      "id": "3774a25d44b0",
+      "number": 1003,
+      "table": 1,
+      "items": [
+        {
+          "itemId": "7b6278709761",
+          "name": "Latte",
+          "size": "",
+          "unitPrice": 190,
+          "qty": 1,
+          "isVeg": true
+        }
+      ],
+      "note": "",
+      "subtotal": 190,
+      "taxPercent": 5,
+      "tax": 10,
+      "total": 200,
+      "status": "served",
+      "paymentMethod": "counter",
+      "paymentStatus": "unpaid",
+      "createdAt": "2026-11-14T10:46:28.652Z",
+      "history": [
+        {
+          "status": "new",
+          "at": "2026-11-14T10:46:28.652Z"
+        },
+        {
+          "status": "preparing",
+          "at": "2026-11-14T10:47:07.913Z"
+        },
+        {
+          "status": "ready",
+          "at": "2026-11-14T10:51:16.760Z"
+        },
+        {
+          "status": "served",
+          "at": "2026-11-14T10:51:23.755Z"
+        }
+      ]
+    },
+    {
+      "id": "04fb74d368df",
+      "number": 1004,
+      "table": 1,
+      "items": [
+        {
+          "itemId": "f87ca2b96b55",
+          "name": "Cappuccino",
+          "size": "Venti",
+          "unitPrice": 240,
+          "qty": 1,
+          "isVeg": true
+        },
+        {
+          "itemId": "292237e840d4",
+          "name": "Filter Coffee",
+          "size": "",
+          "unitPrice": 110,
+          "qty": 1,
+          "isVeg": true
+        }
+      ],
+      "note": "",
+      "subtotal": 350,
+      "taxPercent": 5,
+      "tax": 18,
+      "total": 368,
+      "status": "served",
+      "paymentMethod": "counter",
+      "paymentStatus": "paid",
+      "createdAt": "2026-11-14T10:56:44.966Z",
+      "history": [
+        {
+          "status": "new",
+          "at": "2026-11-14T10:56:44.966Z"
+        },
+        {
+          "status": "preparing",
+          "at": "2026-11-14T10:57:03.947Z"
+        },
+        {
+          "status": "ready",
+          "at": "2026-11-14T10:59:15.666Z"
+        },
+        {
+          "status": "served",
+          "at": "2026-11-14T10:59:19.400Z"
+        }
+      ]
+    },
+    {
+      "id": "ord_1041",
+      "number": 1041,
+      "table": 3,
+      "status": "served",
+      "paymentStatus": "paid",
+      "paymentMethod": "upi",
+      "note": "",
+      "taxPercent": 5,
+      "tax": 10,
+      "subtotal": 200,
+      "total": 210,
+      "items": [
+        {
+          "id": "f87ca2b96b55",
+          "name": "Cold Coffee",
+          "size": "Grande",
+          "unitPrice": 200,
+          "qty": 1
+        }
+      ],
+      "history": [
+        {
+          "status": "new",
+          "at": "2026-11-14T10:46:17.885Z"
+        },
+        {
+          "status": "preparing",
+          "at": "2026-11-14T10:51:17.886Z"
+        },
+        {
+          "status": "ready",
+          "at": "2026-11-14T10:59:17.886Z"
+        },
+        {
+          "status": "served",
+          "at": "2026-11-14T11:45:32.967Z"
+        }
+      ],
+      "createdAt": "2026-11-14T10:46:17.886Z"
+    },
+    {
+      "id": "ord_1042",
+      "number": 1042,
+      "table": 5,
+      "status": "served",
+      "paymentStatus": "unpaid",
+      "paymentMethod": "counter",
+      "note": "less sugar, extra hot",
+      "taxPercent": 5,
+      "tax": 26,
+      "subtotal": 510,
+      "total": 536,
+      "items": [
+        {
+          "id": "f87ca2b96b55",
+          "name": "Cappuccino",
+          "size": "Tall",
+          "unitPrice": 180,
+          "qty": 2
+        },
+        {
+          "id": "veg_sand_id",
+          "name": "Veg Sandwich",
+          "size": "",
+          "unitPrice": 150,
+          "qty": 1
+        }
+      ],
+      "history": [
+        {
+          "status": "new",
+          "at": "2026-11-14T10:53:17.886Z"
+        },
+        {
+          "status": "preparing",
+          "at": "2026-11-14T10:57:17.886Z"
+        },
+        {
+          "status": "ready",
+          "at": "2026-11-14T11:45:35.068Z"
+        },
+        {
+          "status": "served",
+          "at": "2026-11-14T11:45:38.173Z"
+        }
+      ],
+      "createdAt": "2026-11-14T10:53:17.886Z"
+    },
+    {
+      "id": "ord_1043",
+      "number": 1043,
+      "table": 2,
+      "status": "served",
+      "paymentStatus": "unpaid",
+      "paymentMethod": "counter",
+      "note": "",
+      "taxPercent": 5,
+      "tax": 16,
+      "subtotal": 324,
+      "total": 340,
+      "items": [
+        {
+          "id": "f87ca2b96b55",
+          "name": "Cold Coffee",
+          "size": "Tall",
+          "unitPrice": 190,
+          "qty": 1
+        },
+        {
+          "id": "brownie_id",
+          "name": "Brownie",
+          "size": "",
+          "unitPrice": 150,
+          "qty": 1
+        }
+      ],
+      "history": [
+        {
+          "status": "new",
+          "at": "2026-11-14T10:58:17.886Z"
+        },
+        {
+          "status": "preparing",
+          "at": "2026-11-14T11:45:29.072Z"
+        },
+        {
+          "status": "ready",
+          "at": "2026-11-14T11:45:36.370Z"
+        },
+        {
+          "status": "served",
+          "at": "2026-11-14T11:45:39.515Z"
+        }
+      ],
+      "createdAt": "2026-11-14T10:58:17.886Z"
+    },
+    {
+      "id": "ord_1044",
+      "number": 1044,
+      "table": 7,
+      "status": "served",
+      "paymentStatus": "unpaid",
+      "paymentMethod": "counter",
+      "note": "",
+      "taxPercent": 5,
+      "tax": 18,
+      "subtotal": 342,
+      "total": 360,
+      "items": [
+        {
+          "id": "f87ca2b96b55",
+          "name": "Cappuccino",
+          "size": "Tall",
+          "unitPrice": 180,
+          "qty": 2
+        }
+      ],
+      "history": [
+        {
+          "status": "new",
+          "at": "2026-11-14T11:00:17.886Z"
+        },
+        {
+          "status": "preparing",
+          "at": "2026-11-14T11:45:29.872Z"
+        },
+        {
+          "status": "ready",
+          "at": "2026-11-14T11:45:36.609Z"
+        },
+        {
+          "status": "served",
+          "at": "2026-11-14T11:45:52.830Z"
+        }
+      ],
+      "createdAt": "2026-11-14T11:00:17.886Z"
+    },
+    {
+      "id": "a1443a370aef",
+      "number": 1046,
+      "table": 1,
+      "items": [
+        {
+          "itemId": "straw_choc_cake_id",
+          "name": "Strawberry Chocolate Cake",
+          "size": "1 Slice",
+          "unitPrice": 260,
+          "qty": 1,
+          "isVeg": true
+        },
+        {
+          "itemId": "f87ca2b96b55",
+          "name": "Cappuccino",
+          "size": "Tall",
+          "unitPrice": 180,
+          "qty": 1,
+          "isVeg": true
+        }
+      ],
+      "note": "",
+      "subtotal": 440,
+      "taxPercent": 5,
+      "tax": 22,
+      "total": 462,
+      "status": "served",
+      "paymentMethod": "counter",
+      "paymentStatus": "unpaid",
+      "createdAt": "2026-11-14T11:45:22.745Z",
+      "history": [
+        {
+          "status": "new",
+          "at": "2026-11-14T11:45:22.745Z"
+        },
+        {
+          "status": "preparing",
+          "at": "2026-11-14T11:45:31.025Z"
+        },
+        {
+          "status": "ready",
+          "at": "2026-11-14T11:45:36.810Z"
+        },
+        {
+          "status": "served",
+          "at": "2026-11-14T11:45:53.985Z"
+        }
+      ]
+    }
+  ]
+}
