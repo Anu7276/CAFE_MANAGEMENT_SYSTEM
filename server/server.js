@@ -11,8 +11,9 @@ const fs = require('fs');
 const jwt = require('jsonwebtoken');
 require('dotenv').config();
 
-const { connectDB } = require('./config/db');
+const { connectDB, getStatus } = require('./config/db');
 const { setupRedisAdapter } = require('./config/redis');
+const { logger, httpLogger } = require('./config/logger');
 const { errorHandler } = require('./middleware/error');
 const { apiLimiter } = require('./middleware/rateLimiter');
 
@@ -96,9 +97,8 @@ app.use(mongoSanitize({
 // Apply global rate limiting to all /api routes
 app.use('/api', apiLimiter);
 
-if (process.env.NODE_ENV === 'development') {
-  app.use(morgan('dev'));
-}
+// Structured Pino HTTP logging
+app.use(httpLogger);
 
 // Serve static uploads
 const uploadsDir = path.join(__dirname, 'public/uploads');
@@ -116,12 +116,30 @@ app.use('/api/reports', reportRoutes);
 app.use('/api/settings', settingsRoutes);
 app.use('/api/payments', paymentRoutes);
 
-// Health check
+// Health check (Liveness probe)
 app.get('/health', (req, res) => res.json({
   status: 'healthy',
   env: process.env.NODE_ENV || 'development',
   timestamp: new Date().toISOString()
 }));
+
+// Readiness check (Readiness probe)
+app.get('/ready', (req, res) => {
+  const isDbReady = getStatus();
+  if (process.env.NODE_ENV === 'production' && !isDbReady) {
+    return res.status(503).json({
+      status: 'unready',
+      database: 'disconnected',
+      timestamp: new Date().toISOString()
+    });
+  }
+  res.json({
+    status: 'ready',
+    database: isDbReady ? 'connected' : 'local_store',
+    uptime: Math.floor(process.uptime()),
+    timestamp: new Date().toISOString()
+  });
+});
 
 // Production client serving (if built)
 const clientDist = path.join(__dirname, '../client/dist');
@@ -204,5 +222,23 @@ if (require.main === module) {
     console.log(`=================================================\n`);
   });
 }
+
+// Graceful Shutdown Handler
+const handleGracefulShutdown = (signal) => {
+  logger.info(`Received ${signal}. Starting graceful shutdown...`);
+  server.close(() => {
+    logger.info('HTTP and WebSocket servers closed.');
+    process.exit(0);
+  });
+
+  // Force close after 10s if dangling connections persist
+  setTimeout(() => {
+    logger.error('Forced process termination due to timeout.');
+    process.exit(1);
+  }, 10000).unref();
+};
+
+process.on('SIGTERM', () => handleGracefulShutdown('SIGTERM'));
+process.on('SIGINT', () => handleGracefulShutdown('SIGINT'));
 
 module.exports = { app, server };

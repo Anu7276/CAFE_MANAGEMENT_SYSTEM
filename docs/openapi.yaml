@@ -1,0 +1,187 @@
+openapi: 3.0.3
+info:
+  title: Café Emerald API
+  description: Enterprise Contactless Table Ordering & Real-time Kitchen Display System API
+  version: 1.0.0
+servers:
+  - url: http://localhost:5000/api
+    description: Local Development Server
+  - url: https://api.cafeemerald.com/api
+    description: Production Cluster
+
+paths:
+  /auth/login:
+    post:
+      summary: Authenticate staff or owner
+      tags: [Auth]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email:
+                  type: string
+                password:
+                  type: string
+      responses:
+        '200':
+          description: Logged in successfully. Returns JWT and sets httpOnly cookie.
+        '401':
+          description: Invalid credentials
+        '423':
+          description: Account locked due to 5 consecutive failed login attempts
+
+  /items:
+    get:
+      summary: Get active menu items and categories
+      tags: [Menu]
+      responses:
+        '200':
+          description: List of menu items
+
+    post:
+      summary: Create menu item (Staff / Owner)
+      tags: [Menu]
+      security:
+        - bearerAuth: []
+      responses:
+        '201':
+          description: Item created
+
+  /orders:
+    post:
+      summary: Place order from table with signed QR token & server pricing
+      tags: [Orders]
+      parameters:
+        - in: header
+          name: Idempotency-Key
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [table, items]
+              properties:
+                table:
+                  type: integer
+                tableSig:
+                  type: string
+                items:
+                  type: array
+                  items:
+                    type: object
+                    required: [itemId, qty]
+                    properties:
+                      itemId:
+                        type: string
+                      size:
+                        type: string
+                      qty:
+                        type: integer
+      responses:
+        '201':
+          description: Order placed successfully
+        '400':
+          description: Validation error or item sold out
+        '403':
+          description: Store paused or invalid table signature
+
+  /orders/track/{token}:
+    get:
+      summary: Public customer order tracking by unguessable orderToken
+      tags: [Orders]
+      parameters:
+        - in: path
+          name: token
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Order status and items
+
+  /orders/{id}/status:
+    patch:
+      summary: Advance order state machine (Staff / Owner)
+      tags: [Orders]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [status]
+              properties:
+                status:
+                  type: string
+                  enum: [new, preparing, ready, served, rejected]
+      responses:
+        '200':
+          description: Status updated
+
+  /orders/{id}/mark-paid:
+    patch:
+      summary: Mark cash order as settled (Staff / Owner)
+      tags: [Orders]
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Payment marked as paid
+
+  /orders/{id}/print/bill:
+    get:
+      summary: 80mm printable thermal customer bill
+      tags: [Print]
+      responses:
+        '200':
+          description: HTML thermal bill
+
+  /orders/{id}/print/kot:
+    get:
+      summary: 80mm printable Kitchen Order Ticket (KOT)
+      tags: [Print]
+      responses:
+        '200':
+          description: HTML thermal KOT
+
+  /tables:
+    get:
+      summary: List all tables with signed QR URLs
+      tags: [Tables]
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: List of tables and QR codes
+
+  /reports/summary:
+    get:
+      summary: Daily financial sales metrics & top items
+      tags: [Reports]
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Sales analytics summary
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

@@ -1,22 +1,67 @@
 version: '3.8'
 
 services:
+  mongo:
+    image: mongo:7-jammy
+    restart: always
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    restart: always
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+
   server:
-    build: ./server
+    build:
+      context: ./server
+      dockerfile: Dockerfile
     restart: always
     ports:
       - "5000:5000"
     environment:
+      - NODE_ENV=production
       - PORT=5000
-      - MONGO_URI=mongodb://localhost:27017/cafe_emerald
-      - JWT_SECRET=production_secret_emerald_8899
+      - MONGO_URI=mongodb://mongo:27017/cafe_emerald
+      - REDIS_URL=redis://redis:6379
+      - JWT_SECRET=emerald_enterprise_jwt_super_secret_key_2026
+      - TABLE_TOKEN_SECRET=emerald_table_token_secure_hmac_secret_2026
       - CLIENT_URL=http://localhost:5173
+      - PUBLIC_URL=http://localhost:5173
+    depends_on:
+      mongo:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - server_uploads:/app/public/uploads
 
   client:
-    build: ./client
+    build:
+      context: ./client
+      dockerfile: Dockerfile
     restart: always
     ports:
       - "5173:80"
     depends_on:
       - server
 
+volumes:
+  mongo_data:
+  redis_data:
+  server_uploads:
