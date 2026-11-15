@@ -1,6 +1,9 @@
 const crypto = require('crypto');
 const { readStore, writeStore } = require('./storeAdapter');
 
+// In-process mutex to guarantee strict serial atomicity under concurrent requests
+let orderUpdateMutex = Promise.resolve();
+
 class Order {
   static async find(query = {}) {
     const store = readStore();
@@ -18,7 +21,26 @@ class Order {
       results = results.filter(o => o.paymentStatus === query.paymentStatus);
     }
 
+    if (query.razorpayOrderId) {
+      results = results.filter(o => o.razorpayOrderId === query.razorpayOrderId);
+    }
+
     return results.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+  }
+
+  static async findOne(query = {}) {
+    const store = readStore();
+    const orders = store.orders || [];
+    return orders.find(order => {
+      for (const [key, val] of Object.entries(query)) {
+        if (val && typeof val === 'object' && val.$ne !== undefined) {
+          if (order[key] === val.$ne) return false;
+        } else if (order[key] !== val) {
+          return false;
+        }
+      }
+      return true;
+    }) || null;
   }
 
   static async findById(id) {
@@ -126,6 +148,68 @@ class Order {
     };
     writeStore(store);
     return store.orders[index];
+  }
+
+  /**
+   * Atomic findOneAndUpdate with support for $set, $push, and $ne conditions.
+   * Serialized via mutex to guarantee atomic read-modify-write semantics under concurrency.
+   */
+  static async findOneAndUpdate(filter = {}, update = {}, options = {}) {
+    const executeUpdate = async () => {
+      const store = readStore();
+      if (!store.orders) store.orders = [];
+
+      const index = store.orders.findIndex(order => {
+        for (const [key, val] of Object.entries(filter)) {
+          if (val && typeof val === 'object' && val.$ne !== undefined) {
+            if (order[key] === val.$ne) return false;
+          } else if (order[key] !== val) {
+            return false;
+          }
+        }
+        return true;
+      });
+
+      if (index === -1) {
+        return null;
+      }
+
+      const existing = store.orders[index];
+      const updated = { ...existing };
+
+      if (update.$set) {
+        for (const [k, v] of Object.entries(update.$set)) {
+          updated[k] = v;
+        }
+      }
+
+      if (update.$push) {
+        for (const [k, v] of Object.entries(update.$push)) {
+          if (!Array.isArray(updated[k])) {
+            updated[k] = updated[k] ? [updated[k]] : [];
+          } else {
+            updated[k] = [...updated[k]];
+          }
+          updated[k].push(v);
+        }
+      }
+
+      for (const [k, v] of Object.entries(update)) {
+        if (!k.startsWith('$')) {
+          updated[k] = v;
+        }
+      }
+
+      updated.updatedAt = new Date().toISOString();
+      store.orders[index] = updated;
+      writeStore(store);
+
+      return options.new === false ? existing : updated;
+    };
+
+    const nextPromise = orderUpdateMutex.then(executeUpdate);
+    orderUpdateMutex = nextPromise.catch(() => {});
+    return nextPromise;
   }
 }
 

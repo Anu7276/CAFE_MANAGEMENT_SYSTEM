@@ -4,7 +4,7 @@
       "_id": "usr_admin_1",
       "name": "Café Manager",
       "email": "admin@cafeemerald.com",
-      "passwordHash": "$2a$10$na3.FdZeWxgJSqACo3VOyOrqgPohxSsG0rc9IRM805wVv3ZMxvj1O",
+      "passwordHash": "$2a$10$m/xkaGsDq5Oclb9GmctpIO4zO0Aq10G6g4SdaIh4RjGGFzs4HlBvu",
       "role": "owner",
       "failedLoginAttempts": 1,
       "lockUntil": null
@@ -51,6 +51,38 @@
     }
   ],
   "items": [
+    {
+      "_id": "item_1794774487785",
+      "name": "Artisanal Cinnamon Roll",
+      "category": "desserts",
+      "price": 150,
+      "description": "Freshly baked brioche swirled with Korintje cinnamon and cream cheese glaze.",
+      "image": "",
+      "emoji": "🥐",
+      "isVeg": true,
+      "isAvailable": true,
+      "isDeleted": true,
+      "sizes": [],
+      "createdAt": "2026-11-15T20:28:07.785Z",
+      "updatedAt": "2026-11-15T20:28:07.804Z",
+      "deletedAt": "2026-11-15T20:28:07.804Z"
+    },
+    {
+      "_id": "item_1794774427396",
+      "name": "Artisanal Cinnamon Roll",
+      "category": "desserts",
+      "price": 150,
+      "description": "Freshly baked brioche swirled with Korintje cinnamon and cream cheese glaze.",
+      "image": "",
+      "emoji": "🥐",
+      "isVeg": true,
+      "isAvailable": true,
+      "isDeleted": true,
+      "sizes": [],
+      "createdAt": "2026-11-15T20:27:07.396Z",
+      "updatedAt": "2026-11-15T20:27:07.414Z",
+      "deletedAt": "2026-11-15T20:27:07.413Z"
+    },
     {
       "_id": "item_1794773968687",
       "name": "Artisanal Cinnamon Roll",
@@ -526,6 +558,166 @@
   ],
   "orders": [
     {
+      "_id": "ord_1794774488163_af3b9005",
+      "orderToken": "8365b8cdd7020772771ad65308314af8",
+      "idempotencyKey": null,
+      "orderNumber": 1053,
+      "table": 4,
+      "tableSig": null,
+      "items": [
+        {
+          "itemId": "item_coldcoffee_4",
+          "name": "Cold Coffee",
+          "price": 210,
+          "qty": 2
+        }
+      ],
+      "subtotal": 420,
+      "tax": 21,
+      "cgst": 10.5,
+      "sgst": 10.5,
+      "total": 441,
+      "note": "",
+      "paymentMethod": "cash",
+      "paymentStatus": "paid",
+      "razorpayOrderId": null,
+      "razorpayPaymentId": null,
+      "paidAt": "2026-11-15T20:28:08.164Z",
+      "status": "new",
+      "isTest": false,
+      "invoiceNumber": null,
+      "statusHistory": [
+        {
+          "status": "new",
+          "timestamp": "2026-11-15T20:28:08.163Z",
+          "note": "Order placed"
+        }
+      ],
+      "createdAt": "2026-11-15T20:28:08.163Z",
+      "updatedAt": "2026-11-15T20:28:08.196Z"
+    },
+    {
+      "_id": "ord_1794774487425_c2d1fe5f",
+      "orderToken": "2631605a7cf9ba0aee3017121e643618",
+      "idempotencyKey": "test_idemp_1794774487423",
+      "orderNumber": 1052,
+      "table": 5,
+      "tableSig": "373af7c42ce25b4ef3a231cc26b3a4ad",
+      "items": [
+        {
+          "itemId": "item_cake_1",
+          "name": "Strawberry Chocolate Cake",
+          "price": 260,
+          "size": "",
+          "qty": 2,
+          "lineTotal": 520
+        }
+      ],
+      "subtotal": 520,
+      "tax": 26,
+      "cgst": 13,
+      "sgst": 13,
+      "total": 546,
+      "note": "",
+      "paymentMethod": "counter",
+      "paymentStatus": "pending",
+      "razorpayOrderId": null,
+      "razorpayPaymentId": null,
+      "paidAt": null,
+      "status": "new",
+      "isTest": false,
+      "invoiceNumber": null,
+      "statusHistory": [
+        {
+          "status": "new",
+          "timestamp": "2026-11-15T20:28:07.425Z",
+          "note": "Order placed"
+        }
+      ],
+      "createdAt": "2026-11-15T20:28:07.425Z",
+      "updatedAt": "2026-11-15T20:28:07.425Z"
+    },
+    {
+      "_id": "ord_1794774427782_c4f8e5d5",
+      "orderToken": "74f10516fc288acada6f94d15484dd11",
+      "idempotencyKey": null,
+      "orderNumber": 1051,
+      "table": 4,
+      "tableSig": null,
+      "items": [
+        {
+          "itemId": "item_coldcoffee_4",
+          "name": "Cold Coffee",
+          "price": 210,
+          "qty": 2
+        }
+      ],
+      "subtotal": 420,
+      "tax": 21,
+      "cgst": 10.5,
+      "sgst": 10.5,
+      "total": 441,
+      "note": "",
+      "paymentMethod": "cash",
+      "paymentStatus": "paid",
+      "razorpayOrderId": null,
+      "razorpayPaymentId": null,
+      "paidAt": "2026-11-15T20:27:07.783Z",
+      "status": "new",
+      "isTest": false,
+      "invoiceNumber": null,
+      "statusHistory": [
+        {
+          "status": "new",
+          "timestamp": "2026-11-15T20:27:07.782Z",
+          "note": "Order placed"
+        }
+      ],
+      "createdAt": "2026-11-15T20:27:07.782Z",
+      "updatedAt": "2026-11-15T20:27:07.787Z"
+    },
+    {
+      "_id": "ord_1794774427099_feba624d",
+      "orderToken": "bec07c08805737b5be969cb11e8e73a9",
+      "idempotencyKey": "test_idemp_1794774427096",
+      "orderNumber": 1050,
+      "table": 5,
+      "tableSig": "373af7c42ce25b4ef3a231cc26b3a4ad",
+      "items": [
+        {
+          "itemId": "item_cake_1",
+          "name": "Strawberry Chocolate Cake",
+          "price": 260,
+          "size": "",
+          "qty": 2,
+          "lineTotal": 520
+        }
+      ],
+      "subtotal": 520,
+      "tax": 26,
+      "cgst": 13,
+      "sgst": 13,
+      "total": 546,
+      "note": "",
+      "paymentMethod": "counter",
+      "paymentStatus": "pending",
+      "razorpayOrderId": null,
+      "razorpayPaymentId": null,
+      "paidAt": null,
+      "status": "new",
+      "isTest": false,
+      "invoiceNumber": null,
+      "statusHistory": [
+        {
+          "status": "new",
+          "timestamp": "2026-11-15T20:27:07.099Z",
+          "note": "Order placed"
+        }
+      ],
+      "createdAt": "2026-11-15T20:27:07.099Z",
+      "updatedAt": "2026-11-15T20:27:07.099Z"
+    },
+    {
       "_id": "ord_1794773969089_865f1859",
       "orderToken": "97cfd95dddca7daf1ea0cefa7bab08d0",
       "idempotencyKey": null,
@@ -839,11 +1031,1157 @@
     "cgstRate": 2.5,
     "sgstRate": 2.5,
     "totalTables": 20,
-    "updatedAt": "2026-11-15T20:19:39.924Z",
+    "updatedAt": "2026-11-15T20:28:19.401Z",
     "updatedBy": "admin",
     "onlinePaymentEnabled": true
   },
   "auditLogs": [
+    {
+      "_id": "audit_1794774511500_gbx89",
+      "userId": "usr_admin_1",
+      "userEmail": "admin@cafeemerald.com",
+      "userRole": "owner",
+      "action": "order_marked_paid",
+      "entity": "Order",
+      "entityId": "ord_1794774511400_797a23fc",
+      "details": {
+        "paymentMethod": "cash",
+        "total": 546
+      },
+      "ip": "127.0.0.1",
+      "timestamp": "2026-11-15T20:28:31.500Z"
+    },
+    {
+      "_id": "audit_1794774511468_zeb3q",
+      "userId": "usr_admin_1",
+      "userEmail": "admin@cafeemerald.com",
+      "userRole": "owner",
+      "action": "order_status_updated",
+      "entity": "Order",
+      "entityId": "ord_1794774511400_797a23fc",
+      "details": {
+        "from": "new",
+        "to": "preparing",
+        "orderNumber": 1054
+      },
+      "ip": "127.0.0.1",
+      "timestamp": "2026-11-15T20:28:31.468Z"
+    },
+    {
+      "_id": "audit_1794774505974_oevo0",
+      "userId": "customer",
+      "userEmail": "customer@table",
+      "userRole": "customer",
+      "action": "order_paid_upi",
+      "entity": "Order",
+      "entityId": "ord_1794774505962_64db0703",
+      "details": {
+        "razorpayOrderId": "order_atomic_20_1794774505959",
+        "razorpayPaymentId": "pay_v_20_1794774505963",
+        "amount": 189
+      },
+      "ip": "127.0.0.1",
+      "timestamp": "2026-11-15T20:28:25.974Z"
+    },
+    {
+      "_id": "audit_1794774505946_vjh5o",
+      "userId": "customer",
+      "userEmail": "customer@table",
+      "userRole": "customer",
+      "action": "order_paid_upi",
+      "entity": "Order",
+      "entityId": "ord_1794774505929_7f58bbfe",
+      "details": {
+        "razorpayOrderId": "order_atomic_19_1794774505924",
+        "razorpayPaymentId": "pay_v_19_1794774505930",
+        "amount": 189
+      },
+      "ip": "127.0.0.1",
+      "timestamp": "2026-11-15T20:28:25.946Z"
+    },
+    {
+      "_id": "audit_1794774505912_uu408",
+      "userId": "customer",
+      "userEmail": "customer@table",
+      "userRole": "customer",
+      "action": "order_paid_upi",
+      "entity": "Order",
+      "entityId": "ord_1794774505901_79e34bef",
+      "details": {
+        "razorpayOrderId": "order_atomic_18_1794774505897",
+        "razorpayPaymentId": "pay_v_18_1794774505902",
+        "amount": 189
+      },
+      "ip": "127.0.0.1",
+      "timestamp": "2026-11-15T20:28:25.912Z"
+    },
+    {
+      "_id": "audit_1794774505889_pk97c",
+      "userId": "customer",
+      "userEmail": "customer@table",
+      "userRole": "customer",
+      "action": "order_paid_upi",
+      "entity": "Order",
+      "entityId": "ord_1794774505879_a10a20ee",
+      "details": {
+        "razorpayOrderId": "order_atomic_17_1794774505876",
+        "razorpayPaymentId": "pay_v_17_1794774505879",
+        "amount": 189
+      },
+      "ip": "127.0.0.1",
+      "timestamp": "2026-11-15T20:28:25.889Z"
+    },
+    {
+      "_id": "audit_1794774505864_qusb7",
+      "userId": "customer",
+      "userEmail": "customer@table",
+      "userRole": "customer",
+      "action": "order_paid_upi",
+      "entity": "Order",
+      "entityId": "ord_1794774505851_b4114d1a",
+      "details": {
+        "razorpayOrderId": "order_atomic_16_1794774505840",
+        "razorpayPaymentId": "pay_v_16_1794774505852",
+        "amount": 189
+      },
+      "ip": "127.0.0.1",
+      "timestamp": "2026-11-15T20:28:25.864Z"
+    },
+    {
+      "_id": "audit_1794774505829_wn1p9",
+      "userId": "customer",
+      "userEmail": "customer@table",
+      "userRole": "customer",
+      "action": "order_paid_upi",
+      "entity": "Order",
+      "entityId": "ord_1794774505819_b6d451be",
+      "details": {
+        "razorpayOrderId": "order_atomic_15_1794774505815",
+        "razorpayPaymentId": "pay_v_15_1794774505820",
+        "amount": 189
+      },
+      "ip": "127.0.0.1",
+      "timestamp": "2026-11-15T20:28:25.829Z"
+    },
+    {
+      "_id": "audit_1794774505805_eggys",
+      "userId": "customer",
+      "userEmail": "customer@table",
+      "userRole": "customer",
+      "action": "order_paid_upi",
+      "entity": "Order",
+      "entityId": "ord_1794774505790_1436c461",
+      "details": {
+        "razorpayOrderId": "order_atomic_14_1794774505787",
+        "razorpayPaymentId": "pay_v_14_1794774505791",
+        "amount": 189
+      },
+      "ip": "127.0.0.1",
+      "timestamp": "2026-11-15T20:28:25.805Z"
+    },
+    {
+      "_id": "audit_1794774505777_tshh0",
+      "userId": "customer",
+      "userEmail": "customer@table",
+      "userRole": "customer",
+      "action": "order_paid_upi",
+      "entity": "Order",
+      "entityId": "ord_1794774505768_3cef9b06",
+      "details": {
+        "razorpayOrderId": "order_atomic_13_1794774505764",
+        "razorpayPaymentId": "pay_v_13_1794774505769",
+        "amount": 189
+      },
+      "ip": "127.0.0.1",
+      "timestamp": "2026-11-15T20:28:25.777Z"
+    },
+    {
+      "_id": "audit_1794774505755_a85yr",
+      "userId": "customer",
+      "userEmail": "customer@table",
+      "userRole": "customer",
+      "action": "order_paid_upi",
+      "entity": "Order",
+      "entityId": "ord_1794774505745_7b94404e",
+      "details": {
+        "razorpayOrderId": "order_atomic_12_1794774505742",
+        "razorpayPaymentId": "pay_v_12_1794774505745",
+        "amount": 189
+      },
+      "ip": "127.0.0.1",
+      "timestamp": "2026-11-15T20:28:25.755Z"
+    },
+    {
+      "_id": "audit_1794774505733_6n2nz",
+      "userId": "customer",
+      "userEmail": "customer@table",
+      "userRole": "customer",
+      "action": "order_paid_upi",
+      "entity": "Order",
+      "entityId": "ord_1794774505722_3857b2c6",
+      "details": {
+        "razorpayOrderId": "order_atomic_11_1794774505717",
+        "razorpayPaymentId": "pay_v_11_1794774505723",
+        "amount": 189
+      },
+      "ip": "127.0.0.1",
+      "timestamp": "2026-11-15T20:28:25.733Z"
+    },
+    {
+      "_id": "audit_1794774505707_edxcw",
+      "userId": "customer",
+      "userEmail": "customer@table",
+      "userRole": "customer",
+      "action": "order_paid_upi",
+      "entity": "Order",
+      "entityId": "ord_1794774505697_2b48de7e",
+      "details": {
+        "razorpayOrderId": "order_atomic_10_1794774505694",
+        "razorpayPaymentId": "pay_v_10_1794774505698",
+        "amount": 189
+      },
+      "ip": "127.0.0.1",
+      "timestamp": "2026-11-15T20:28:25.707Z"
+    },
+    {
+      "_id": "audit_1794774505684_tw0t5",
+      "userId": "customer",
+      "userEmail": "customer@table",
+      "userRole": "customer",
+      "action": "order_paid_upi",
+      "entity": "Order",
+      "entityId": "ord_1794774505670_0599a57e",
+      "details": {
+        "razorpayOrderId": "order_atomic_9_1794774505665",
+        "razorpayPaymentId": "pay_v_9_1794774505671",
+        "amount": 189
+      },
+      "ip": "127.0.0.1",
+      "timestamp": "2026-11-15T20:28:25.684Z"
+    },
+    {
+      "_id": "audit_1794774505645_ktnjb",
+      "userId": "customer",
+      "userEmail": "customer@table",
+      "userRole": "customer",
+      "action": "order_paid_upi",
+      "entity": "Order",
+      "entityId": "ord_1794774505623_3e1144f7",
+      "details": {
+        "razorpayOrderId": "order_atomic_8_1794774505620",
+        "razorpayPaymentId": "pay_v_8_1794774505625",
+        "amount": 189
+      },
+      "ip": "127.0.0.1",
+      "timestamp": "2026-11-15T20:28:25.645Z"
+    },
+    {
+      "_id": "audit_1794774505598_sxcku",
+      "userId": "customer",
+      "userEmail": "customer@table",
+      "userRole": "customer",
+      "action": "order_paid_upi",
+      "entity": "Order",
+      "entityId": "ord_1794774505577_5248a228",
+      "details": {
+        "razorpayOrderId": "order_atomic_7_1794774505572",
+        "razorpayPaymentId": "pay_v_7_1794774505578",
+        "amount": 189
+      },
+      "ip": "127.0.0.1",
+      "timestamp": "2026-11-15T20:28:25.598Z"
+    },
+    {
+      "_id": "audit_1794774505558_yk44n",
+      "userId": "customer",
+      "userEmail": "customer@table",
+      "userRole": "customer",
+      "action": "order_paid_upi",
+      "entity": "Order",
+      "entityId": "ord_1794774505539_621e16f2",
+      "details": {
+        "razorpayOrderId": "order_atomic_6_1794774505532",
+        "razorpayPaymentId": "pay_v_6_1794774505540",
+        "amount": 189
+      },
+      "ip": "127.0.0.1",
+      "timestamp": "2026-11-15T20:28:25.558Z"
+    },
+    {
+      "_id": "audit_1794774505511_csro0",
+      "userId": "customer",
+      "userEmail": "customer@table",
+      "userRole": "customer",
+      "action": "order_paid_upi",
+      "entity": "Order",
+      "entityId": "ord_1794774505494_b2d3e496",
+      "details": {
+        "razorpayOrderId": "order_atomic_5_1794774505489",
+        "razorpayPaymentId": "pay_v_5_1794774505496",
+        "amount": 189
+      },
+      "ip": "127.0.0.1",
+      "timestamp": "2026-11-15T20:28:25.511Z"
+    },
+    {
+      "_id": "audit_1794774505465_5kkqq",
+      "userId": "customer",
+      "userEmail": "customer@table",
+      "userRole": "customer",
+      "action": "order_paid_upi",
+      "entity": "Order",
+      "entityId": "ord_1794774505440_8f4f02f9",
+      "details": {
+        "razorpayOrderId": "order_atomic_4_1794774505435",
+        "razorpayPaymentId": "pay_v_4_1794774505442",
+        "amount": 189
+      },
+      "ip": "127.0.0.1",
+      "timestamp": "2026-11-15T20:28:25.465Z"
+    },
+    {
+      "_id": "audit_1794774505412_zebzz",
+      "userId": "customer",
+      "userEmail": "customer@table",
+      "userRole": "customer",
+      "action": "order_paid_upi",
+      "entity": "Order",
+      "entityId": "ord_1794774505389_7ade8581",
+      "details": {
+        "razorpayOrderId": "order_atomic_3_1794774505381",
+        "razorpayPaymentId": "pay_v_3_1794774505391",
+        "amount": 189
+      },
+      "ip": "127.0.0.1",
+      "timestamp": "2026-11-15T20:28:25.412Z"
+    },
+    {
+      "_id": "audit_1794774505355_41d18",
+      "userId": "customer",
+      "userEmail": "customer@table",
+      "userRole": "customer",
+      "action": "order_paid_upi",
+      "entity": "Order",
+      "entityId": "ord_1794774505324_83b4b216",
+      "details": {
+        "razorpayOrderId": "order_atomic_2_1794774505312",
+        "razorpayPaymentId": "pay_v_2_1794774505327",
+        "amount": 189
+      },
+      "ip": "127.0.0.1",
+      "timestamp": "2026-11-15T20:28:25.355Z"
+    },
+    {
+      "_id": "audit_1794774505272_ogqks",
+      "userId": "customer",
+      "userEmail": "customer@table",
+      "userRole": "customer",
+      "action": "order_paid_upi",
+      "entity": "Order",
+      "entityId": "ord_1794774505217_f61bdf89",
+      "details": {
+        "razorpayOrderId": "order_atomic_1_1794774505212",
+        "razorpayPaymentId": "pay_v_1_1794774505218",
+        "amount": 189
+      },
+      "ip": "127.0.0.1",
+      "timestamp": "2026-11-15T20:28:25.272Z"
+    },
+    {
+      "_id": "audit_1794774499385_j9zwi",
+      "userId": "razorpay_webhook",
+      "userEmail": "webhook@razorpay.com",
+      "userRole": "webhook",
+      "action": "order_paid_webhook",
+      "entity": "Order",
+      "entityId": "ord_1794774499373_626b120c",
+      "details": {
+        "razorpayOrderId": "order_sim_webhook_1794774499370",
+        "razorpayPaymentId": "pay_sim_wh_1794774499370",
+        "amount": 105
+      },
+      "ip": "127.0.0.1",
+      "timestamp": "2026-11-15T20:28:19.385Z"
+    },
+    {
+      "_id": "audit_1794774499354_a1wbt",
+      "userId": "customer",
+      "userEmail": "customer@table",
+      "userRole": "customer",
+      "action": "order_paid_upi",
+      "entity": "Order",
+      "entityId": "ord_1794774499341_17cc1e40",
+      "details": {
+        "razorpayOrderId": "order_sim_inflight_1794774499338",
+        "razorpayPaymentId": "pay_sim_success_1794774499345",
+        "amount": 147
+      },
+      "ip": "127.0.0.1",
+      "timestamp": "2026-11-15T20:28:19.354Z"
+    },
+    {
+      "_id": "audit_1794774487937_72sgu",
+      "userId": "usr_admin_1",
+      "userEmail": "admin@cafeemerald.com",
+      "userRole": "owner",
+      "action": "item_created",
+      "entity": "Item",
+      "entityId": "item_1794774487785",
+      "details": {
+        "name": "Artisanal Cinnamon Roll"
+      },
+      "ip": "",
+      "timestamp": "2026-11-15T20:28:07.937Z"
+    },
+    {
+      "_id": "audit_1794774479333_02mof",
+      "userId": "razorpay_webhook",
+      "userEmail": "webhook@razorpay.com",
+      "userRole": "webhook",
+      "action": "order_paid_webhook",
+      "entity": "Order",
+      "entityId": "ord_1794774479325_47328f07",
+      "details": {
+        "razorpayOrderId": "order_sim_webhook_1794774479322",
+        "razorpayPaymentId": "pay_sim_wh_1794774479322",
+        "amount": 105
+      },
+      "ip": "127.0.0.1",
+      "timestamp": "2026-11-15T20:27:59.333Z"
+    },
+    {
+      "_id": "audit_1794774479310_gs5kc",
+      "userId": "customer",
+      "userEmail": "customer@table",
+      "userRole": "customer",
+      "action": "order_paid_upi",
+      "entity": "Order",
+      "entityId": "ord_1794774479298_60b39945",
+      "details": {
+        "razorpayOrderId": "order_sim_inflight_1794774479295",
+        "razorpayPaymentId": "pay_sim_success_1794774479301",
+        "amount": 147
+      },
+      "ip": "127.0.0.1",
+      "timestamp": "2026-11-15T20:27:59.310Z"
+    },
+    {
+      "_id": "audit_1794774448423_wbogb",
+      "userId": "usr_admin_1",
+      "userEmail": "admin@cafeemerald.com",
+      "userRole": "owner",
+      "action": "order_marked_paid",
+      "entity": "Order",
+      "entityId": "ord_1794774448321_b7fff325",
+      "details": {
+        "paymentMethod": "cash",
+        "total": 546
+      },
+      "ip": "127.0.0.1",
+      "timestamp": "2026-11-15T20:27:28.423Z"
+    },
+    {
+      "_id": "audit_1794774448379_4lzpu",
+      "userId": "usr_admin_1",
+      "userEmail": "admin@cafeemerald.com",
+      "userRole": "owner",
+      "action": "order_status_updated",
+      "entity": "Order",
+      "entityId": "ord_1794774448321_b7fff325",
+      "details": {
+        "from": "new",
+        "to": "preparing",
+        "orderNumber": 1052
+      },
+      "ip": "127.0.0.1",
+      "timestamp": "2026-11-15T20:27:28.379Z"
+    },
+    {
+      "_id": "audit_1794774442772_2emfy",
+      "userId": "customer",
+      "userEmail": "customer@table",
+      "userRole": "customer",
+      "action": "order_paid_upi",
+      "entity": "Order",
+      "entityId": "ord_1794774442757_9aa85568",
+      "details": {
+        "razorpayOrderId": "order_atomic_20_1794774442750",
+        "razorpayPaymentId": "pay_v_20_1794774442759",
+        "amount": 189
+      },
+      "ip": "127.0.0.1",
+      "timestamp": "2026-11-15T20:27:22.772Z"
+    },
+    {
+      "_id": "audit_1794774442735_2l2ik",
+      "userId": "customer",
+      "userEmail": "customer@table",
+      "userRole": "customer",
+      "action": "order_paid_upi",
+      "entity": "Order",
+      "entityId": "ord_1794774442710_7ca7ede6",
+      "details": {
+        "razorpayOrderId": "order_atomic_19_1794774442705",
+        "razorpayPaymentId": "pay_v_19_1794774442720",
+        "amount": 189
+      },
+      "ip": "127.0.0.1",
+      "timestamp": "2026-11-15T20:27:22.735Z"
+    },
+    {
+      "_id": "audit_1794774442690_pgimp",
+      "userId": "customer",
+      "userEmail": "customer@table",
+      "userRole": "customer",
+      "action": "order_paid_upi",
+      "entity": "Order",
+      "entityId": "ord_1794774442676_d30eb9e7",
+      "details": {
+        "razorpayOrderId": "order_atomic_18_1794774442672",
+        "razorpayPaymentId": "pay_v_18_1794774442677",
+        "amount": 189
+      },
+      "ip": "127.0.0.1",
+      "timestamp": "2026-11-15T20:27:22.690Z"
+    },
+    {
+      "_id": "audit_1794774442656_15421",
+      "userId": "customer",
+      "userEmail": "customer@table",
+      "userRole": "customer",
+      "action": "order_paid_upi",
+      "entity": "Order",
+      "entityId": "ord_1794774442642_faf18ec9",
+      "details": {
+        "razorpayOrderId": "order_atomic_17_1794774442638",
+        "razorpayPaymentId": "pay_v_17_1794774442643",
+        "amount": 189
+      },
+      "ip": "127.0.0.1",
+      "timestamp": "2026-11-15T20:27:22.656Z"
+    },
+    {
+      "_id": "audit_1794774442625_nj3h2",
+      "userId": "customer",
+      "userEmail": "customer@table",
+      "userRole": "customer",
+      "action": "order_paid_upi",
+      "entity": "Order",
+      "entityId": "ord_1794774442613_39b36cce",
+      "details": {
+        "razorpayOrderId": "order_atomic_16_1794774442611",
+        "razorpayPaymentId": "pay_v_16_1794774442614",
+        "amount": 189
+      },
+      "ip": "127.0.0.1",
+      "timestamp": "2026-11-15T20:27:22.625Z"
+    },
+    {
+      "_id": "audit_1794774442601_4fjjm",
+      "userId": "customer",
+      "userEmail": "customer@table",
+      "userRole": "customer",
+      "action": "order_paid_upi",
+      "entity": "Order",
+      "entityId": "ord_1794774442591_4446994b",
+      "details": {
+        "razorpayOrderId": "order_atomic_15_1794774442587",
+        "razorpayPaymentId": "pay_v_15_1794774442592",
+        "amount": 189
+      },
+      "ip": "127.0.0.1",
+      "timestamp": "2026-11-15T20:27:22.601Z"
+    },
+    {
+      "_id": "audit_1794774442576_idgo3",
+      "userId": "customer",
+      "userEmail": "customer@table",
+      "userRole": "customer",
+      "action": "order_paid_upi",
+      "entity": "Order",
+      "entityId": "ord_1794774442565_ae51dd18",
+      "details": {
+        "razorpayOrderId": "order_atomic_14_1794774442562",
+        "razorpayPaymentId": "pay_v_14_1794774442565",
+        "amount": 189
+      },
+      "ip": "127.0.0.1",
+      "timestamp": "2026-11-15T20:27:22.576Z"
+    },
+    {
+      "_id": "audit_1794774442550_ire8t",
+      "userId": "customer",
+      "userEmail": "customer@table",
+      "userRole": "customer",
+      "action": "order_paid_upi",
+      "entity": "Order",
+      "entityId": "ord_1794774442538_d2ebf828",
+      "details": {
+        "razorpayOrderId": "order_atomic_13_1794774442533",
+        "razorpayPaymentId": "pay_v_13_1794774442540",
+        "amount": 189
+      },
+      "ip": "127.0.0.1",
+      "timestamp": "2026-11-15T20:27:22.550Z"
+    },
+    {
+      "_id": "audit_1794774442520_2r6kn",
+      "userId": "customer",
+      "userEmail": "customer@table",
+      "userRole": "customer",
+      "action": "order_paid_upi",
+      "entity": "Order",
+      "entityId": "ord_1794774442506_ca636008",
+      "details": {
+        "razorpayOrderId": "order_atomic_12_1794774442500",
+        "razorpayPaymentId": "pay_v_12_1794774442507",
+        "amount": 189
+      },
+      "ip": "127.0.0.1",
+      "timestamp": "2026-11-15T20:27:22.520Z"
+    },
+    {
+      "_id": "audit_1794774442483_9hm4q",
+      "userId": "customer",
+      "userEmail": "customer@table",
+      "userRole": "customer",
+      "action": "order_paid_upi",
+      "entity": "Order",
+      "entityId": "ord_1794774442464_85f20d05",
+      "details": {
+        "razorpayOrderId": "order_atomic_11_1794774442459",
+        "razorpayPaymentId": "pay_v_11_1794774442466",
+        "amount": 189
+      },
+      "ip": "127.0.0.1",
+      "timestamp": "2026-11-15T20:27:22.483Z"
+    },
+    {
+      "_id": "audit_1794774442443_7pxsg",
+      "userId": "customer",
+      "userEmail": "customer@table",
+      "userRole": "customer",
+      "action": "order_paid_upi",
+      "entity": "Order",
+      "entityId": "ord_1794774442426_b6c86fdf",
+      "details": {
+        "razorpayOrderId": "order_atomic_10_1794774442419",
+        "razorpayPaymentId": "pay_v_10_1794774442428",
+        "amount": 189
+      },
+      "ip": "127.0.0.1",
+      "timestamp": "2026-11-15T20:27:22.443Z"
+    },
+    {
+      "_id": "audit_1794774442402_ge9ad",
+      "userId": "customer",
+      "userEmail": "customer@table",
+      "userRole": "customer",
+      "action": "order_paid_upi",
+      "entity": "Order",
+      "entityId": "ord_1794774442388_ff0a9aee",
+      "details": {
+        "razorpayOrderId": "order_atomic_9_1794774442382",
+        "razorpayPaymentId": "pay_v_9_1794774442390",
+        "amount": 189
+      },
+      "ip": "127.0.0.1",
+      "timestamp": "2026-11-15T20:27:22.402Z"
+    },
+    {
+      "_id": "audit_1794774442369_m7qdw",
+      "userId": "customer",
+      "userEmail": "customer@table",
+      "userRole": "customer",
+      "action": "order_paid_upi",
+      "entity": "Order",
+      "entityId": "ord_1794774442353_122bf6ee",
+      "details": {
+        "razorpayOrderId": "order_atomic_8_1794774442348",
+        "razorpayPaymentId": "pay_v_8_1794774442354",
+        "amount": 189
+      },
+      "ip": "127.0.0.1",
+      "timestamp": "2026-11-15T20:27:22.369Z"
+    },
+    {
+      "_id": "audit_1794774442336_8xcqp",
+      "userId": "customer",
+      "userEmail": "customer@table",
+      "userRole": "customer",
+      "action": "order_paid_upi",
+      "entity": "Order",
+      "entityId": "ord_1794774442322_378151f6",
+      "details": {
+        "razorpayOrderId": "order_atomic_7_1794774442316",
+        "razorpayPaymentId": "pay_v_7_1794774442324",
+        "amount": 189
+      },
+      "ip": "127.0.0.1",
+      "timestamp": "2026-11-15T20:27:22.336Z"
+    },
+    {
+      "_id": "audit_1794774442297_563ta",
+      "userId": "customer",
+      "userEmail": "customer@table",
+      "userRole": "customer",
+      "action": "order_paid_upi",
+      "entity": "Order",
+      "entityId": "ord_1794774442277_290a89c3",
+      "details": {
+        "razorpayOrderId": "order_atomic_6_1794774442269",
+        "razorpayPaymentId": "pay_v_6_1794774442279",
+        "amount": 189
+      },
+      "ip": "127.0.0.1",
+      "timestamp": "2026-11-15T20:27:22.297Z"
+    },
+    {
+      "_id": "audit_1794774442250_tvcku",
+      "userId": "customer",
+      "userEmail": "customer@table",
+      "userRole": "customer",
+      "action": "order_paid_upi",
+      "entity": "Order",
+      "entityId": "ord_1794774442233_e34ca831",
+      "details": {
+        "razorpayOrderId": "order_atomic_5_1794774442229",
+        "razorpayPaymentId": "pay_v_5_1794774442235",
+        "amount": 189
+      },
+      "ip": "127.0.0.1",
+      "timestamp": "2026-11-15T20:27:22.250Z"
+    },
+    {
+      "_id": "audit_1794774442211_ne115",
+      "userId": "customer",
+      "userEmail": "customer@table",
+      "userRole": "customer",
+      "action": "order_paid_upi",
+      "entity": "Order",
+      "entityId": "ord_1794774442186_fe05ccd3",
+      "details": {
+        "razorpayOrderId": "order_atomic_4_1794774442174",
+        "razorpayPaymentId": "pay_v_4_1794774442188",
+        "amount": 189
+      },
+      "ip": "127.0.0.1",
+      "timestamp": "2026-11-15T20:27:22.211Z"
+    },
+    {
+      "_id": "audit_1794774442148_on4if",
+      "userId": "customer",
+      "userEmail": "customer@table",
+      "userRole": "customer",
+      "action": "order_paid_upi",
+      "entity": "Order",
+      "entityId": "ord_1794774442128_a3f3b609",
+      "details": {
+        "razorpayOrderId": "order_atomic_3_1794774442123",
+        "razorpayPaymentId": "pay_v_3_1794774442130",
+        "amount": 189
+      },
+      "ip": "127.0.0.1",
+      "timestamp": "2026-11-15T20:27:22.148Z"
+    },
+    {
+      "_id": "audit_1794774442107_oh1bh",
+      "userId": "customer",
+      "userEmail": "customer@table",
+      "userRole": "customer",
+      "action": "order_paid_upi",
+      "entity": "Order",
+      "entityId": "ord_1794774442090_7421fea1",
+      "details": {
+        "razorpayOrderId": "order_atomic_2_1794774442086",
+        "razorpayPaymentId": "pay_v_2_1794774442091",
+        "amount": 189
+      },
+      "ip": "127.0.0.1",
+      "timestamp": "2026-11-15T20:27:22.107Z"
+    },
+    {
+      "_id": "audit_1794774442074_hw60i",
+      "userId": "customer",
+      "userEmail": "customer@table",
+      "userRole": "customer",
+      "action": "order_paid_upi",
+      "entity": "Order",
+      "entityId": "ord_1794774442062_e99f16a3",
+      "details": {
+        "razorpayOrderId": "order_atomic_1_1794774442058",
+        "razorpayPaymentId": "pay_v_1_1794774442063",
+        "amount": 189
+      },
+      "ip": "127.0.0.1",
+      "timestamp": "2026-11-15T20:27:22.075Z"
+    },
+    {
+      "_id": "audit_1794774438248_2ksb3",
+      "userId": "razorpay_webhook",
+      "userEmail": "webhook@razorpay.com",
+      "userRole": "webhook",
+      "action": "order_paid_webhook",
+      "entity": "Order",
+      "entityId": "ord_1794774438233_4fb9ebf4",
+      "details": {
+        "razorpayOrderId": "order_sim_webhook_1794774438228",
+        "razorpayPaymentId": "pay_sim_wh_1794774438228",
+        "amount": 105
+      },
+      "ip": "127.0.0.1",
+      "timestamp": "2026-11-15T20:27:18.248Z"
+    },
+    {
+      "_id": "audit_1794774438205_iu2n4",
+      "userId": "customer",
+      "userEmail": "customer@table",
+      "userRole": "customer",
+      "action": "order_paid_upi",
+      "entity": "Order",
+      "entityId": "ord_1794774438181_6873810b",
+      "details": {
+        "razorpayOrderId": "order_sim_inflight_1794774438176",
+        "razorpayPaymentId": "pay_sim_success_1794774438188",
+        "amount": 147
+      },
+      "ip": "127.0.0.1",
+      "timestamp": "2026-11-15T20:27:18.205Z"
+    },
+    {
+      "_id": "audit_1794774427539_4fvrx",
+      "userId": "usr_admin_1",
+      "userEmail": "admin@cafeemerald.com",
+      "userRole": "owner",
+      "action": "item_created",
+      "entity": "Item",
+      "entityId": "item_1794774427396",
+      "details": {
+        "name": "Artisanal Cinnamon Roll"
+      },
+      "ip": "",
+      "timestamp": "2026-11-15T20:27:07.539Z"
+    },
+    {
+      "_id": "audit_1794774408529_oimgm",
+      "userId": "customer",
+      "userEmail": "customer@table",
+      "userRole": "customer",
+      "action": "order_paid_upi",
+      "entity": "Order",
+      "entityId": "ord_1794774408520_1235883f",
+      "details": {
+        "razorpayOrderId": "order_atomic_20_1794774408516",
+        "razorpayPaymentId": "pay_v_20_1794774408521",
+        "amount": 189
+      },
+      "ip": "127.0.0.1",
+      "timestamp": "2026-11-15T20:26:48.529Z"
+    },
+    {
+      "_id": "audit_1794774408507_yboo9",
+      "userId": "customer",
+      "userEmail": "customer@table",
+      "userRole": "customer",
+      "action": "order_paid_upi",
+      "entity": "Order",
+      "entityId": "ord_1794774408498_70110e10",
+      "details": {
+        "razorpayOrderId": "order_atomic_19_1794774408496",
+        "razorpayPaymentId": "pay_v_19_1794774408499",
+        "amount": 189
+      },
+      "ip": "127.0.0.1",
+      "timestamp": "2026-11-15T20:26:48.507Z"
+    },
+    {
+      "_id": "audit_1794774408488_33t4f",
+      "userId": "customer",
+      "userEmail": "customer@table",
+      "userRole": "customer",
+      "action": "order_paid_upi",
+      "entity": "Order",
+      "entityId": "ord_1794774408479_fd5a0d9c",
+      "details": {
+        "razorpayOrderId": "order_atomic_18_1794774408476",
+        "razorpayPaymentId": "pay_v_18_1794774408479",
+        "amount": 189
+      },
+      "ip": "127.0.0.1",
+      "timestamp": "2026-11-15T20:26:48.488Z"
+    },
+    {
+      "_id": "audit_1794774408468_zluvf",
+      "userId": "customer",
+      "userEmail": "customer@table",
+      "userRole": "customer",
+      "action": "order_paid_upi",
+      "entity": "Order",
+      "entityId": "ord_1794774408459_8bce1228",
+      "details": {
+        "razorpayOrderId": "order_atomic_17_1794774408456",
+        "razorpayPaymentId": "pay_v_17_1794774408459",
+        "amount": 189
+      },
+      "ip": "127.0.0.1",
+      "timestamp": "2026-11-15T20:26:48.468Z"
+    },
+    {
+      "_id": "audit_1794774408448_xahrl",
+      "userId": "customer",
+      "userEmail": "customer@table",
+      "userRole": "customer",
+      "action": "order_paid_upi",
+      "entity": "Order",
+      "entityId": "ord_1794774408440_326d966c",
+      "details": {
+        "razorpayOrderId": "order_atomic_16_1794774408437",
+        "razorpayPaymentId": "pay_v_16_1794774408441",
+        "amount": 189
+      },
+      "ip": "127.0.0.1",
+      "timestamp": "2026-11-15T20:26:48.448Z"
+    },
+    {
+      "_id": "audit_1794774408428_kps2q",
+      "userId": "customer",
+      "userEmail": "customer@table",
+      "userRole": "customer",
+      "action": "order_paid_upi",
+      "entity": "Order",
+      "entityId": "ord_1794774408420_ad743d3c",
+      "details": {
+        "razorpayOrderId": "order_atomic_15_1794774408417",
+        "razorpayPaymentId": "pay_v_15_1794774408420",
+        "amount": 189
+      },
+      "ip": "127.0.0.1",
+      "timestamp": "2026-11-15T20:26:48.428Z"
+    },
+    {
+      "_id": "audit_1794774408409_xbmqm",
+      "userId": "customer",
+      "userEmail": "customer@table",
+      "userRole": "customer",
+      "action": "order_paid_upi",
+      "entity": "Order",
+      "entityId": "ord_1794774408401_540ae23c",
+      "details": {
+        "razorpayOrderId": "order_atomic_14_1794774408398",
+        "razorpayPaymentId": "pay_v_14_1794774408401",
+        "amount": 189
+      },
+      "ip": "127.0.0.1",
+      "timestamp": "2026-11-15T20:26:48.409Z"
+    },
+    {
+      "_id": "audit_1794774408391_ehtgx",
+      "userId": "customer",
+      "userEmail": "customer@table",
+      "userRole": "customer",
+      "action": "order_paid_upi",
+      "entity": "Order",
+      "entityId": "ord_1794774408382_c9201f99",
+      "details": {
+        "razorpayOrderId": "order_atomic_13_1794774408380",
+        "razorpayPaymentId": "pay_v_13_1794774408383",
+        "amount": 189
+      },
+      "ip": "127.0.0.1",
+      "timestamp": "2026-11-15T20:26:48.391Z"
+    },
+    {
+      "_id": "audit_1794774408372_xm6a1",
+      "userId": "customer",
+      "userEmail": "customer@table",
+      "userRole": "customer",
+      "action": "order_paid_upi",
+      "entity": "Order",
+      "entityId": "ord_1794774408362_ef5ee543",
+      "details": {
+        "razorpayOrderId": "order_atomic_12_1794774408360",
+        "razorpayPaymentId": "pay_v_12_1794774408363",
+        "amount": 189
+      },
+      "ip": "127.0.0.1",
+      "timestamp": "2026-11-15T20:26:48.372Z"
+    },
+    {
+      "_id": "audit_1794774408353_eqv3g",
+      "userId": "customer",
+      "userEmail": "customer@table",
+      "userRole": "customer",
+      "action": "order_paid_upi",
+      "entity": "Order",
+      "entityId": "ord_1794774408345_44c088c8",
+      "details": {
+        "razorpayOrderId": "order_atomic_11_1794774408340",
+        "razorpayPaymentId": "pay_v_11_1794774408345",
+        "amount": 189
+      },
+      "ip": "127.0.0.1",
+      "timestamp": "2026-11-15T20:26:48.353Z"
+    },
+    {
+      "_id": "audit_1794774408331_x9rym",
+      "userId": "customer",
+      "userEmail": "customer@table",
+      "userRole": "customer",
+      "action": "order_paid_upi",
+      "entity": "Order",
+      "entityId": "ord_1794774408321_e3f87873",
+      "details": {
+        "razorpayOrderId": "order_atomic_10_1794774408318",
+        "razorpayPaymentId": "pay_v_10_1794774408322",
+        "amount": 189
+      },
+      "ip": "127.0.0.1",
+      "timestamp": "2026-11-15T20:26:48.331Z"
+    },
+    {
+      "_id": "audit_1794774408307_wdmg9",
+      "userId": "customer",
+      "userEmail": "customer@table",
+      "userRole": "customer",
+      "action": "order_paid_upi",
+      "entity": "Order",
+      "entityId": "ord_1794774408297_4f866188",
+      "details": {
+        "razorpayOrderId": "order_atomic_9_1794774408294",
+        "razorpayPaymentId": "pay_v_9_1794774408297",
+        "amount": 189
+      },
+      "ip": "127.0.0.1",
+      "timestamp": "2026-11-15T20:26:48.307Z"
+    },
+    {
+      "_id": "audit_1794774408280_y2c1s",
+      "userId": "customer",
+      "userEmail": "customer@table",
+      "userRole": "customer",
+      "action": "order_paid_upi",
+      "entity": "Order",
+      "entityId": "ord_1794774408270_6f12643e",
+      "details": {
+        "razorpayOrderId": "order_atomic_8_1794774408268",
+        "razorpayPaymentId": "pay_v_8_1794774408271",
+        "amount": 189
+      },
+      "ip": "127.0.0.1",
+      "timestamp": "2026-11-15T20:26:48.280Z"
+    },
+    {
+      "_id": "audit_1794774408260_8z1mb",
+      "userId": "customer",
+      "userEmail": "customer@table",
+      "userRole": "customer",
+      "action": "order_paid_upi",
+      "entity": "Order",
+      "entityId": "ord_1794774408251_12b4e474",
+      "details": {
+        "razorpayOrderId": "order_atomic_7_1794774408248",
+        "razorpayPaymentId": "pay_v_7_1794774408251",
+        "amount": 189
+      },
+      "ip": "127.0.0.1",
+      "timestamp": "2026-11-15T20:26:48.260Z"
+    },
+    {
+      "_id": "audit_1794774408240_weym2",
+      "userId": "customer",
+      "userEmail": "customer@table",
+      "userRole": "customer",
+      "action": "order_paid_upi",
+      "entity": "Order",
+      "entityId": "ord_1794774408232_95e07e04",
+      "details": {
+        "razorpayOrderId": "order_atomic_6_1794774408230",
+        "razorpayPaymentId": "pay_v_6_1794774408232",
+        "amount": 189
+      },
+      "ip": "127.0.0.1",
+      "timestamp": "2026-11-15T20:26:48.240Z"
+    },
+    {
+      "_id": "audit_1794774408222_c8fer",
+      "userId": "customer",
+      "userEmail": "customer@table",
+      "userRole": "customer",
+      "action": "order_paid_upi",
+      "entity": "Order",
+      "entityId": "ord_1794774408213_0808e067",
+      "details": {
+        "razorpayOrderId": "order_atomic_5_1794774408211",
+        "razorpayPaymentId": "pay_v_5_1794774408214",
+        "amount": 189
+      },
+      "ip": "127.0.0.1",
+      "timestamp": "2026-11-15T20:26:48.222Z"
+    },
+    {
+      "_id": "audit_1794774408202_72odf",
+      "userId": "customer",
+      "userEmail": "customer@table",
+      "userRole": "customer",
+      "action": "order_paid_upi",
+      "entity": "Order",
+      "entityId": "ord_1794774408193_6231f664",
+      "details": {
+        "razorpayOrderId": "order_atomic_4_1794774408190",
+        "razorpayPaymentId": "pay_v_4_1794774408193",
+        "amount": 189
+      },
+      "ip": "127.0.0.1",
+      "timestamp": "2026-11-15T20:26:48.202Z"
+    },
+    {
+      "_id": "audit_1794774408181_qtt3r",
+      "userId": "customer",
+      "userEmail": "customer@table",
+      "userRole": "customer",
+      "action": "order_paid_upi",
+      "entity": "Order",
+      "entityId": "ord_1794774408171_c942e0f4",
+      "details": {
+        "razorpayOrderId": "order_atomic_3_1794774408168",
+        "razorpayPaymentId": "pay_v_3_1794774408172",
+        "amount": 189
+      },
+      "ip": "127.0.0.1",
+      "timestamp": "2026-11-15T20:26:48.181Z"
+    },
+    {
+      "_id": "audit_1794774408158_aha4m",
+      "userId": "customer",
+      "userEmail": "customer@table",
+      "userRole": "customer",
+      "action": "order_paid_upi",
+      "entity": "Order",
+      "entityId": "ord_1794774408148_1051ccef",
+      "details": {
+        "razorpayOrderId": "order_atomic_2_1794774408144",
+        "razorpayPaymentId": "pay_v_2_1794774408148",
+        "amount": 189
+      },
+      "ip": "127.0.0.1",
+      "timestamp": "2026-11-15T20:26:48.158Z"
+    },
+    {
+      "_id": "audit_1794774408134_w6ykk",
+      "userId": "customer",
+      "userEmail": "customer@table",
+      "userRole": "customer",
+      "action": "order_paid_upi",
+      "entity": "Order",
+      "entityId": "ord_1794774408122_026e0e24",
+      "details": {
+        "razorpayOrderId": "order_atomic_1_1794774408121",
+        "razorpayPaymentId": "pay_v_1_1794774408123",
+        "amount": 189
+      },
+      "ip": "127.0.0.1",
+      "timestamp": "2026-11-15T20:26:48.134Z"
+    },
     {
       "_id": "audit_1794773985981_bbkow",
       "userId": "usr_admin_1",
@@ -1839,6 +3177,6 @@
     }
   ],
   "invoiceSequences": {
-    "2026-27": 246
+    "2026-27": 296
   }
 }

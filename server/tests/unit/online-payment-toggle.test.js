@@ -205,10 +205,16 @@ async function run() {
       }
     };
 
+    const rawWebhookBody = JSON.stringify(webhookPayload);
+    const whSecret = process.env.RAZORPAY_WEBHOOK_SECRET || 'emerald_razorpay_webhook_default_secret';
+    const whSig = crypto.createHmac('sha256', whSecret).update(rawWebhookBody).digest('hex');
+
     // First webhook delivery
     const whRes1 = await request(app)
       .post('/api/payments/webhook')
-      .send(webhookPayload);
+      .set('Content-Type', 'application/json')
+      .set('x-razorpay-signature', whSig)
+      .send(rawWebhookBody);
 
     assert.strictEqual(whRes1.statusCode, 200, 'First webhook must return 200');
 
@@ -219,7 +225,9 @@ async function run() {
     // Duplicate webhook delivery
     const whRes2 = await request(app)
       .post('/api/payments/webhook')
-      .send(webhookPayload);
+      .set('Content-Type', 'application/json')
+      .set('x-razorpay-signature', whSig)
+      .send(rawWebhookBody);
 
     assert.strictEqual(whRes2.statusCode, 200, 'Duplicate webhook must return 200');
     assert.strictEqual(whRes2.body.alreadyProcessed, true, 'Duplicate webhook must report alreadyProcessed: true');

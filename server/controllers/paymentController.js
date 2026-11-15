@@ -81,30 +81,27 @@ const verifyPayment = async (req, res, next) => {
       return res.status(400).json({ success: false, message: 'Payment details are required' });
     }
 
-    // Look up order strictly by stored razorpayOrderId (or candidate orderToken matching razorpayOrderId)
-    let order = null;
-    if (orderToken) {
+    // Look up existing order to ensure it exists; reject unknown orders with 404
+    let existingOrder = await Order.findOne({ razorpayOrderId });
+    if (!existingOrder && orderToken) {
       const candidate = await Order.findByToken(orderToken);
-      if (candidate && candidate.razorpayOrderId === razorpayOrderId) {
-        order = candidate;
+      if (candidate && (!candidate.razorpayOrderId || candidate.razorpayOrderId === razorpayOrderId)) {
+        existingOrder = candidate;
       }
-    }
-    if (!order) {
-      const allOrders = await Order.find();
-      order = allOrders.find(o => o.razorpayOrderId === razorpayOrderId);
     }
 
     // Only reject verify for an unknown razorpayOrderId
-    if (!order) {
+    if (!existingOrder) {
       return res.status(404).json({ success: false, message: 'Unknown or invalid Razorpay order ID' });
     }
 
-    // Idempotency: duplicate verify calls return success without duplicate notifications
-    if (order.paymentStatus === 'paid') {
+    // Idempotency: if already paid prior to signature verification, return alreadyProcessed: true
+    if (existingOrder.paymentStatus === 'paid') {
       return res.json({
         success: true,
+        status: 'ok',
         message: 'Payment already verified and captured',
-        data: order,
+        data: existingOrder,
         alreadyProcessed: true
       });
     }
@@ -119,36 +116,56 @@ const verifyPayment = async (req, res, next) => {
       return res.status(400).json({ success: false, message: 'Invalid payment signature verification' });
     }
 
-    const updatePayload = {
+    const now = new Date().toISOString();
+    const isPaymentPending = existingOrder.status === 'payment_pending';
+    const setPayload = {
       paymentStatus: 'paid',
       paymentMethod: 'upi',
       razorpayPaymentId,
-      paidAt: new Date().toISOString()
+      paidAt: now
     };
-
-    const isNewlyDispatched = order.status === 'payment_pending';
-    if (isNewlyDispatched) {
-      updatePayload.status = 'new';
-      updatePayload.statusHistory = [
-        ...(order.statusHistory || []),
-        { status: 'new', timestamp: new Date().toISOString(), note: 'UPI payment confirmed; dispatched to kitchen' }
-      ];
+    if (isPaymentPending) {
+      setPayload.status = 'new';
     }
 
-    const updated = await Order.findByIdAndUpdate(order._id, updatePayload);
+    const statusHistoryEntry = isPaymentPending
+      ? { status: 'new', timestamp: now, note: 'UPI payment confirmed; dispatched to kitchen' }
+      : { status: existingOrder.status || 'new', timestamp: now, note: 'UPI payment verified and confirmed' };
 
+    // ONE atomic update: only matches if paymentStatus is not already 'paid'
+    const updatedOrder = await Order.findOneAndUpdate(
+      { razorpayOrderId, paymentStatus: { $ne: 'paid' } },
+      {
+        $set: setPayload,
+        $push: { statusHistory: statusHistoryEntry }
+      },
+      { new: true }
+    );
+
+    // If updatedOrder is null (already marked paid concurrently), return alreadyProcessed: true and emit nothing
+    if (!updatedOrder) {
+      const alreadyPaidOrder = await Order.findOne({ razorpayOrderId }) || existingOrder;
+      return res.json({
+        success: true,
+        status: 'ok',
+        message: 'Payment already verified and captured',
+        data: alreadyPaidOrder,
+        alreadyProcessed: true
+      });
+    }
+
+    // ONLY the call that gets a document back moves payment_pending to new and emits socket events
     const io = req.app.get('io');
     if (io) {
-      if (isNewlyDispatched) {
-        // Dispatched to kitchen for the first time
-        io.to('admin_kds').emit('order:created', updated);
+      if (isPaymentPending) {
+        io.to('admin_kds').emit('order:created', updatedOrder);
       } else {
-        io.to('admin_kds').emit('order:updated', updated);
+        io.to('admin_kds').emit('order:updated', updatedOrder);
       }
-      io.to(`order_${order.orderToken}`).emit('order:status', {
-        orderNumber: order.orderNumber,
-        orderToken: order.orderToken,
-        status: updated.status,
+      io.to(`order_${updatedOrder.orderToken}`).emit('order:status', {
+        orderNumber: updatedOrder.orderNumber,
+        orderToken: updatedOrder.orderToken,
+        status: updatedOrder.status,
         paymentStatus: 'paid',
         paymentMethod: 'upi'
       });
@@ -160,15 +177,16 @@ const verifyPayment = async (req, res, next) => {
       userRole: 'customer',
       action: 'order_paid_upi',
       entity: 'Order',
-      entityId: order._id,
-      details: { razorpayOrderId, razorpayPaymentId, amount: order.total },
+      entityId: updatedOrder._id,
+      details: { razorpayOrderId, razorpayPaymentId, amount: updatedOrder.total },
       ip: req.ip
     });
 
-    res.json({
+    return res.json({
       success: true,
+      status: 'ok',
       message: 'Payment verified and captured successfully',
-      data: updated
+      data: updatedOrder
     });
   } catch (error) {
     next(error);
@@ -176,85 +194,113 @@ const verifyPayment = async (req, res, next) => {
 };
 
 /**
- * Webhook handler with HMAC signature verification and idempotent event handling
+ * Webhook handler with HMAC signature verification and atomic idempotent event handling
  */
 const handleWebhook = async (req, res, next) => {
   try {
     const signature = req.headers['x-razorpay-signature'];
-    const rawBody = req.rawBody || JSON.stringify(req.body);
+    if (!signature) {
+      return res.status(400).json({ success: false, message: 'Missing Razorpay webhook signature header' });
+    }
+
+    const rawBody = req.rawBody || (Buffer.isBuffer(req.body) ? req.body : (typeof req.body === 'string' ? req.body : JSON.stringify(req.body)));
 
     const isValid = verifyWebhookSignature(rawBody, signature);
-    if (!isValid && process.env.NODE_ENV === 'production') {
+    if (!isValid) {
       return res.status(400).json({ success: false, message: 'Invalid webhook signature' });
     }
 
-    const event = req.body?.event;
-    const payload = req.body?.payload;
+    let body = req.body;
+    if (Buffer.isBuffer(body)) {
+      try {
+        body = JSON.parse(body.toString('utf8'));
+      } catch {
+        return res.status(400).json({ success: false, message: 'Invalid JSON webhook payload' });
+      }
+    }
+
+    const event = body?.event;
+    const payload = body?.payload;
 
     if (event === 'payment.captured' || event === 'order.paid') {
       const payment = payload?.payment?.entity;
       const orderEntity = payload?.order?.entity;
       const rzpOrderId = payment?.order_id || orderEntity?.id;
+      const razorpayPaymentId = payment?.id;
+      const paymentMethod = payment?.method || 'upi';
 
       if (rzpOrderId) {
-        const orders = await Order.find();
-        const order = orders.find(o => o.razorpayOrderId === rzpOrderId);
+        const existingOrder = await Order.findOne({ razorpayOrderId: rzpOrderId });
+        if (!existingOrder) {
+          return res.json({ status: 'ok', message: 'No matching order for webhook' });
+        }
 
-        if (order) {
-          // Idempotency: the same payment event twice must not double-mark or double-notify
-          if (order.paymentStatus === 'paid') {
-            return res.json({ status: 'ok', alreadyProcessed: true });
+        const now = new Date().toISOString();
+        const isPaymentPending = existingOrder.status === 'payment_pending';
+        const setPayload = {
+          paymentStatus: 'paid',
+          paymentMethod,
+          paidAt: now
+        };
+        if (razorpayPaymentId) {
+          setPayload.razorpayPaymentId = razorpayPaymentId;
+        }
+        if (isPaymentPending) {
+          setPayload.status = 'new';
+        }
+
+        const statusHistoryEntry = isPaymentPending
+          ? { status: 'new', timestamp: now, note: 'Payment verified via Razorpay webhook; dispatched to kitchen' }
+          : { status: existingOrder.status || 'new', timestamp: now, note: 'Payment verified via Razorpay webhook' };
+
+        // ONE atomic update: only matches if paymentStatus is not already 'paid'
+        const updatedOrder = await Order.findOneAndUpdate(
+          { razorpayOrderId: rzpOrderId, paymentStatus: { $ne: 'paid' } },
+          {
+            $set: setPayload,
+            $push: { statusHistory: statusHistoryEntry }
+          },
+          { new: true }
+        );
+
+        // If updatedOrder is null (already paid), return alreadyProcessed: true and emit nothing
+        if (!updatedOrder) {
+          return res.json({ status: 'ok', alreadyProcessed: true });
+        }
+
+        // ONLY the call that gets a document back may move payment_pending to new and emit socket events
+        const io = req.app.get('io');
+        if (io) {
+          if (isPaymentPending) {
+            io.to('admin_kds').emit('order:created', updatedOrder);
+          } else {
+            io.to('admin_kds').emit('order:updated', updatedOrder);
           }
-
-          const updatePayload = {
+          io.to(`order_${updatedOrder.orderToken}`).emit('order:status', {
+            orderNumber: updatedOrder.orderNumber,
+            orderToken: updatedOrder.orderToken,
+            status: updatedOrder.status,
             paymentStatus: 'paid',
-            paymentMethod: payment?.method || 'upi',
-            razorpayPaymentId: payment?.id || order.razorpayPaymentId,
-            paidAt: new Date().toISOString()
-          };
-
-          const isNewlyDispatched = order.status === 'payment_pending';
-          if (isNewlyDispatched) {
-            updatePayload.status = 'new';
-            updatePayload.statusHistory = [
-              ...(order.statusHistory || []),
-              { status: 'new', timestamp: new Date().toISOString(), note: 'Payment verified via Razorpay webhook; dispatched to kitchen' }
-            ];
-          }
-
-          const updated = await Order.findByIdAndUpdate(order._id, updatePayload);
-
-          const io = req.app.get('io');
-          if (io) {
-            if (isNewlyDispatched) {
-              io.to('admin_kds').emit('order:created', updated);
-            } else {
-              io.to('admin_kds').emit('order:updated', updated);
-            }
-            io.to(`order_${order.orderToken}`).emit('order:status', {
-              orderNumber: order.orderNumber,
-              orderToken: order.orderToken,
-              status: updated.status,
-              paymentStatus: 'paid',
-              paymentMethod: updatePayload.paymentMethod
-            });
-          }
-
-          await AuditLog.logAction({
-            userId: 'razorpay_webhook',
-            userEmail: 'webhook@razorpay.com',
-            userRole: 'webhook',
-            action: 'order_paid_webhook',
-            entity: 'Order',
-            entityId: order._id,
-            details: { razorpayOrderId: rzpOrderId, razorpayPaymentId: payment?.id, amount: order.total },
-            ip: req.ip
+            paymentMethod: updatedOrder.paymentMethod
           });
         }
+
+        await AuditLog.logAction({
+          userId: 'razorpay_webhook',
+          userEmail: 'webhook@razorpay.com',
+          userRole: 'webhook',
+          action: 'order_paid_webhook',
+          entity: 'Order',
+          entityId: updatedOrder._id,
+          details: { razorpayOrderId: rzpOrderId, razorpayPaymentId, amount: updatedOrder.total },
+          ip: req.ip
+        });
+
+        return res.json({ status: 'ok', processed: true });
       }
     }
 
-    res.json({ status: 'ok' });
+    return res.json({ status: 'ok' });
   } catch (error) {
     next(error);
   }

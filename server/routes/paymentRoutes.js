@@ -12,7 +12,7 @@ router.post('/razorpay/create-order', initiatePayment);
 // Customer verify signature after completing payment
 router.post('/razorpay/verify', verifyPayment);
 
-// Razorpay server-to-server webhook
-router.post('/webhook', express.raw({ type: 'application/json' }), handleWebhook);
+// Razorpay server-to-server webhook (verifies signature against raw request body)
+router.post('/webhook', handleWebhook);
 
 module.exports = router;
