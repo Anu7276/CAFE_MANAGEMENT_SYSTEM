@@ -348,6 +348,17 @@ export default function AdminDashboardPage() {
     }
   };
 
+  const handleToggleOnlinePayment = async () => {
+    if (!settings) return;
+    try {
+      const current = settings.onlinePaymentEnabled !== false;
+      const res = await api.patch('/settings', { onlinePaymentEnabled: !current });
+      setSettings(res.data.data);
+    } catch (err) {
+      alert('Failed to update online payment switch');
+    }
+  };
+
   const handleSaveBusinessSettings = async (e) => {
     e.preventDefault();
     if (!settings) return;
@@ -1114,6 +1125,26 @@ export default function AdminDashboardPage() {
                 }`}
               >
                 {settings.acceptingOrders ? 'Accepting Orders' : 'Paused (Locked)'}
+              </button>
+            </div>
+
+            <div className="p-4 rounded-2xl bg-black/40 border border-white/10 flex items-center justify-between">
+              <div>
+                <h4 className="font-bold text-white text-sm">Online Payment Enabled</h4>
+                <p className="text-xs text-white/50">
+                  Toggle Razorpay online UPI/card payments. Turn OFF during an on-site pilot to restrict customer checkout to Cash at Counter.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={handleToggleOnlinePayment}
+                className={`px-4 py-2 rounded-full font-bold text-xs transition ${
+                  settings.onlinePaymentEnabled !== false
+                    ? 'bg-mintGreen text-[#071a12] hover:bg-[#88e7bd]'
+                    : 'bg-amber-500 text-[#071a12] hover:bg-amber-400'
+                }`}
+              >
+                {settings.onlinePaymentEnabled !== false ? 'Online UPI Active' : 'Cash-Only (Pilot)'}
               </button>
             </div>
 

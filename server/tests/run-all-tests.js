@@ -18,6 +18,7 @@ const testSuites = [
   { name: 'Production Unit: GST Invoice Sequence & Concurrency', file: path.resolve(__dirname, 'unit/invoice-sequence.test.js') },
   { name: 'Production Unit: Legal Policy Pages for Razorpay', file: path.resolve(__dirname, 'unit/policy-pages.test.js') },
   { name: 'Production Unit: Deploy Telemetry & Launch Checklist', file: path.resolve(__dirname, 'unit/deploy-check.test.js') },
+  { name: 'Production Unit: Online Payment Setting & Pilot Gate', file: path.resolve(__dirname, 'unit/online-payment-toggle.test.js') },
   { name: 'Phase 5: Supertest REST API Integration', file: path.resolve(__dirname, 'api/supertest.test.js') }
 ];
 

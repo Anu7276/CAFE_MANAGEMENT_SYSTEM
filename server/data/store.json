@@ -4,7 +4,7 @@
       "_id": "usr_admin_1",
       "name": "Café Manager",
       "email": "admin@cafeemerald.com",
-      "passwordHash": "$2a$10$FGTW3cF6Now7zoGfXgxGRuMfXQkxM3gjntOXIcGbGc.hyLPJNN5By",
+      "passwordHash": "$2a$10$AWRRo1yiRCJ9wemoveKyJOmIEwBRKZjPz1wnDoD9C5QpagN6/KIlm",
       "role": "owner",
       "failedLoginAttempts": 1,
       "lockUntil": null
@@ -51,6 +51,38 @@
     }
   ],
   "items": [
+    {
+      "_id": "item_1794772702285",
+      "name": "Artisanal Cinnamon Roll",
+      "category": "desserts",
+      "price": 150,
+      "description": "Freshly baked brioche swirled with Korintje cinnamon and cream cheese glaze.",
+      "image": "",
+      "emoji": "🥐",
+      "isVeg": true,
+      "isAvailable": true,
+      "isDeleted": true,
+      "sizes": [],
+      "createdAt": "2026-11-15T19:58:22.285Z",
+      "updatedAt": "2026-11-15T19:58:22.309Z",
+      "deletedAt": "2026-11-15T19:58:22.308Z"
+    },
+    {
+      "_id": "item_1794772631541",
+      "name": "Artisanal Cinnamon Roll",
+      "category": "desserts",
+      "price": 150,
+      "description": "Freshly baked brioche swirled with Korintje cinnamon and cream cheese glaze.",
+      "image": "",
+      "emoji": "🥐",
+      "isVeg": true,
+      "isAvailable": true,
+      "isDeleted": true,
+      "sizes": [],
+      "createdAt": "2026-11-15T19:57:11.541Z",
+      "updatedAt": "2026-11-15T19:57:11.561Z",
+      "deletedAt": "2026-11-15T19:57:11.560Z"
+    },
     {
       "_id": "item_1794772160792",
       "name": "Artisanal Cinnamon Roll",
@@ -478,296 +510,8 @@
   ],
   "orders": [
     {
-      "_id": "ord_1794772172745_53b03e37",
-      "orderToken": "9124be3d42002fa74a1b2a882f4f1999",
-      "idempotencyKey": "supertest_idemp_1794772172730",
-      "orderNumber": 1052,
-      "table": 12,
-      "tableSig": "9e230ecde3d03c2077a3c5a7cfc5647f",
-      "items": [
-        {
-          "itemId": "item_cake_1",
-          "name": "Strawberry Chocolate Cake",
-          "category": "desserts",
-          "emoji": "🍰",
-          "price": 260,
-          "size": "",
-          "qty": 2,
-          "lineTotal": 520
-        }
-      ],
-      "subtotal": 520,
-      "tax": 26,
-      "cgst": 13,
-      "sgst": 13,
-      "total": 546,
-      "note": "Supertest barista note",
-      "paymentMethod": "cash",
-      "paymentStatus": "paid",
-      "status": "preparing",
-      "isTest": false,
-      "invoiceNumber": "CE/2026-27/000172",
-      "statusHistory": [
-        {
-          "status": "new",
-          "timestamp": "2026-11-15T19:49:32.745Z",
-          "note": "Order placed"
-        },
-        {
-          "status": "preparing",
-          "timestamp": "2026-11-15T19:49:32.772Z",
-          "note": "Status changed to preparing"
-        }
-      ],
-      "createdAt": "2026-11-15T19:49:32.745Z",
-      "updatedAt": "2026-11-15T19:49:32.791Z",
-      "paidAt": "2026-11-15T19:49:32.790Z"
-    },
-    {
-      "_id": "ord_1794772161151_717f58d3",
-      "orderToken": "df30c7461f22c50fd2905c06f942a7ef",
-      "idempotencyKey": null,
-      "orderNumber": 1051,
-      "table": 4,
-      "tableSig": null,
-      "items": [
-        {
-          "itemId": "item_coldcoffee_4",
-          "name": "Cold Coffee",
-          "price": 210,
-          "qty": 2
-        }
-      ],
-      "subtotal": 420,
-      "tax": 21,
-      "cgst": 10.5,
-      "sgst": 10.5,
-      "total": 441,
-      "note": "",
-      "paymentMethod": "cash",
-      "paymentStatus": "paid",
-      "status": "new",
-      "isTest": false,
-      "invoiceNumber": null,
-      "statusHistory": [
-        {
-          "status": "new",
-          "timestamp": "2026-11-15T19:49:21.151Z",
-          "note": "Order placed"
-        }
-      ],
-      "createdAt": "2026-11-15T19:49:21.151Z",
-      "updatedAt": "2026-11-15T19:49:21.153Z",
-      "paidAt": "2026-11-15T19:49:21.151Z"
-    },
-    {
-      "_id": "ord_1794772160395_1886d170",
-      "orderToken": "fb768b49c25e96a87a415df145318bba",
-      "idempotencyKey": "test_idemp_1794772160393",
-      "orderNumber": 1050,
-      "table": 5,
-      "tableSig": "373af7c42ce25b4ef3a231cc26b3a4ad",
-      "items": [
-        {
-          "itemId": "item_cake_1",
-          "name": "Strawberry Chocolate Cake",
-          "price": 260,
-          "size": "",
-          "qty": 2,
-          "lineTotal": 520
-        }
-      ],
-      "subtotal": 520,
-      "tax": 26,
-      "cgst": 13,
-      "sgst": 13,
-      "total": 546,
-      "note": "",
-      "paymentMethod": "counter",
-      "paymentStatus": "pending",
-      "status": "new",
-      "isTest": false,
-      "invoiceNumber": null,
-      "statusHistory": [
-        {
-          "status": "new",
-          "timestamp": "2026-11-15T19:49:20.395Z",
-          "note": "Order placed"
-        }
-      ],
-      "createdAt": "2026-11-15T19:49:20.395Z",
-      "updatedAt": "2026-11-15T19:49:20.395Z"
-    },
-    {
-      "_id": "ord_1794772029784_46f2a752",
-      "orderToken": "75d8c789da1081530ef0d8274b61ed17",
-      "idempotencyKey": "supertest_idemp_1794772029766",
-      "orderNumber": 1049,
-      "table": 12,
-      "tableSig": "9e230ecde3d03c2077a3c5a7cfc5647f",
-      "items": [
-        {
-          "itemId": "item_cake_1",
-          "name": "Strawberry Chocolate Cake",
-          "category": "desserts",
-          "emoji": "🍰",
-          "price": 260,
-          "size": "",
-          "qty": 2,
-          "lineTotal": 520
-        }
-      ],
-      "subtotal": 520,
-      "tax": 26,
-      "cgst": 13,
-      "sgst": 13,
-      "total": 546,
-      "note": "Supertest barista note",
-      "paymentMethod": "cash",
-      "paymentStatus": "paid",
-      "status": "preparing",
-      "isTest": false,
-      "invoiceNumber": "CE/2026-27/000147",
-      "statusHistory": [
-        {
-          "status": "new",
-          "timestamp": "2026-11-15T19:47:09.784Z",
-          "note": "Order placed"
-        },
-        {
-          "status": "preparing",
-          "timestamp": "2026-11-15T19:47:09.817Z",
-          "note": "Status changed to preparing"
-        }
-      ],
-      "createdAt": "2026-11-15T19:47:09.784Z",
-      "updatedAt": "2026-11-15T19:47:09.833Z",
-      "paidAt": "2026-11-15T19:47:09.832Z"
-    },
-    {
-      "_id": "ord_1794772023830_7def3b64",
-      "orderToken": "7b1d8788e7eea6a663dd46e61a04ad7e",
-      "idempotencyKey": null,
-      "orderNumber": 1048,
-      "table": 4,
-      "tableSig": null,
-      "items": [
-        {
-          "itemId": "item_coldcoffee_4",
-          "name": "Cold Coffee",
-          "price": 210,
-          "qty": 2
-        }
-      ],
-      "subtotal": 420,
-      "tax": 21,
-      "cgst": 10.5,
-      "sgst": 10.5,
-      "total": 441,
-      "note": "",
-      "paymentMethod": "cash",
-      "paymentStatus": "paid",
-      "status": "new",
-      "isTest": false,
-      "invoiceNumber": null,
-      "statusHistory": [
-        {
-          "status": "new",
-          "timestamp": "2026-11-15T19:47:03.830Z",
-          "note": "Order placed"
-        }
-      ],
-      "createdAt": "2026-11-15T19:47:03.830Z",
-      "updatedAt": "2026-11-15T19:47:03.834Z",
-      "paidAt": "2026-11-15T19:47:03.832Z"
-    },
-    {
-      "_id": "ord_1794772023008_58b7615e",
-      "orderToken": "9aab0fc346fcfce7cb17829782e6bf1d",
-      "idempotencyKey": "test_idemp_1794772023002",
-      "orderNumber": 1047,
-      "table": 5,
-      "tableSig": "373af7c42ce25b4ef3a231cc26b3a4ad",
-      "items": [
-        {
-          "itemId": "item_cake_1",
-          "name": "Strawberry Chocolate Cake",
-          "price": 260,
-          "size": "",
-          "qty": 2,
-          "lineTotal": 520
-        }
-      ],
-      "subtotal": 520,
-      "tax": 26,
-      "cgst": 13,
-      "sgst": 13,
-      "total": 546,
-      "note": "",
-      "paymentMethod": "counter",
-      "paymentStatus": "pending",
-      "status": "new",
-      "isTest": false,
-      "invoiceNumber": null,
-      "statusHistory": [
-        {
-          "status": "new",
-          "timestamp": "2026-11-15T19:47:03.008Z",
-          "note": "Order placed"
-        }
-      ],
-      "createdAt": "2026-11-15T19:47:03.008Z",
-      "updatedAt": "2026-11-15T19:47:03.008Z"
-    },
-    {
-      "_id": "ord_1794771883755_f0621ab5",
-      "orderToken": "a9e3b6681a7f378ca42708d37d1e17dc",
-      "idempotencyKey": "supertest_idemp_1794771883724",
-      "orderNumber": 1046,
-      "table": 12,
-      "tableSig": "9e230ecde3d03c2077a3c5a7cfc5647f",
-      "items": [
-        {
-          "itemId": "item_cake_1",
-          "name": "Strawberry Chocolate Cake",
-          "category": "desserts",
-          "emoji": "🍰",
-          "price": 260,
-          "size": "",
-          "qty": 2,
-          "lineTotal": 520
-        }
-      ],
-      "subtotal": 520,
-      "tax": 26,
-      "cgst": 13,
-      "sgst": 13,
-      "total": 546,
-      "note": "Supertest barista note",
-      "paymentMethod": "cash",
-      "paymentStatus": "paid",
-      "status": "preparing",
-      "isTest": false,
-      "invoiceNumber": "CE/2026-27/000122",
-      "statusHistory": [
-        {
-          "status": "new",
-          "timestamp": "2026-11-15T19:44:43.755Z",
-          "note": "Order placed"
-        },
-        {
-          "status": "preparing",
-          "timestamp": "2026-11-15T19:44:43.794Z",
-          "note": "Status changed to preparing"
-        }
-      ],
-      "createdAt": "2026-11-15T19:44:43.755Z",
-      "updatedAt": "2026-11-15T19:44:43.821Z",
-      "paidAt": "2026-11-15T19:44:43.819Z"
-    },
-    {
-      "_id": "ord_1794771878054_0d17a414",
-      "orderToken": "c79e8d7697b52e3deff20ea4497c6f6b",
+      "_id": "ord_1794772702726_f00527dd",
+      "orderToken": "1708d013a6890553624e7d78b4bcb0b1",
       "idempotencyKey": null,
       "orderNumber": 1045,
       "table": 4,
@@ -794,18 +538,18 @@
       "statusHistory": [
         {
           "status": "new",
-          "timestamp": "2026-11-15T19:44:38.054Z",
+          "timestamp": "2026-11-15T19:58:22.726Z",
           "note": "Order placed"
         }
       ],
-      "createdAt": "2026-11-15T19:44:38.054Z",
-      "updatedAt": "2026-11-15T19:44:38.057Z",
-      "paidAt": "2026-11-15T19:44:38.055Z"
+      "createdAt": "2026-11-15T19:58:22.726Z",
+      "updatedAt": "2026-11-15T19:58:22.731Z",
+      "paidAt": "2026-11-15T19:58:22.728Z"
     },
     {
-      "_id": "ord_1794771877202_93b3a995",
-      "orderToken": "da2eb5de2403f8e9fe1accf7b41ce84d",
-      "idempotencyKey": "test_idemp_1794771877200",
+      "_id": "ord_1794772701899_74dbfd16",
+      "orderToken": "c369692cdbd08bb7508b1cb339e48e90",
+      "idempotencyKey": "test_idemp_1794772701895",
       "orderNumber": 1044,
       "table": 5,
       "tableSig": "373af7c42ce25b4ef3a231cc26b3a4ad",
@@ -833,12 +577,12 @@
       "statusHistory": [
         {
           "status": "new",
-          "timestamp": "2026-11-15T19:44:37.202Z",
+          "timestamp": "2026-11-15T19:58:21.899Z",
           "note": "Order placed"
         }
       ],
-      "createdAt": "2026-11-15T19:44:37.202Z",
-      "updatedAt": "2026-11-15T19:44:37.202Z"
+      "createdAt": "2026-11-15T19:58:21.899Z",
+      "updatedAt": "2026-11-15T19:58:21.899Z"
     },
     {
       "_id": "ord_1041",
@@ -929,10 +673,70 @@
     "cgstRate": 2.5,
     "sgstRate": 2.5,
     "totalTables": 20,
-    "updatedAt": "2026-11-15T19:49:20.787Z",
-    "updatedBy": "admin@cafeemerald.com"
+    "updatedAt": "2026-11-15T19:58:32.944Z",
+    "updatedBy": "admin",
+    "onlinePaymentEnabled": true
   },
   "auditLogs": [
+    {
+      "_id": "audit_1794772718707_nwe0p",
+      "userId": "usr_admin_1",
+      "userEmail": "admin@cafeemerald.com",
+      "userRole": "owner",
+      "action": "order_marked_paid",
+      "entity": "Order",
+      "entityId": "ord_1794772718575_ffa827eb",
+      "details": {
+        "paymentMethod": "cash",
+        "total": 546
+      },
+      "ip": "127.0.0.1",
+      "timestamp": "2026-11-15T19:58:38.707Z"
+    },
+    {
+      "_id": "audit_1794772718682_pcsso",
+      "userId": "usr_admin_1",
+      "userEmail": "admin@cafeemerald.com",
+      "userRole": "owner",
+      "action": "order_status_updated",
+      "entity": "Order",
+      "entityId": "ord_1794772718575_ffa827eb",
+      "details": {
+        "from": "new",
+        "to": "preparing",
+        "orderNumber": 1046
+      },
+      "ip": "127.0.0.1",
+      "timestamp": "2026-11-15T19:58:38.682Z"
+    },
+    {
+      "_id": "audit_1794772702437_9z64t",
+      "userId": "usr_admin_1",
+      "userEmail": "admin@cafeemerald.com",
+      "userRole": "owner",
+      "action": "item_created",
+      "entity": "Item",
+      "entityId": "item_1794772702285",
+      "details": {
+        "name": "Artisanal Cinnamon Roll"
+      },
+      "ip": "",
+      "timestamp": "2026-11-15T19:58:22.437Z"
+    },
+    {
+      "_id": "audit_1794772631676_poftg",
+      "userId": "usr_admin_1",
+      "userEmail": "admin@cafeemerald.com",
+      "userRole": "owner",
+      "action": "item_created",
+      "entity": "Item",
+      "entityId": "item_1794772631541",
+      "details": {
+        "name": "Artisanal Cinnamon Roll"
+      },
+      "ip": "",
+      "timestamp": "2026-11-15T19:57:11.676Z"
+    },
     {
       "_id": "audit_1794772172794_0gty6",
       "userId": "usr_admin_1",
@@ -1728,6 +1532,6 @@
     }
   ],
   "invoiceSequences": {
-    "2026-27": 172
+    "2026-27": 221
   }
 }

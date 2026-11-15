@@ -2,6 +2,7 @@ const request = require('supertest');
 const assert = require('assert');
 const bcrypt = require('bcryptjs');
 const { app } = require('../../server');
+const Order = require('../../models/Order');
 const { generateTableSig } = require('../../utils/tableToken');
 const { readStore, writeStore } = require('../../models/storeAdapter');
 
@@ -109,6 +110,12 @@ async function runSupertestSuite() {
   // 4. Order Creation with Signed Table Token & Price Integrity
   await test('POST /api/orders creates order with server price & unguessable token', async () => {
     const tableNum = 12;
+    // Clean any prior open test orders for this test table so repeated runs never exceed table cap
+    const existingTableOrders = await Order.find({ table: tableNum });
+    for (const ord of existingTableOrders) {
+      await Order.findByIdAndDelete(ord._id);
+    }
+
     const tableSig = generateTableSig(tableNum);
     const idempKey = 'supertest_idemp_' + Date.now();
 
@@ -246,6 +253,11 @@ async function runSupertestSuite() {
     assert(res.body.data.today);
     assert(typeof res.body.data.today.revenue === 'number');
     assert(Array.isArray(res.body.data.topItems));
+
+    // Cleanup created test order
+    if (createdOrderId) {
+      await Order.findByIdAndDelete(createdOrderId);
+    }
   });
 
   console.log('\n=============================================');

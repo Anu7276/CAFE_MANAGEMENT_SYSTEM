@@ -45,14 +45,17 @@ Copy and paste this template block for every active day of the pilot run.
 
 ---
 
-## 📋 Completed Pilot Log Sample (Reference)
+## 📋 EXAMPLE ONLY - not real data: Day 1 Reference Log
 
-### 📆 Day 1 — 2026-11-18 (Wednesday)
+> [!NOTE]
+> **EXAMPLE ONLY — NOT REAL DATA:** The following log block is an illustrative reference demonstrating proper metric recording for staff and floor managers. Do not treat this as live operational history.
+
+### 📆 Reference Sample Day — 2026-11-18 (Wednesday) [EXAMPLE ONLY]
 
 #### 1. Shift Overview
-- **Date & Day:** 2026-11-18 (Wednesday)
-- **Duty Floor Manager:** R. Sharma
-- **Kitchen Head / Barista:** A. Joshi
+- **Date & Day:** 2026-11-18 (Wednesday) [EXAMPLE]
+- **Duty Floor Manager:** R. Sharma [EXAMPLE]
+- **Kitchen Head / Barista:** A. Joshi [EXAMPLE]
 - **Operational Hours:** 11:00 AM – 9:00 PM
 
 #### 2. Key Operational Metrics
@@ -75,6 +78,46 @@ Copy and paste this template block for every active day of the pilot run.
 
 #### 5. Incident & Bug Tracking
 - *No P0 or P1 incidents recorded. Minor: staff requested slightly larger table badge on KOT ticket (resolved).*
+
+---
+
+## 📝 Active Pilot Live Shift Logs
+
+> [!TIP]
+> **Pilot Mode Pre-KYC Tip:** If operating an on-site pilot before Razorpay merchant live activation, set **"Online payment enabled" to OFF** in Admin Settings (`onlinePaymentEnabled: false`). This cleanly restricts customer checkouts to **Cash at Counter** and prevents failed UPI attempts.
+
+### 📆 Real Pilot Log — Day 1
+
+#### 1. Shift Overview
+- **Date & Day:** _______________________
+- **Duty Floor Manager:** _______________________
+- **Kitchen Head / Barista:** _______________________
+- **Operational Hours:** _______________________
+
+#### 2. Key Operational Metrics
+| Metric | Value | Target / Benchmark | Status |
+| :--- | :---: | :---: | :---: |
+| **Total Orders Placed** | [ ] | ≥ 50 orders/day | [ ] Normal [ ] Low |
+| **Failed / Abandoned Orders** | [ ] | ≤ 2% | [ ] OK [ ] Warning |
+| **HTTP 429 Rate Limits / Table Caps** | [ ] | ≤ 1% | [ ] OK [ ] High |
+| **Avg Seconds: Placed ➔ Accepted** | [ ]s | < 45 seconds | [ ] Fast [ ] Slow |
+| **Network Disconnect / Reconnect Events** | [ ] | ≤ 5 / shift | [ ] Stable [ ] Unstable |
+| **Total Net Sales (₹ INR)** | ₹[ ] | — | Verified |
+
+#### 3. Staff Operational Issues
+- **Kitchen KDS Handling:** __________________________________________________
+- **Thermal Printer & KOT:** __________________________________________________
+- **Counter Payments / Settle Cash:** _________________________________________
+
+#### 4. Customer Feedback & Dining Experience
+- **QR Scan & Menu Loading:** ________________________________________________
+- **UPI / Cash Checkout Experience:** _________________________________________
+- **Customer Comments:** ____________________________________________________
+
+#### 5. Incident & Bug Tracking
+| Bug / Incident Description | Severity (P0/P1/P2) | Root Cause | Immediate Action & Resolution |
+| :--- | :---: | :--- | :--- |
+| | | | |
 
 ---
 

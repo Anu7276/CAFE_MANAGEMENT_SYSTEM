@@ -15,6 +15,7 @@ const DEFAULT_SETTINGS = {
   totalTables: 20,
   maxOpenOrdersPerTable: 3,
   requirePaymentBeforeKds: false,
+  onlinePaymentEnabled: true,
   updatedAt: new Date().toISOString()
 };
 

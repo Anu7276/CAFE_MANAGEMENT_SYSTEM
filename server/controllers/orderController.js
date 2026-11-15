@@ -16,12 +16,19 @@ const createOrder = async (req, res, next) => {
     const { table, items, note, paymentMethod, tableSig } = req.body;
     const idempotencyKey = req.headers['idempotency-key'] || req.headers['x-idempotency-key'] || null;
 
-    // 0. Check Master "Accepting Orders" Switch
+    // 0. Check Master "Accepting Orders" Switch & Online Payment Gate
     const settings = await Settings.get();
     if (settings && settings.acceptingOrders === false) {
       return res.status(403).json({
         success: false,
         message: 'The café is currently paused and not accepting new orders. Please check with staff.'
+      });
+    }
+
+    if ((paymentMethod === 'upi' || paymentMethod === 'card') && settings.onlinePaymentEnabled === false) {
+      return res.status(403).json({
+        success: false,
+        message: 'Online payments are currently disabled. Please select Cash at Counter.'
       });
     }
 

@@ -1,5 +1,6 @@
 const Order = require('../models/Order');
 const AuditLog = require('../models/AuditLog');
+const Settings = require('../models/Settings');
 const { createRazorpayOrder, verifyPaymentSignature, verifyWebhookSignature } = require('../services/razorpayService');
 
 /**
@@ -7,6 +8,14 @@ const { createRazorpayOrder, verifyPaymentSignature, verifyWebhookSignature } = 
  */
 const initiatePayment = async (req, res, next) => {
   try {
+    const settings = await Settings.get();
+    if (settings.onlinePaymentEnabled === false) {
+      return res.status(403).json({
+        success: false,
+        message: 'Online payments are currently disabled. Please pay at the counter.'
+      });
+    }
+
     const { orderToken, orderId } = req.body;
     let order = null;
 
@@ -62,6 +71,14 @@ const initiatePayment = async (req, res, next) => {
  */
 const verifyPayment = async (req, res, next) => {
   try {
+    const settings = await Settings.get();
+    if (settings.onlinePaymentEnabled === false) {
+      return res.status(403).json({
+        success: false,
+        message: 'Online payments are currently disabled. Please pay at the counter.'
+      });
+    }
+
     const { razorpayOrderId, razorpayPaymentId, razorpaySignature, orderToken } = req.body;
 
     if (!razorpayOrderId || !razorpayPaymentId) {

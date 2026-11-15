@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { X, Plus, Minus, ArrowRight, ShieldCheck } from 'lucide-react';
+import { X, Plus, Minus, ArrowRight, ShieldCheck, Banknote, Smartphone } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { useI18n } from '../context/I18nContext';
 import api from '../api/client';
@@ -10,7 +10,22 @@ export default function CartDrawer({ isOpen, onClose, onOrderPlaced }) {
   const { t } = useI18n();
   const [note, setNote] = useState('');
   const [paymentMethod, setPaymentMethod] = useState('counter');
+  const [onlinePaymentEnabled, setOnlinePaymentEnabled] = useState(true);
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    api.get('/settings')
+      .then(res => {
+        if (res.data?.data) {
+          const isEnabled = res.data.data.onlinePaymentEnabled !== false;
+          setOnlinePaymentEnabled(isEnabled);
+          if (!isEnabled) {
+            setPaymentMethod('counter');
+          }
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   const handleCheckout = async () => {
     if (!cart.length || loading) return;
@@ -141,6 +156,45 @@ export default function CartDrawer({ isOpen, onClose, onOrderPlaced }) {
                 maxLength={300}
                 className="w-full bg-black/40 border border-white/10 rounded-xl px-3 py-2 text-xs text-white placeholder-white/30 focus:outline-none focus:border-mintGreen"
               />
+            </div>
+          )}
+
+          {/* Payment Method Selection */}
+          {cart.length > 0 && (
+            <div className="mt-4">
+              <label className="text-[11px] font-bold text-white/60 uppercase tracking-wider block mb-1">
+                Payment Option
+              </label>
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  type="button"
+                  onClick={() => setPaymentMethod('counter')}
+                  className={`py-2 px-3 rounded-xl border text-xs font-bold transition flex items-center justify-center gap-1.5 ${
+                    paymentMethod === 'counter'
+                      ? 'border-mintGreen bg-mintGreen/15 text-mintGreen shadow-sm shadow-mintGreen/10'
+                      : 'border-white/10 bg-black/20 text-white/60 hover:text-white'
+                  }`}
+                >
+                  <Banknote className="w-3.5 h-3.5" /> Cash at Counter
+                </button>
+                {onlinePaymentEnabled ? (
+                  <button
+                    type="button"
+                    onClick={() => setPaymentMethod('upi')}
+                    className={`py-2 px-3 rounded-xl border text-xs font-bold transition flex items-center justify-center gap-1.5 ${
+                      paymentMethod === 'upi'
+                        ? 'border-mintGreen bg-mintGreen/15 text-mintGreen shadow-sm shadow-mintGreen/10'
+                        : 'border-white/10 bg-black/20 text-white/60 hover:text-white'
+                    }`}
+                  >
+                    <Smartphone className="w-3.5 h-3.5" /> Pay via UPI
+                  </button>
+                ) : (
+                  <div className="py-2 px-3 rounded-xl border border-white/5 bg-white/5 text-[10px] text-white/30 flex items-center justify-center text-center">
+                    Online UPI Paused (Pilot)
+                  </div>
+                )}
+              </div>
             </div>
           )}
         </div>
