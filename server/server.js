@@ -194,11 +194,15 @@ io.on('connection', (socket) => {
 });
 
 const PORT = process.env.PORT || 5000;
-server.listen(PORT, () => {
-  console.log(`\n=================================================`);
-  console.log(`  ☕ Café Emerald MERN Server (Secured P0)`);
-  console.log(`  🌐 Server running on: http://localhost:${PORT}`);
-  console.log(`  📡 WebSocket Socket.io with Room Auth enabled`);
-  console.log(`  🛡️ Rate Limiting, Mongo Sanitize, Helmet active`);
-  console.log(`=================================================\n`);
-});
+if (require.main === module) {
+  server.listen(PORT, () => {
+    console.log(`\n=================================================`);
+    console.log(`  ☕ Café Emerald MERN Server (Secured P0)`);
+    console.log(`  🌐 Server running on: http://localhost:${PORT}`);
+    console.log(`  📡 WebSocket Socket.io with Room Auth enabled`);
+    console.log(`  🛡️ Rate Limiting, Mongo Sanitize, Helmet active`);
+    console.log(`=================================================\n`);
+  });
+}
+
+module.exports = { app, server };

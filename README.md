@@ -1,458 +1,308 @@
-# ☕ Café Emerald — Production MERN Table Ordering & Kitchen Live KDS
+# ☕ Café Emerald — Enterprise MERN QR Table Ordering & Kitchen KDS
 
-> **A high-speed, contactless QR table-ordering platform and real-time Kitchen Display System (KDS)** built with React 18 (Vite), Tailwind CSS, Framer Motion, Node.js, Express, MongoDB/Mongoose, and Socket.io.
+> **Production-Grade, Contactless QR Table Ordering & Real-Time Kitchen Display System (KDS)** built with React 18 (Vite), Tailwind CSS, Framer Motion, Node.js, Express, MongoDB/Mongoose, Socket.io, Redis Adapter, and Razorpay UPI.
 
 ---
 
 ## 📑 Table of Contents
-- [1. Overview & Key Capabilities](#1-overview--key-capabilities)
+- [1. Production Roadmap & Phase Ledger](#1-production-roadmap--phase-ledger)
 - [2. System Architecture](#2-system-architecture)
-- [3. End-to-End User Flow](#3-end-to-end-user-flow)
-- [4. Real-Time WebSocket Event Flow](#4-real-time-websocket-event-flow)
-- [5. Database Schema & Data Models](#5-database-schema--data-models)
-- [6. Order Lifecycle State Machine](#6-order-lifecycle-state-machine)
-- [7. Design System & UI Specification](#7-design-system--ui-specification)
-- [8. Project Directory Structure](#8-project-directory-structure)
-- [9. REST API Reference](#9-rest-api-reference)
-- [10. Quick Start & Local Setup](#10-quick-start--local-setup)
-- [11. Docker & Production Deployment](#11-docker--production-deployment)
-- [12. Self-Review & Troubleshooting](#12-self-review--troubleshooting)
+- [3. Security Architecture & Threat Mitigation](#3-security-architecture--threat-mitigation)
+- [4. Order State Machine](#4-order-state-machine)
+- [5. Realtime Reliability & Redis Scaling](#5-realtime-reliability--redis-scaling)
+- [6. Payments, UPI & GST Invoicing](#6-payments-upi--gst-invoicing)
+- [7. Complete REST API Reference](#7-complete-rest-api-reference)
+- [8. Automated Test Suite (Phases 1–5)](#8-automated-test-suite-phases-15)
+- [9. Quick Start & Local Setup](#9-quick-start--local-setup)
+- [10. Docker & Production Deployment](#10-docker--production-deployment)
 
 ---
 
-## 1. Overview & Key Capabilities
+## 1. Production Roadmap & Phase Ledger
 
-Café Emerald transforms the dining experience into a frictionless, app-free digital ordering workflow:
-
-1. **Contactless Customer QR Ordering (`/?table=X`)**:
-   - Dynamic table number detection via QR parameter.
-   - **Compact Full-Bleed Portrait Cards (~220px × 330px)** with studio food photography, 3-dot carousel indicators, coral-red prices (`#ff4757`), and inline quantity steppers.
-   - **Zero-Blur Crystal Lighting**: Multi-stop dark vignette gradient without milky backdrop blur so the food stays 100% sharp and appetizing.
-   - **Size Options Modal**: Dedicated cup selector (Tall, Grande, Venti) with custom prices.
-   - **Live Slide-Over Cart**: Kitchen special notes, payment selector (UPI / Pay at Counter), and 5% tax breakdown.
-   - **Live Order Tracker**: Real-time progress timeline (Received → Preparing → Ready → Served) powered by WebSockets.
-
-2. **Kitchen KDS & Barista Live Board (`/admin`)**:
-   - Real-time **Socket.io Kanban Dispatch Board** with columns for *New*, *In Kitchen (Preparing)*, and *Ready for Table*.
-   - One-click status transitions that immediately sync with the customer's live tracker.
-   - Resilient database adapter: connects seamlessly to **MongoDB** when available, and automatically provides a zero-config persistent JSON fallback store if local MongoDB is offline.
+| Phase | Module | Commit | Status | Key Deliverables & Test Verification |
+| :--- | :--- | :--- | :--- | :--- |
+| **Phase 1** | **P0 Security Hardening** | `fda17ad` | ✅ Completed | Signed table tokens (HMAC-SHA256), DB-only price calculation, idempotency keys, unguessable 32-char `orderToken`, brute-force account lockout (5 bad attempts = 15m lock), rate limiting, `helmet`, `mongo-sanitize`, `httpOnly` cookie JWT. |
+| **Phase 2** | **Admin Management** | `cc7f5d4` | ✅ Completed | Items CRUD with Multer image upload, soft-delete (`isDeleted: true`), sold-out toggle (`isAvailable`), master "Accepting Orders" switch, print-ready table QR generator, sales analytics reports, staff accounts management, audit logging. |
+| **Phase 3** | **Payments + GST Bill** | `f48f053` | ✅ Completed | Server-enforced state machine (`new` ➔ `preparing` ➔ `ready` ➔ `served`, `rejected`), Razorpay UPI integration with HMAC webhook signature verification, cash "mark paid" button, 80mm thermal printable GST invoice (GSTIN, FSSAI, SAC `996331`, 2.5% CGST + 2.5% SGST) and Kitchen Order Ticket (KOT). |
+| **Phase 4** | **Realtime Reliability** | `c4e9c7c` | ✅ Completed | Socket reconnect auto-refetch, HTTP polling fallback (every 8s when disconnected), `@socket.io/redis-adapter` for multi-instance clustering, Web Audio API synthesized kitchen chime (D5 ➔ A5 harmonic fifth) with autoplay unlock. |
+| **Phase 5** | **Quality & Test Automation** | `HEAD` | ✅ Completed | 16 Unit tests (pricing, modifiers, state machine, crypto), 13 Supertest API integration tests, Playwright E2E customer-to-kitchen lifecycle test, k6 load test script (50 concurrent tables). |
+| **Phase 6** | **CI/CD & DevOps Hardening** | In Progress | ⏳ Upcoming | GitHub Actions workflow, Pino logging, Sentry error tracking, `/health` and `/ready` probes, hardened multi-stage Dockerfile with `HEALTHCHECK`. |
+| **Phase 7** | **Frontend Polish & i18n** | In Progress | ⏳ Upcoming | Error boundaries, loading skeletons, PWA service worker for kitchen tablets, accessibility contrast pass, multi-lingual support (English, Hindi, Gujarati). |
 
 ---
 
 ## 2. System Architecture
 
-The following diagram illustrates the complete client-server-database topography and communication protocols:
-
 ```mermaid
 flowchart TD
-    subgraph ClientLayer ["Frontend Client Layer (Vite + React 18)"]
-        A["Customer Mobile Web PWA<br/>(Table QR View)"]
-        B["Customer Desktop View<br/>(Split Menu + Live Panel)"]
-        C["Kitchen / Admin KDS<br/>(Real-Time Kanban Board)"]
+    subgraph Clients ["Client Layer"]
+        C1["Customer Mobile Web PWA<br/>(/t/:table?sig=...)"]
+        C2["Admin & Kitchen Display<br/>(/admin)"]
     end
 
-    subgraph GatewayLayer ["Network & Security Gateway"]
-        D["Reverse Proxy / Express Static Host<br/>(Port 5000)"]
-        E["CORS & Helmet Security Middleware"]
-        F["Rate Limiting & JSON Body Parser"]
+    subgraph Gateway ["Network & Security Layer"]
+        GW["Express Gateway / Port 5000"]
+        HL["Helmet CSP & Security Headers"]
+        RL["Express Rate Limiters (Login / Order / API)"]
+        MS["Mongo Sanitize (NoSQL Injection Defense)"]
+        CP["Cookie Parser (httpOnly JWT)"]
     end
 
-    subgraph ServiceLayer ["Backend Application Engine (Node.js & Express)"]
-        G["Auth Controller<br/>(JWT & Bcrypt)"]
-        H["Item Controller<br/>(Catalog & Categories)"]
-        I["Order Controller<br/>(Calculation & Dispatch)"]
-        J["Socket.io WebSocket Gateway<br/>(Bi-Directional Event Loop)"]
+    subgraph Services ["Application & Business Logic Layer"]
+        AUTH["Auth Controller & RBAC<br/>(Owner / Staff)"]
+        ITEMS["Item Controller<br/>(CRUD + Soft Delete + Multer)"]
+        ORDERS["Order Engine & State Machine<br/>(DB Pricing + Idempotency)"]
+        PAY["Razorpay Payment Service<br/>(UPI + Webhook HMAC)"]
+        INV["GST Invoice & KOT Engine<br/>(80mm Thermal Generator)"]
+        REPORTS["Analytics & Reports Controller"]
     end
 
-    subgraph DataLayer ["Data & Persistence Layer"]
-        K{{"Active DB Selector"}}
-        L[("MongoDB / Atlas<br/>(Mongoose Engine)")]
-        M[("Local Persistent Store<br/>(server/data/store.json)")]
+    subgraph Realtime ["Realtime Messaging Layer"]
+        SIO["Socket.IO Server"]
+        REDIS["Redis Pub/Sub Adapter<br/>(Horizontal Multi-Instance)"]
+        ROOM1["Room: 'admin_kds'<br/>(Authenticated Staff)"]
+        ROOM2["Room: 'order_{orderToken}'<br/>(Private Customer Status)"]
     end
 
-    A -->|"HTTPS / REST"| D
-    B -->|"HTTPS / REST"| D
-    C -->|"HTTPS / REST"| D
-    A <-->|"WebSocket WSS"| J
-    C <-->|"WebSocket WSS"| J
+    subgraph Storage ["Persistence Layer"]
+        MONGO[("MongoDB Atlas / Local<br/>(Primary Storage)")]
+        DEVSTORE[("Zero-Config JSON Store<br/>(Dev Sandbox Only)")]
+    end
 
-    D --> E --> F
-    F --> G
-    F --> H
-    F --> I
-    I <--> J
+    C1 -->|"HTTP REST & WSS"| GW
+    C2 -->|"HTTP REST & WSS"| GW
 
-    G --> K
-    H --> K
-    I --> K
+    GW --> HL --> RL --> MS --> CP
 
-    K -->|"If Mongo Reachable"| L
-    K -->|"Zero-Config Fallback"| M
+    CP --> AUTH
+    CP --> ITEMS
+    CP --> ORDERS
+    CP --> PAY
+    CP --> INV
+    CP --> REPORTS
+
+    ORDERS <--> SIO
+    AUTH <--> SIO
+    SIO <--> REDIS
+    SIO --> ROOM1
+    SIO --> ROOM2
+
+    SERVICES -->|"Production"| MONGO
+    SERVICES -.->|"Dev Fallback Only"| DEVSTORE
 ```
 
 ---
 
-## 3. End-to-End User Flow
-
-The journey of a guest from table arrival to completed meal service:
-
-```mermaid
-flowchart LR
-    A["Scan Table QR Code<br/>(table=5)"] --> B["Browse Menu Catalog<br/>(Categories & Veg Filter)"]
-    B --> C["Select Item & Customizations<br/>(Tall / Grande / Venti)"]
-    C --> D["Add to Live Cart Drawer<br/>(Add Kitchen Notes)"]
-    D --> E["Choose Payment<br/>(Counter or UPI)"]
-    E --> F["Submit Order<br/>(POST /api/orders)"]
-    F --> G["Live Tracker Activates<br/>(WebSocket Listening)"]
-    F -.->|"Socket.io Broadcast"| H["Kitchen KDS Alert<br/>(New Column)"]
-    H --> I["Barista Accepts<br/>(Status: Preparing)"]
-    I --> J["Order Completed<br/>(Status: Ready)"]
-    J --> K["Waitstaff Delivers<br/>(Status: Served)"]
-    I -.->|"Push Event"| G
-    J -.->|"Push Event"| G
-    K -.->|"Push Event"| G
-```
-
----
-
-## 4. Real-Time WebSocket Event Flow
-
-How the customer's phone and the kitchen's Kanban board maintain real-time bi-directional synchronization without page refreshing:
+## 3. Security Architecture & Threat Mitigation
 
 ```mermaid
 sequenceDiagram
     autonumber
-    actor Customer as Customer (Table 5)
-    participant Client as React App
-    participant Server as Express & Socket.io Server
-    actor Kitchen as Barista (Kitchen KDS)
+    actor Customer as Customer (Table 3)
+    participant Client as React Client
+    participant Server as Express Server
+    participant DB as Database Catalog
 
-    Note over Customer,Client: Customer places order for 2x Cappuccino + 1x Brownie
-    Customer->>Client: Tap "Place Order · ₹651"
-    Client->>Server: HTTP POST /api/orders (table: 5, items: [...])
-    Server-->>Server: Compute subtotal, 5% tax, assign #1044
-    Server-->>Client: HTTP 201 Created (Order Object)
-    Client->>Customer: Display Live Tracker (Status: Received)
-
-    par Real-Time Broadcast
-        Server->>Kitchen: WebSocket Emit "order:created"
-        Note over Kitchen: Kitchen board chimes and displays Order #1044 in "New"
-    end
-
-    Note over Kitchen: Barista starts preparing espresso
-    Kitchen->>Server: HTTP PATCH /api/orders/1044/status { status: "preparing" }
-    Server-->>Kitchen: HTTP 200 OK
-    Server->>Client: WebSocket Emit "order:1044:status" { status: "preparing" }
-    Client->>Customer: Tracker step moves to "Preparing" (Green active ring)
-
-    Note over Kitchen: Order ready for table dispatch
-    Kitchen->>Server: HTTP PATCH /api/orders/1044/status { status: "ready" }
-    Server-->>Kitchen: HTTP 200 OK
-    Server->>Client: WebSocket Emit "order:1044:status" { status: "ready" }
-    Client->>Customer: Tracker alerts: "Ready! Coming hot to Table 5"
+    Note over Customer,Client: Customer scans physical table QR code
+    Customer->>Client: Open /t/3?sig=3b72c9...
+    Client->>Client: Extract table=3 & sig; store in session
+    Customer->>Client: Adds item to cart & clicks Checkout
+    Client->>Client: Generate UUID Idempotency-Key
+    Client->>Server: POST /api/orders { table: 3, tableSig: '3b72c9...', items: [{ id, qty, price: 1 }] }
+    
+    Server->>Server: Verify table signature timingSafeEqual(sig, HMAC(table))
+    Server->>Server: Check Idempotency-Key (Return existing if replayed)
+    Server->>DB: Fetch authentic items by ID (Ignore client-sent price: 1)
+    Server->>Server: Calculate subtotal + 2.5% CGST + 2.5% SGST = Total
+    Server->>Server: Generate crypto-random 32-char orderToken
+    Server->>DB: Save Order with unguessable orderToken
+    Server->>Client: 201 Created { orderToken: 'f8a9...', total: 273 }
+    
+    Note over Customer,Server: Live Status Tracking (No sequential ID leaks)
+    Client->>Server: Socket emit 'join:order' ('f8a9...')
+    Server->>Client: Realtime status push on state transition
 ```
 
 ---
 
-## 5. Database Schema & Data Models
+## 4. Order State Machine
 
-Entity relationships and fields across users, categories, menu items, and customer orders:
-
-```mermaid
-erDiagram
-    USER {
-        string _id PK
-        string name
-        string email
-        string passwordHash
-        string role "customer | staff | admin"
-        date createdAt
-    }
-
-    CATEGORY {
-        string _id PK
-        string slug "coffee | cold | snacks | desserts"
-        string name
-        string emoji
-        int sortOrder
-    }
-
-    ITEM {
-        string _id PK
-        string name
-        string category FK
-        number price
-        string description
-        string image
-        string emoji
-        boolean isVeg
-        boolean isAvailable
-        date createdAt
-    }
-
-    SIZE_OPTION {
-        string name "Tall | Grande | Venti"
-        number extra
-    }
-
-    ORDER {
-        string _id PK
-        int orderNumber UK
-        int table
-        number subtotal
-        number tax
-        number total
-        string note
-        string paymentMethod "counter | upi"
-        string paymentStatus "pending | paid"
-        string status "new | preparing | ready | served | rejected"
-        date createdAt
-    }
-
-    ORDER_ITEM {
-        string itemId FK
-        string name
-        number price
-        string size
-        int qty
-    }
-
-    CATEGORY ||--o{ ITEM : "groups"
-    ITEM ||--o{ SIZE_OPTION : "offers"
-    ORDER ||--|{ ORDER_ITEM : "contains"
-```
-
----
-
-## 6. Order Lifecycle State Machine
-
-Allowed state transitions for an order through the Kitchen Display System:
+Order transitions are strictly enforced on the server. Unauthorized status jumps (such as bypassing kitchen preparation directly to `served`) are rejected with HTTP 400.
 
 ```mermaid
 stateDiagram-v2
-    [*] --> New : Customer Places Order
-
-    New --> Preparing : Barista Clicks "Accept & Prepare"
-    New --> Rejected : Kitchen Rejects (Sold Out / Closed)
-
-    Preparing --> Ready : Barista Clicks "Mark Ready"
-    Ready --> Served : Waitstaff Delivers to Table
-
-    Served --> [*] : Order Completed
-    Rejected --> [*] : Order Terminated
+    [*] --> new: Customer Places Order
+    new --> preparing: Staff Accepts in KDS
+    new --> rejected: Staff Cancels / Sold Out
+    
+    preparing --> ready: Food / Beverage Prepared
+    preparing --> rejected: Kitchen Cancellation
+    
+    ready --> served: Delivered to Table
+    
+    served --> [*]: Terminal State
+    rejected --> [*]: Terminal State
 ```
 
 ---
 
-## 7. Design System & UI Specification
+## 5. Realtime Reliability & Redis Scaling
 
-### 7.1 Palette & Tokens
-* **Background Dark**: `#071a12` (Deep Forest Noir)
-* **Surface Container**: `#0d281e` (Sleek Emerald Card Container)
-* **Accent / Mint**: `#38d39f` (Focus indicators, active pills, step rings)
-* **Alert / Price**: `#ff4757` (High-contrast prices, sold-out tags, favorite hearts)
-* **Typography**: Google Font `Plus Jakarta Sans`, tight tracking (`-0.015em`)
-
-### 7.2 The 220px × 330px Compact Card Architecture
-The card dimensions and elements were engineered to match high-end mobile café standards:
-* **Dimensions**: Width `210px–250px`, Aspect Ratio `1 / 1.44` (~`320px` height).
-* **Desktop Grid**: Displays 3 to 4 cards per row instead of 2 massive billboard cards.
-* **Mobile Grid**: Clean 2-column grid (`repeat(2, 1fr)`) to allow browsing without endless vertical scrolling.
-* **Lighting Scrim**: Dark multi-stop gradient (`rgba(3, 14, 9, 0.98)` to `transparent`) at the bottom 25% only. **Zero backdrop blur**, keeping the food crisp and sharp.
+- **Horizontal Scalability:** Socket.IO is configured with `@socket.io/redis-adapter` and `ioredis`. Multi-container setups share order status events seamlessly across instances.
+- **Auto-Sync on Reconnect:** When a client's network drops and reconnects, an automated `onReconnect` event fires, immediately fetching `/api/orders` to synchronize any missed status transitions.
+- **Dual Polling Fallback:** If WebSocket connections are blocked by strict corporate firewalls or unstable networks, Socket.IO falls back to HTTP long-polling, backed by an application-level 8-second interval poll.
+- **Audio Chime:** A synthesized 2-tone melodic notification (D5 587.33 Hz ➔ A5 880.00 Hz) alerts staff of incoming orders without downloading external MP3 files.
 
 ---
 
-## 8. Project Directory Structure
+## 6. Payments, UPI & GST Invoicing
 
-```text
-cafe-app/
-├── server/                      # Node.js + Express + Socket.io Server (MVC)
-│   ├── config/
-│   │   └── db.js                # Dual Mongo / Local JSON database connector
-│   ├── controllers/
-│   │   ├── authController.js    # Staff login & registration
-│   │   ├── itemController.js    # Menu catalog CRUD & filters
-│   │   └── orderController.js   # Order placement & status dispatcher
-│   ├── middleware/
-│   │   ├── auth.js              # JWT verification & RBAC guard
-│   │   └── error.js             # Centralized JSON error handler
-│   ├── models/
-│   │   ├── User.js              # User model interface
-│   │   ├── Category.js          # Menu category schema
-│   │   ├── Item.js              # Menu dish item schema
-│   │   ├── Order.js             # Table order schema
-│   │   └── storeAdapter.js      # Zero-config resilient JSON data engine
-│   ├── routes/
-│   │   ├── authRoutes.js        # /api/auth endpoints
-│   │   ├── itemRoutes.js        # /api/items endpoints
-│   │   └── orderRoutes.js       # /api/orders endpoints
-│   ├── utils/
-│   │   └── generateToken.js     # JWT generation utility
-│   ├── scripts/
-│   │   └── seed.js              # Database seed script
-│   ├── data/
-│   │   └── store.json           # Active persistent data store
-│   ├── .env.example
-│   ├── Dockerfile
-│   ├── package.json
-│   └── server.js                # Main server entry point
-├── client/                      # React 18 (Vite) + Tailwind CSS + Framer Motion
-│   ├── src/
-│   │   ├── api/
-│   │   │   └── client.js        # Axios instance with JWT interceptor
-│   │   ├── components/
-│   │   │   ├── DishCard.jsx     # Compact ~220px × 330px full-bleed card
-│   │   │   ├── DetailModal.jsx  # Cup size selection modal (Tall/Grande/Venti)
-│   │   │   ├── CartDrawer.jsx   # Slide-over cart & payment drawer
-│   │   │   └── LiveTracker.jsx  # Real-time WebSocket step tracker
-│   │   ├── context/
-│   │   │   ├── CartContext.jsx  # Cart state & tax calculation
-│   │   │   └── SocketContext.jsx# Live Socket.io connection lifecycle
-│   │   ├── pages/
-│   │   │   ├── MenuPage.jsx     # Customer responsive menu view
-│   │   │   └── AdminDashboardPage.jsx # Kitchen KDS Kanban board
-│   │   ├── App.jsx              # Routing & context tree
-│   │   ├── main.jsx             # React DOM mount point
-│   │   └── index.css            # Tailwind directives & custom scrollbars
-│   ├── dist/                    # Compiled production assets
-│   ├── index.html
-│   ├── tailwind.config.js
-│   ├── vite.config.js
-│   ├── Dockerfile
-│   └── package.json
-├── docker-compose.yml           # Unified Docker container configuration
-└── README.md                    # Master documentation
+- **Razorpay UPI:** Orders generate precise paise-denominated checkout sessions (`POST /api/payments/razorpay/create-order`). Payment signatures are verified using HMAC-SHA256.
+- **Cash "Mark Paid":** Kitchen operators settle counter orders with one click (`PATCH /api/orders/:id/mark-paid`), broadcasting status changes live to the customer.
+- **Indian GST Compliance:**
+  - **GSTIN:** `27AAAAA0000A1Z5`
+  - **FSSAI License:** `11522018000452`
+  - **SAC Code:** `996331` (Restaurant and food delivery services)
+  - **Tax Split:** 2.5% CGST + 2.5% SGST (5% Total GST)
+- **Thermal Printing (80mm):**
+  - Customer Bill: `GET /api/orders/:id/print/bill`
+  - Kitchen Order Ticket (KOT): `GET /api/orders/:id/print/kot`
+
+---
+
+## 7. Complete REST API Reference
+
+### Authentication & Staff (`/api/auth`)
+| Method | Endpoint | Access | Description |
+| :--- | :--- | :--- | :--- |
+| `POST` | `/api/auth/login` | Public | Staff/Owner login with rate limiting & lockout. Returns JWT & sets `httpOnly` cookie. |
+| `POST` | `/api/auth/logout` | Public | Clears `httpOnly` authentication cookie. |
+| `GET` | `/api/auth/me` | Staff / Owner | Returns currently authenticated user session. |
+| `GET` | `/api/auth/staff` | Staff / Owner | Lists all staff accounts and active/lockout states. |
+| `POST` | `/api/auth/staff` | Owner Only | Provisions a new staff or co-owner account. |
+| `DELETE` | `/api/auth/staff/:id` | Owner Only | Removes staff account (owner account protected). |
+
+### Menu Items (`/api/items`)
+| Method | Endpoint | Access | Description |
+| :--- | :--- | :--- | :--- |
+| `GET` | `/api/items` | Public | Returns active menu items (excludes soft-deleted items). |
+| `GET` | `/api/items/:id` | Public | Returns single item details. |
+| `POST` | `/api/items` | Staff / Owner | Create item with Multer file upload or URL. |
+| `PUT` | `/api/items/:id` | Staff / Owner | Update item details, prices, or modifiers. |
+| `PATCH` | `/api/items/:id/availability` | Staff / Owner | Toggle sold-out switch; broadcasts live WebSocket event. |
+| `DELETE` | `/api/items/:id` | Staff / Owner | Soft-delete item (`isDeleted: true`). |
+| `PATCH` | `/api/items/:id/restore` | Staff / Owner | Restore soft-deleted item. |
+
+### Orders & Tracking (`/api/orders`)
+| Method | Endpoint | Access | Description |
+| :--- | :--- | :--- | :--- |
+| `POST` | `/api/orders` | Public (Rate Limited) | Create order with signed table token, server price lookup, and idempotency key. |
+| `GET` | `/api/orders/track/:token`| Public | Safe customer tracking by unguessable 32-char token. |
+| `GET` | `/api/orders` | Staff / Owner | List orders with date, table, status, and search filters. |
+| `GET` | `/api/orders/:id` | Staff / Owner | Get order details by ID. |
+| `PATCH` | `/api/orders/:id/status` | Staff / Owner | Advance order state machine (`preparing`, `ready`, `served`, `rejected`). |
+| `PATCH` | `/api/orders/:id/mark-paid` | Staff / Owner | Mark cash order as settled. |
+| `GET` | `/api/orders/:id/invoice` | Staff / Owner | Returns structured GST invoice data. |
+| `GET` | `/api/orders/:id/print/bill`| Staff / Owner | 80mm thermal printable customer bill. |
+| `GET` | `/api/orders/:id/print/kot` | Staff / Owner | 80mm thermal printable Kitchen Order Ticket. |
+
+### Tables & QR Codes (`/api/tables`)
+| Method | Endpoint | Access | Description |
+| :--- | :--- | :--- | :--- |
+| `GET` | `/api/tables` | Staff / Owner | Returns table list, signed URLs, PNG QR Data URIs, and occupancy status. |
+| `GET` | `/api/tables/:table/qr` | Staff / Owner | Single table signed QR code. |
+
+### Payments (`/api/payments`)
+| Method | Endpoint | Access | Description |
+| :--- | :--- | :--- | :--- |
+| `POST` | `/api/payments/razorpay/create-order` | Public | Initiate Razorpay UPI / Card order. |
+| `POST` | `/api/payments/razorpay/verify` | Public | Verify customer payment signature. |
+| `POST` | `/api/payments/webhook` | Public | Razorpay webhook listener with HMAC verification. |
+
+### Reports & Settings (`/api/reports`, `/api/settings`)
+| Method | Endpoint | Access | Description |
+| :--- | :--- | :--- | :--- |
+| `GET` | `/api/reports/summary` | Staff / Owner | Today's revenue, order counts, AOV, top 10 items, hourly trends. |
+| `GET` | `/api/settings` | Public | Store profile and master "Accepting Orders" status. |
+| `PATCH` | `/api/settings` | Staff / Owner | Update café config and toggle master ordering switch. |
+
+---
+
+## 8. Automated Test Suite (Phases 1–5)
+
+To run all 6 test suites across all phases with a single command:
+```bash
+npm test --prefix server
+```
+
+### Individual Test Runners:
+```bash
+# Phase 1: Security Hardening Suite (15 checks)
+node server/test-phase1-security.js
+
+# Phase 2: Admin Management Suite (16 checks)
+node server/test-phase2-admin.js
+
+# Phase 3: Payments & GST Bill Suite (21 checks)
+node server/test-phase3-payments.js
+
+# Phase 4: Realtime Reliability Suite (6 checks)
+node server/test-phase4-realtime.js
+
+# Phase 5: Unit Tests - Pricing & State Machine (16 checks)
+npm run test:unit --prefix server
+
+# Phase 5: Supertest REST API Integration (13 checks)
+npm run test:api --prefix server
+
+# Phase 5: Playwright End-to-End Test Suite
+npx playwright test
+
+# Phase 5: k6 Load Test (50 Concurrent Tables)
+k6 run load-tests/k6-50-tables.js
 ```
 
 ---
 
-## 9. REST API Reference
+## 9. Quick Start & Local Setup
 
-### 9.1 Menu & Catalog Endpoints
-
-#### `GET /api/items`
-Returns all menu items matching query filters.
-* **Query Parameters**:
-  - `category` (string, optional): Filter by category slug (e.g. `coffee`, `cold`, `snacks`, `desserts`).
-  - `search` (string, optional): Search term matching name or description.
-  - `vegOnly` (boolean, optional): Set `true` to return vegetarian items only.
-* **Response (200 OK)**:
-```json
-{
-  "success": true,
-  "count": 6,
-  "categories": [
-    { "slug": "coffee", "name": "Coffee", "emoji": "☕" }
-  ],
-  "data": [
-    {
-      "_id": "item_capp_2",
-      "name": "Cappuccino",
-      "category": "coffee",
-      "price": 180,
-      "description": "Velvety micro-foam espresso crafted with artisanal dark roast beans.",
-      "image": "https://images.unsplash.com/photo-1534778101976-62847782c213?w=800",
-      "isVeg": true,
-      "isAvailable": true,
-      "sizes": [
-        { "name": "Tall", "extra": 0 },
-        { "name": "Grande", "extra": 30 },
-        { "name": "Venti", "extra": 60 }
-      ]
-    }
-  ]
-}
+### 1. Configure Environment Variables
+Copy `.env.example` in both directories:
+```bash
+cp server/.env.example server/.env
+cp client/.env.example client/.env
 ```
 
----
-
-### 9.2 Order Placement & Tracking
-
-#### `POST /api/orders`
-Places a new order for a table and broadcasts it immediately to the Kitchen KDS.
-* **Request Payload**:
-```json
-{
-  "table": 5,
-  "items": [
-    { "itemId": "item_cake_1", "name": "Strawberry Chocolate Cake", "price": 260, "size": "1 Slice", "qty": 1 },
-    { "itemId": "item_capp_2", "name": "Cappuccino", "price": 180, "size": "Grande", "qty": 2 }
-  ],
-  "note": "Extra hot please",
-  "paymentMethod": "upi"
-}
-```
-* **Response (201 Created)**:
-```json
-{
-  "success": true,
-  "data": {
-    "_id": "ord_1794658064276",
-    "orderNumber": 1044,
-    "table": 5,
-    "subtotal": 620,
-    "tax": 31,
-    "total": 651,
-    "status": "new",
-    "createdAt": "2026-11-15T12:00:00.000Z"
-  }
-}
-```
-
-#### `PATCH /api/orders/:id/status`
-Updates order status and triggers real-time customer tracker push notification.
-* **Headers**: `Authorization: Bearer <TOKEN>`
-* **Request Body**: `{ "status": "preparing" | "ready" | "served" | "rejected" }`
-
----
-
-## 10. Quick Start & Local Setup
-
-### Prerequisites
-- Node.js `v18+` or `v20+`
-- npm `v9+` or `v10+`
-
-### Step 1: Install & Launch Server
-The Express server automatically hosts both the REST API and the compiled React SPA:
+### 2. Start Backend Server
 ```bash
 cd server
 npm install
 node server.js
 ```
+The server runs on **`http://localhost:5000`**.
 
-The application is now live at:
-- **Customer Table Menu**: [http://localhost:5000/?table=1](http://localhost:5000/?table=1)
-- **Kitchen KDS Live Board**: [http://localhost:5000/admin](http://localhost:5000/admin)
-
-### Step 2 (Optional): Launch Vite Dev Server for Frontend Work
-If you want to modify React components with Hot Module Replacement (HMR):
+### 3. Start Frontend Dev Server
 ```bash
 cd client
 npm install
 npm run dev
 ```
-Opens on **[http://localhost:5173/?table=1](http://localhost:5173/?table=1)** and automatically proxies `/api` calls to port 5000.
+The client runs on **`http://localhost:5173`**.
+
+- **Customer QR Menu**: [http://localhost:5173/t/1?sig=...](http://localhost:5173)
+- **Admin & Kitchen KDS**: [http://localhost:5173/admin](http://localhost:5173/admin)
+  - **Email:** `admin@cafeemerald.com`
+  - **Password:** `adminpassword123`
 
 ---
 
-## 11. Docker & Production Deployment
+## 10. Docker & Production Deployment
 
-### 11.1 Run with Docker Compose
-To run the full stack containerized with a single command:
+To spin up the entire application stack containerized:
 ```bash
 docker-compose up --build
 ```
-This launches:
-- `server`: Node.js Express & Socket.io container on port `5000`
-- `client`: Nginx container serving optimized React static assets on port `5173`
-
----
-
-## 12. Self-Review & Troubleshooting
-
-| Observation | Root Cause | Solution |
-| :--- | :--- | :--- |
-| **Cards looking too large on PC** | Grid was set to `minmax(280px, 1fr)`, expanding cards to 450px wide. | Replaced with strict `minmax(210px, 250px)` and `aspect-ratio: 1 / 1.44` (~320px height) to show 3–4 cards per row. |
-| **Milky horizontal fog line** | `backdrop-filter: blur(16px)` on overlay. | Removed blur entirely; replaced with clean multi-stop dark vignette gradient. |
-| **Local MongoDB not installed** | Windows environment missing local `mongod` service. | Built automatic fallback adapter (`server/models/storeAdapter.js`) that persists to JSON without crashing. |
-| **Stale browser CSS on refresh** | Browser aggressive caching of `.css` files. | Configured `server.js` with `'Cache-Control': 'no-cache'` and Vite hash bundling. |
+This builds and runs:
+- `server`: Hardened Node.js Express & Socket.IO server on port `5000`.
+- `client`: Optimized Nginx container serving compiled Vite production assets on port `5173`.
