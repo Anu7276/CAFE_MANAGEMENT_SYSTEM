@@ -15,6 +15,7 @@ const { validateProductionSecrets } = require('./config/validateSecrets');
 // Enforce strong secrets on startup in production
 validateProductionSecrets();
 
+const { initSentry } = require('./config/sentry');
 const { connectDB, getStatus } = require('./config/db');
 const { setupRedisAdapter } = require('./config/redis');
 const { logger, httpLogger } = require('./config/logger');
@@ -33,6 +34,7 @@ const paymentRoutes = require('./routes/paymentRoutes');
 connectDB();
 
 const app = express();
+initSentry(app);
 const server = http.createServer(app);
 
 // Production Configuration: Trust Reverse Proxy (Render, Railway, Nginx, Cloudflare)

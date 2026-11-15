@@ -12,6 +12,7 @@
     "test:api": "node tests/api/supertest.test.js"
   },
   "dependencies": {
+    "@sentry/node": "^11.12.0",
     "@socket.io/redis-adapter": "^8.3.0",
     "bcryptjs": "^2.4.3",
     "cloudinary": "^2.11.0",

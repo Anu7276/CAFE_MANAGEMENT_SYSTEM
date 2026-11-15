@@ -1,6 +1,13 @@
+const { Sentry } = require('../config/sentry');
+
 const errorHandler = (err, req, res, next) => {
   const statusCode = res.statusCode === 200 ? 500 : res.statusCode;
   const isProd = process.env.NODE_ENV === 'production';
+
+  // Report 5xx server exceptions to Sentry
+  if (statusCode >= 500 && process.env.SENTRY_DSN) {
+    Sentry.captureException(err);
+  }
 
   const response = {
     success: false,
