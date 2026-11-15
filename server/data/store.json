@@ -6,7 +6,7 @@
       "email": "admin@cafeemerald.com",
       "passwordHash": "$2a$10$Y2oNKRQjmCVOoZH/UMYF7uLQdIHTsCORLtJSWFORqQUe4cLSs63Ki",
       "role": "owner",
-      "failedLoginAttempts": 1,
+      "failedLoginAttempts": 0,
       "lockUntil": null
     },
     {
@@ -317,6 +317,50 @@
     }
   ],
   "orders": [
+    {
+      "_id": "ord_1794770283323_017d1017",
+      "orderToken": "4283417df8e41f305e127672f1290650",
+      "idempotencyKey": "smoke_1794770283258_axmro4",
+      "orderNumber": 1072,
+      "table": 3,
+      "tableSig": "3bb5caea5404024a2c9fd46797a8f2eb",
+      "items": [
+        {
+          "itemId": "item_cake_1",
+          "name": "Strawberry Chocolate Cake",
+          "category": "desserts",
+          "emoji": "🍰",
+          "price": 260,
+          "size": "",
+          "qty": 2,
+          "lineTotal": 520
+        }
+      ],
+      "subtotal": 520,
+      "tax": 26,
+      "cgst": 13,
+      "sgst": 13,
+      "total": 546,
+      "note": "Automated Post-Deploy Smoke Test",
+      "paymentMethod": "cash",
+      "paymentStatus": "paid",
+      "status": "preparing",
+      "statusHistory": [
+        {
+          "status": "new",
+          "timestamp": "2026-11-15T19:18:03.323Z",
+          "note": "Order placed"
+        },
+        {
+          "status": "preparing",
+          "timestamp": "2026-11-15T19:18:03.452Z",
+          "note": "Status changed to preparing"
+        }
+      ],
+      "createdAt": "2026-11-15T19:18:03.323Z",
+      "updatedAt": "2026-11-15T19:18:03.461Z",
+      "paidAt": "2026-11-15T19:18:03.460Z"
+    },
     {
       "_id": "ord_1794770169429_96e924e4",
       "orderToken": "c46b815c32e127c63e7dc30c2b321d67",
@@ -1461,6 +1505,37 @@
     "updatedBy": "admin@cafeemerald.com"
   },
   "auditLogs": [
+    {
+      "_id": "audit_1794770283462_one1a",
+      "userId": "usr_admin_1",
+      "userEmail": "admin@cafeemerald.com",
+      "userRole": "owner",
+      "action": "order_marked_paid",
+      "entity": "Order",
+      "entityId": "ord_1794770283323_017d1017",
+      "details": {
+        "paymentMethod": "cash",
+        "total": 546
+      },
+      "ip": "::1",
+      "timestamp": "2026-11-15T19:18:03.462Z"
+    },
+    {
+      "_id": "audit_1794770283454_q839p",
+      "userId": "usr_admin_1",
+      "userEmail": "admin@cafeemerald.com",
+      "userRole": "owner",
+      "action": "order_status_updated",
+      "entity": "Order",
+      "entityId": "ord_1794770283323_017d1017",
+      "details": {
+        "from": "new",
+        "to": "preparing",
+        "orderNumber": 1072
+      },
+      "ip": "::1",
+      "timestamp": "2026-11-15T19:18:03.454Z"
+    },
     {
       "_id": "audit_1794770169489_kkc3e",
       "userId": "usr_admin_1",

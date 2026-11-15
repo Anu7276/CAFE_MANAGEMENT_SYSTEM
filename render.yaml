@@ -1,0 +1,54 @@
+services:
+  # Café Emerald Backend API & WebSocket Server
+  - type: web
+    name: cafe-emerald-server
+    runtime: node
+    plan: starter
+    rootDir: server
+    buildCommand: npm install
+    startCommand: node server.js
+    healthCheckPath: /ready
+    autoDeploy: true
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 5000
+      - key: TRUST_PROXY
+        value: "1"
+      - key: MONGO_URI
+        sync: false
+      - key: JWT_SECRET
+        generateValue: true
+      - key: TABLE_SIGNING_SECRET
+        generateValue: true
+      - key: CLIENT_URL
+        sync: false
+      - key: PUBLIC_URL
+        sync: false
+      - key: REDIS_URL
+        fromService:
+          type: redis
+          name: cafe-emerald-redis
+          property: connectionString
+      - key: CLOUDINARY_CLOUD_NAME
+        sync: false
+      - key: CLOUDINARY_API_KEY
+        sync: false
+      - key: CLOUDINARY_API_SECRET
+        sync: false
+      - key: RAZORPAY_KEY_ID
+        sync: false
+      - key: RAZORPAY_KEY_SECRET
+        sync: false
+      - key: RAZORPAY_WEBHOOK_SECRET
+        sync: false
+      - key: SENTRY_DSN
+        sync: false
+
+  # Redis Instance for Multi-Instance Socket.io Pub/Sub
+  - type: redis
+    name: cafe-emerald-redis
+    plan: starter
+    maxmemoryPolicy: allkeys-lru
+    ipAllowList: [] # internal network only
