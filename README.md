@@ -70,8 +70,8 @@ flowchart TD
     end
 
     subgraph Storage ["Persistence Layer"]
-        MONGO[("MongoDB Atlas / Local<br/>(Primary Storage)")]
-        DEVSTORE[("Zero-Config JSON Store<br/>(Dev Sandbox Only)")]
+        MONGO[("MongoDB Atlas Database")]
+        DEVSTORE[("Local JSON Store Sandbox")]
     end
 
     C1 -->|"HTTP REST & WSS"| GW
@@ -111,8 +111,8 @@ sequenceDiagram
     participant DB as Database Catalog
 
     Note over Customer,Client: Customer scans physical table QR code
-    Customer->>Client: Open /t/3?sig=3b72c9...
-    Client->>Client: Extract table=3 and sig, save to session
+    Customer->>Client: Open table URL with HMAC signature token
+    Client->>Client: Extract table number and signature token
     Customer->>Client: Add items to cart and click Checkout
     Client->>Client: Generate UUID Idempotency-Key
     Client->>Server: POST /api/orders with signed table token and items
@@ -120,12 +120,12 @@ sequenceDiagram
     Server->>Server: Verify table signature with timingSafeEqual
     Server->>Server: Check Idempotency-Key in cache
     Server->>DB: Fetch authentic items by ID, ignore client price
-    Server->>Server: Calculate subtotal + CGST (2.5%) + SGST (2.5%) = Total
+    Server->>Server: Calculate subtotal plus 2.5 percent CGST plus 2.5 percent SGST
     Server->>Server: Generate crypto-random 32-char orderToken
     Server->>DB: Persist order with unguessable orderToken
     Server->>Client: 201 Created with orderToken and verified total
     
-    Note over Customer,Server: Live Status Tracking (Unguessable token room)
+    Note over Customer,Server: Live Status Tracking via unguessable room
     Client->>Server: Socket emit join:order with orderToken
     Server->>Client: Realtime status push on order transition
 ```
@@ -339,8 +339,8 @@ flowchart LR
     subgraph Registry ["Target Platforms"]
         VERCEL["Vercel Edge (Frontend SPA)"]
         RENDER["Render / Railway / ECS (Node.js Server)"]
-        ATLAS[("MongoDB Atlas (Database)")]
-        UPSTASH[("Upstash Redis (Socket Pub/Sub)")]
+        ATLAS[("MongoDB Atlas Database")]
+        UPSTASH[("Upstash Redis PubSub")]
     end
 
     P1 --> LINT
@@ -368,7 +368,7 @@ flowchart TD
     subgraph Browser ["Client Device / Kitchen Tablet"]
         UI["React Application View"]
         SW["Service Worker (sw.js)"]
-        CACHE[("Cache Storage (CacheFirst v1.0.0)")]
+        CACHE[("Cache Storage CacheFirst v1.0.0")]
         NET["Network Fetch"]
     end
 
