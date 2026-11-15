@@ -15,6 +15,10 @@
 - [8. Automated Test Suite (Phases 1–5)](#8-automated-test-suite-phases-15)
 - [9. Quick Start & Local Setup](#9-quick-start--local-setup)
 - [10. Docker & Production Deployment](#10-docker--production-deployment)
+- [11. CI/CD & DevOps Architecture](#11-cicd--devops-architecture)
+- [12. PWA & Kitchen Display Service Worker](#12-pwa--kitchen-display-service-worker)
+- [13. Multi-Language i18n (English, Hindi, Gujarati)](#13-multi-language-i18n-english-hindi-gujarati)
+- [14. Operations Runbook & OpenAPI Specs](#14-operations-runbook--openapi-specs)
 
 ---
 
@@ -26,9 +30,9 @@
 | **Phase 2** | **Admin Management** | `cc7f5d4` | ✅ Completed | Items CRUD with Multer image upload, soft-delete (`isDeleted: true`), sold-out toggle (`isAvailable`), master "Accepting Orders" switch, print-ready table QR generator, sales analytics reports, staff accounts management, audit logging. |
 | **Phase 3** | **Payments + GST Bill** | `f48f053` | ✅ Completed | Server-enforced state machine (`new` ➔ `preparing` ➔ `ready` ➔ `served`, `rejected`), Razorpay UPI integration with HMAC webhook signature verification, cash "mark paid" button, 80mm thermal printable GST invoice (GSTIN, FSSAI, SAC `996331`, 2.5% CGST + 2.5% SGST) and Kitchen Order Ticket (KOT). |
 | **Phase 4** | **Realtime Reliability** | `c4e9c7c` | ✅ Completed | Socket reconnect auto-refetch, HTTP polling fallback (every 8s when disconnected), `@socket.io/redis-adapter` for multi-instance clustering, Web Audio API synthesized kitchen chime (D5 ➔ A5 harmonic fifth) with autoplay unlock. |
-| **Phase 5** | **Quality & Test Automation** | `HEAD` | ✅ Completed | 16 Unit tests (pricing, modifiers, state machine, crypto), 13 Supertest API integration tests, Playwright E2E customer-to-kitchen lifecycle test, k6 load test script (50 concurrent tables). |
-| **Phase 6** | **CI/CD & DevOps Hardening** | In Progress | ⏳ Upcoming | GitHub Actions workflow, Pino logging, Sentry error tracking, `/health` and `/ready` probes, hardened multi-stage Dockerfile with `HEALTHCHECK`. |
-| **Phase 7** | **Frontend Polish & i18n** | In Progress | ⏳ Upcoming | Error boundaries, loading skeletons, PWA service worker for kitchen tablets, accessibility contrast pass, multi-lingual support (English, Hindi, Gujarati). |
+| **Phase 5** | **Quality & Test Automation** | `43e32fa` | ✅ Completed | 16 Unit tests (pricing, modifiers, state machine, crypto), 13 Supertest API integration tests, Playwright E2E customer-to-kitchen lifecycle test, k6 load test script (50 concurrent tables). |
+| **Phase 6** | **CI/CD & DevOps Hardening** | `97b9001` | ✅ Completed | GitHub Actions CI/CD (`ci.yml`), Pino structured logging with header/token redaction, `/health` and `/ready` probes, graceful SIGTERM/SIGINT shutdown, non-root multi-stage Dockerfiles with HEALTHCHECK, Docker Compose with Mongo + Redis, OpenAPI 3.0 specification (`docs/openapi.yaml`), disaster recovery runbook (`docs/RUNBOOK.md`). |
+| **Phase 7** | **Frontend Polish & i18n** | `HEAD` | ✅ Completed | React `ErrorBoundary` with fallback UI, PWA manifest & Service Worker for kitchen tablets, loading skeletons and empty states, full i18n localization in English (EN), Hindi (हिन्दी), and Gujarati (ગુજરાતી) with persistent zero-reload switching. |
 
 ---
 
@@ -304,5 +308,113 @@ To spin up the entire application stack containerized:
 docker-compose up --build
 ```
 This builds and runs:
-- `server`: Hardened Node.js Express & Socket.IO server on port `5000`.
-- `client`: Optimized Nginx container serving compiled Vite production assets on port `5173`.
+- `server`: Hardened Node.js Express & Socket.IO server on port `5000` (non-root `USER node`, built-in healthchecks).
+- `client`: High-performance Nginx Alpine container serving compiled Vite production assets on port `5173`.
+- `mongo`: Persistent MongoDB 6.0 container with data volume mount.
+- `redis`: High-throughput Redis 7 Alpine cache and pub/sub adapter.
+
+---
+
+## 11. CI/CD & DevOps Architecture
+
+The deployment pipeline is fully automated through GitHub Actions (`.github/workflows/ci.yml`), validating code quality, test suites, and Docker containerization on every pull request and push to `main`.
+
+```mermaid
+flowchart LR
+    subgraph Trigger ["GitHub Triggers"]
+        P1["Push to main"]
+        P2["Pull Request"]
+    end
+
+    subgraph CI ["GitHub Actions Workflow (.github/workflows/ci.yml)"]
+        direction TB
+        LINT["Static Analysis & Code Verification"]
+        TEST["Test Suites (Unit + Supertest API)"]
+        BUILD["Vite Frontend Production Build"]
+        DOCKER["Docker Multi-Stage Build & Lint"]
+    end
+
+    subgraph Registry ["Target Platforms"]
+        VERCEL["Vercel Edge (Frontend SPA)"]
+        RENDER["Render / Railway / ECS (Node.js Server)"]
+        ATLAS[("MongoDB Atlas (Database)")]
+        UPSTASH[("Upstash Redis (Socket Pub/Sub)")]
+    end
+
+    Trigger --> CI
+    LINT --> TEST --> BUILD --> DOCKER
+    DOCKER -->|"Continuous Deploy"| VERCEL
+    DOCKER -->|"Continuous Deploy"| RENDER
+    RENDER <--> ATLAS
+    RENDER <--> UPSTASH
+```
+
+### Health & Readiness Probes
+- **`GET /health`** (Liveness Probe): Returns `{ status: 'ok', uptime, timestamp }`. Used by container orchestrators (Kubernetes/Docker) to detect process hangs.
+- **`GET /ready`** (Readiness Probe): Returns `{ status: 'ready', database: 'connected', redis: 'ready' }`. Asserts database connection health before traffic routing.
+- **Graceful Shutdown**: Intercepts `SIGTERM` and `SIGINT`, closes HTTP server, disconnects WebSocket clients, terminates MongoDB & Redis connections safely within 10 seconds.
+
+---
+
+## 12. PWA & Kitchen Display Service Worker
+
+Café Emerald incorporates a Progressive Web App (PWA) manifest (`client/public/manifest.json`) and a dedicated Service Worker (`client/public/sw.js`) designed for kitchen tablets and mobile customer devices.
+
+```mermaid
+flowchart TD
+    subgraph Browser ["Client Device / Kitchen Tablet"]
+        UI["React Application View"]
+        SW["Service Worker (sw.js)"]
+        CACHE[("Cache Storage (CacheFirst v1.0.0)")]
+        NET["Network Fetch"]
+    end
+
+    subgraph ServerSide ["Backend & Cloud APIs"]
+        API["Express REST API (/api)"]
+        WSS["Socket.IO Gateway (/socket.io)"]
+    end
+
+    UI -->|"Asset / Page Request"| SW
+    SW -->|"Check Static Cache"| CACHE
+    CACHE -->|"Cache Hit (Offline Ready)"| UI
+    CACHE -.->|"Cache Miss"| NET
+    NET -->|"Fetch & Cache Clone"| SW
+
+    UI -->|"Dynamic Order & Payment Calls"| API
+    UI <-->|"Realtime Status & KOT Chimes"| WSS
+```
+
+- **PWA Features**: Standalone display mode, dark emerald theme color (`#071a12`), installable on Android/iOS/iPad kitchen tablets.
+- **Offline Resilience**: Static assets, fonts, icons, and shell layouts are stored in Cache Storage (`CacheFirst` policy). Dynamic `/api` and `/socket.io` traffic bypasses the cache to ensure zero stale data.
+
+---
+
+## 13. Multi-Language i18n (English, Hindi, Gujarati)
+
+The customer ordering interface supports seamless, zero-reload internationalization via the React `I18nContext`:
+- 🇬🇧 **English (en)**: Default international locale.
+- 🇮🇳 **Hindi हिन्दी (hi)**: Native Hindi terminology (e.g. "ऑर्डर मिला", "तैयार हो रहा है", "कार्ट देखें").
+- 🇮🇳 **Gujarati ગુજરાતી (gu)**: Native Gujarati localization (e.g. "ઓર્ડર મળ્યો", "તૈયાર થઈ રહ્યો છે", "કાર્ટ જુઓ").
+
+```mermaid
+flowchart LR
+    USER["Customer Selects Language (EN / हिं / ગુજ)"]
+    CTX["I18nContext State Provider"]
+    STORE[("localStorage ('cafe_language')")]
+    VIEWS["React Components (MenuPage, CartDrawer, DishCard, LiveTracker)"]
+
+    USER -->|"changeLanguage('hi')"| CTX
+    CTX -->|"Persist Choice"| STORE
+    CTX -->|"Reactive Re-render (Zero Page Reload)"| VIEWS
+```
+
+---
+
+## 14. Operations Runbook & OpenAPI Specs
+
+- **Production Runbook**: Detailed operational procedures are documented in [`docs/RUNBOOK.md`](docs/RUNBOOK.md), covering:
+  - Zero-downtime deployment strategies.
+  - Automated database backup and point-in-time recovery (`mongodump` / `mongorestore`).
+  - Secret rotation runbook for JWT keys, table HMAC secrets, and Razorpay credentials.
+  - Offline internet outage and network fallback runbook for café staff.
+- **API Documentation**: Full OpenAPI 3.0 specification is available in [`docs/openapi.yaml`](docs/openapi.yaml), importable directly into Postman, Swagger UI, or Insomnia.

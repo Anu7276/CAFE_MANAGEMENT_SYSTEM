@@ -2,10 +2,12 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { X, Plus, Minus, ArrowRight, ShieldCheck } from 'lucide-react';
 import { useCart } from '../context/CartContext';
+import { useI18n } from '../context/I18nContext';
 import api from '../api/client';
 
 export default function CartDrawer({ isOpen, onClose, onOrderPlaced }) {
   const { cart, table, tableSig, updateQty, clearCart, subtotal, tax, total } = useCart();
+  const { t } = useI18n();
   const [note, setNote] = useState('');
   const [paymentMethod, setPaymentMethod] = useState('counter');
   const [loading, setLoading] = useState(false);
@@ -67,9 +69,9 @@ export default function CartDrawer({ isOpen, onClose, onOrderPlaced }) {
         <div>
           <div className="flex items-center justify-between pb-4 border-b border-white/10">
             <div>
-              <h2 className="text-xl font-extrabold text-white">Your Order</h2>
+              <h2 className="text-xl font-extrabold text-white">{t('yourOrder')}</h2>
               <div className="flex items-center gap-1.5 mt-0.5">
-                <span className="text-xs text-mintGreen font-semibold">Table {table}</span>
+                <span className="text-xs text-mintGreen font-semibold">{t('table')} {table}</span>
                 {tableSig && (
                   <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-emeraldDark/80 text-mintGreen border border-mintGreen/30">
                     <ShieldCheck className="w-3 h-3" /> Verified QR
@@ -88,7 +90,7 @@ export default function CartDrawer({ isOpen, onClose, onOrderPlaced }) {
           {/* Cart Items List */}
           <div className="mt-4 flex flex-col gap-3 max-h-[45vh] overflow-y-auto pr-1">
             {!cart.length ? (
-              <div className="text-center py-10 text-white/50 text-sm">Your cart is empty.</div>
+              <div className="text-center py-10 text-white/50 text-sm">{t('cartEmpty')}</div>
             ) : (
               cart.map((item, idx) => (
                 <div
@@ -129,7 +131,7 @@ export default function CartDrawer({ isOpen, onClose, onOrderPlaced }) {
           {cart.length > 0 && (
             <div className="mt-4">
               <label className="text-[11px] font-bold text-white/60 uppercase tracking-wider block mb-1">
-                Special Note for Barista
+                {t('specialNote')}
               </label>
               <input
                 type="text"
@@ -147,15 +149,15 @@ export default function CartDrawer({ isOpen, onClose, onOrderPlaced }) {
         <div className="pt-4 border-t border-white/10">
           <div className="space-y-1 mb-4 text-xs">
             <div className="flex justify-between text-white/60">
-              <span>Subtotal</span>
+              <span>{t('subtotal')}</span>
               <span>₹{subtotal}</span>
             </div>
             <div className="flex justify-between text-white/60">
-              <span>GST (5% split 2.5% CGST + 2.5% SGST)</span>
+              <span>{t('gstTax')}</span>
               <span>₹{tax}</span>
             </div>
             <div className="flex justify-between text-sm font-bold text-white pt-1 border-t border-white/5">
-              <span>Total Payable</span>
+              <span>{t('totalPayable')}</span>
               <span className="text-mintGreen text-base">₹{total}</span>
             </div>
           </div>
@@ -173,7 +175,7 @@ export default function CartDrawer({ isOpen, onClose, onOrderPlaced }) {
               <span className="animate-pulse">Securing & Placing Order...</span>
             ) : (
               <>
-                <span>Place Order · ₹{total}</span>
+                <span>{t('placeOrder')} · ₹{total}</span>
                 <ArrowRight className="w-4 h-4" />
               </>
             )}

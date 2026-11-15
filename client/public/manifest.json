@@ -1,0 +1,16 @@
+{
+  "short_name": "Emerald Café",
+  "name": "Café Emerald — QR Table Ordering & KDS",
+  "icons": [
+    {
+      "src": "favicon.ico",
+      "sizes": "64x64 32x32 24x24 16x16",
+      "type": "image/x-icon"
+    }
+  ],
+  "start_url": "/?source=pwa",
+  "background_color": "#071a12",
+  "theme_color": "#071a12",
+  "display": "standalone",
+  "orientation": "portrait"
+}

@@ -2,22 +2,24 @@ import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { CheckCircle2, Clock, Utensils, Smile, ShieldCheck, QrCode, CreditCard, Receipt, Wifi, WifiOff } from 'lucide-react';
 import { useSocketState } from '../context/SocketContext';
+import { useI18n } from '../context/I18nContext';
 import api from '../api/client';
-
-const STEPS = [
-  { key: 'new', label: 'Received', desc: 'The café has received your order', icon: CheckCircle2 },
-  { key: 'preparing', label: 'Preparing', desc: 'Handcrafted hot & fresh by our baristas', icon: Utensils },
-  { key: 'ready', label: 'Ready', desc: 'On its way to your table right now', icon: Clock },
-  { key: 'served', label: 'Served', desc: 'Enjoy your food and coffee!', icon: Smile }
-];
 
 export default function LiveTracker({ orderId, orderToken, initialOrder, onOrderMore }) {
   const { socket, isConnected, onReconnect } = useSocketState();
+  const { t } = useI18n();
   const [order, setOrder] = useState(initialOrder || null);
   const [paying, setPaying] = useState(false);
   const [upiModal, setUpiModal] = useState(false);
   const [paymentData, setPaymentData] = useState(null);
   const token = orderToken || initialOrder?.orderToken || orderId;
+
+  const steps = [
+    { key: 'new', label: t('orderReceived'), desc: t('orderReceivedDesc'), icon: CheckCircle2 },
+    { key: 'preparing', label: t('orderPreparing'), desc: t('orderPreparingDesc'), icon: Utensils },
+    { key: 'ready', label: t('orderReady'), desc: t('orderReadyDesc'), icon: Clock },
+    { key: 'served', label: t('orderServed'), desc: t('orderServedDesc'), icon: Smile }
+  ];
 
   const fetchOrder = async () => {
     try {
@@ -135,7 +137,7 @@ export default function LiveTracker({ orderId, orderToken, initialOrder, onOrder
     );
   }
 
-  const currentStepIndex = STEPS.findIndex((s) => s.key === order.status);
+  const currentStepIndex = steps.findIndex((s) => s.key === order.status);
 
   return (
     <motion.div
@@ -147,7 +149,7 @@ export default function LiveTracker({ orderId, orderToken, initialOrder, onOrder
         <div>
           <div className="flex items-center gap-1.5">
             <span className="text-[11px] font-extrabold text-mintGreen tracking-wider uppercase block">
-              Live Order Status
+              {t('liveStatus')}
             </span>
             <ShieldCheck className="w-3.5 h-3.5 text-mintGreen" />
           </div>
@@ -160,7 +162,7 @@ export default function LiveTracker({ orderId, orderToken, initialOrder, onOrder
 
       {/* Step Tracker Timeline */}
       <div className="space-y-6 relative before:absolute before:left-4 before:top-3 before:bottom-3 before:w-0.5 before:bg-white/15">
-        {STEPS.map((step, idx) => {
+        {steps.map((step, idx) => {
           const isDone = currentStepIndex >= idx;
           const isCurrent = currentStepIndex === idx;
           const Icon = step.icon;
@@ -237,7 +239,7 @@ export default function LiveTracker({ orderId, orderToken, initialOrder, onOrder
             {order.paymentStatus === 'paid' ? (
               <div className="flex items-center justify-between p-3 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-xs">
                 <span className="font-bold text-emerald-300">
-                  ✓ Payment Settled ({order.paymentMethod?.toUpperCase() || 'UPI'})
+                  {t('paidSettled')} ({order.paymentMethod?.toUpperCase() || 'UPI'})
                 </span>
                 <span className="text-mintGreen font-bold">₹{order.total}</span>
               </div>
@@ -249,10 +251,10 @@ export default function LiveTracker({ orderId, orderToken, initialOrder, onOrder
                   className="w-full h-11 rounded-2xl bg-mintGreen text-[#071a12] font-bold text-xs flex items-center justify-center gap-2 hover:bg-[#88e7bd] transition shadow-lg shadow-mintGreen/20 disabled:opacity-50"
                 >
                   <QrCode className="w-4 h-4" />
-                  <span>{paying ? 'Connecting Gateway...' : `Pay ₹${order.total} via UPI / Card`}</span>
+                  <span>{paying ? 'Connecting Gateway...' : `${t('payUpi')} (₹${order.total})`}</span>
                 </button>
                 <div className="text-center text-[10px] text-white/50">
-                  Or pay with Cash at the counter
+                  {t('payCounter')}
                 </div>
               </div>
             )}
@@ -264,7 +266,7 @@ export default function LiveTracker({ orderId, orderToken, initialOrder, onOrder
         onClick={onOrderMore}
         className="w-full mt-4 h-10 rounded-full border border-white/20 text-white text-xs font-bold hover:bg-white/10 transition"
       >
-        Place Another Order
+        {t('orderMore')}
       </button>
 
       {/* UPI Checkout Modal */}

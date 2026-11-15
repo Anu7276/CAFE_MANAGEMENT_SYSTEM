@@ -2,9 +2,11 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Heart, ShoppingBag, Plus, Minus } from 'lucide-react';
 import { useCart } from '../context/CartContext';
+import { useI18n } from '../context/I18nContext';
 
 export default function DishCard({ item, onOpenDetail }) {
   const { addToCart } = useCart();
+  const { t } = useI18n();
   const [qty, setQty] = useState(1);
   const [isLiked, setIsLiked] = useState(false);
 
@@ -117,10 +119,16 @@ export default function DishCard({ item, onOpenDetail }) {
 
           <button
             onClick={handleAdd}
-            className="flex-1 h-[30px] px-2.5 rounded-full bg-white text-[#0c2f21] text-xs font-extrabold flex items-center justify-center gap-1.5 shadow-md hover:bg-[#f0f7f3] hover:-translate-y-0.5 transition active:translate-y-0 whitespace-nowrap"
+            disabled={item.isAvailable === false}
+            aria-label={`${item.isAvailable === false ? t('soldOut') : t('addToCart')} ${item.name}`}
+            className={`flex-1 h-[30px] px-2.5 rounded-full text-xs font-extrabold flex items-center justify-center gap-1.5 shadow-md transition whitespace-nowrap ${
+              item.isAvailable === false
+                ? 'bg-red-500/20 text-coralRed border border-red-500/30 cursor-not-allowed'
+                : 'bg-white text-[#0c2f21] hover:bg-[#f0f7f3] hover:-translate-y-0.5 active:translate-y-0'
+            }`}
           >
             <ShoppingBag className="w-3 h-3" />
-            <span>Add to Cart</span>
+            <span>{item.isAvailable === false ? t('soldOut') : t('addToCart')}</span>
           </button>
         </div>
       </div>

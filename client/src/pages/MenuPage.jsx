@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Search, ShoppingBag } from 'lucide-react';
+import { Search, ShoppingBag, Globe } from 'lucide-react';
 import api from '../api/client';
 import { useCart } from '../context/CartContext';
+import { useI18n } from '../context/I18nContext';
 import DishCard from '../components/DishCard';
 import DetailModal from '../components/DetailModal';
 import CartDrawer from '../components/CartDrawer';
@@ -9,6 +10,7 @@ import LiveTracker from '../components/LiveTracker';
 
 export default function MenuPage() {
   const { table, cartCount } = useCart();
+  const { lang, changeLanguage, t } = useI18n();
   const [items, setItems] = useState([]);
   const [categories, setCategories] = useState([]);
   const [selectedCat, setSelectedCat] = useState('all');
@@ -16,6 +18,7 @@ export default function MenuPage() {
   const [search, setSearch] = useState('');
   const [modalItem, setModalItem] = useState(null);
   const [cartOpen, setCartOpen] = useState(false);
+  const [menuLoading, setMenuLoading] = useState(true);
   const [activeOrder, setActiveOrder] = useState(() => {
     try {
       const saved = sessionStorage.getItem('emerald_active_order');
@@ -45,6 +48,7 @@ export default function MenuPage() {
 
   useEffect(() => {
     const fetchMenu = async () => {
+      setMenuLoading(true);
       try {
         const res = await api.get('/items', {
           params: { category: selectedCat, search, vegOnly }
@@ -53,6 +57,8 @@ export default function MenuPage() {
         setCategories(res.data.categories);
       } catch (err) {
         console.error(err);
+      } finally {
+        setMenuLoading(false);
       }
     };
     fetchMenu();
@@ -66,18 +72,45 @@ export default function MenuPage() {
           <div className="flex items-center gap-3">
             <span className="text-2xl">☕</span>
             <div className="border-l border-white/20 pl-3">
-              <h1 className="text-lg font-extrabold tracking-tight">CAFÉ EMERALD</h1>
-              <span className="text-[11px] text-white/70 block -mt-0.5">Table {table} · Table Ordering</span>
+              <h1 className="text-lg font-extrabold tracking-tight">{t('cafeTitle')}</h1>
+              <span className="text-[11px] text-white/70 block -mt-0.5">{t('table')} {table} · {t('tableOrdering')}</span>
             </div>
           </div>
 
-          <button
-            onClick={() => setCartOpen(true)}
-            className="flex items-center gap-2 bg-white text-[#0c2f21] px-4 py-2 rounded-full font-extrabold text-xs shadow-lg hover:bg-slate-100 transition active:scale-95"
-          >
-            <ShoppingBag className="w-4 h-4" />
-            <span>Cart ({cartCount})</span>
-          </button>
+          <div className="flex items-center gap-2">
+            {/* Language Switcher Pill */}
+            <div className="flex items-center bg-black/40 rounded-full p-0.5 border border-white/10 text-[10px] font-bold">
+              <button
+                onClick={() => changeLanguage('en')}
+                className={`px-2 py-1 rounded-full transition ${lang === 'en' ? 'bg-mintGreen text-[#071a12]' : 'text-white/60 hover:text-white'}`}
+                title="English"
+              >
+                EN
+              </button>
+              <button
+                onClick={() => changeLanguage('hi')}
+                className={`px-2 py-1 rounded-full transition ${lang === 'hi' ? 'bg-mintGreen text-[#071a12]' : 'text-white/60 hover:text-white'}`}
+                title="हिन्दी"
+              >
+                हिं
+              </button>
+              <button
+                onClick={() => changeLanguage('gu')}
+                className={`px-2 py-1 rounded-full transition ${lang === 'gu' ? 'bg-mintGreen text-[#071a12]' : 'text-white/60 hover:text-white'}`}
+                title="ગુજરાતી"
+              >
+                ગુજ
+              </button>
+            </div>
+
+            <button
+              onClick={() => setCartOpen(true)}
+              className="flex items-center gap-2 bg-white text-[#0c2f21] px-4 py-2 rounded-full font-extrabold text-xs shadow-lg hover:bg-slate-100 transition active:scale-95"
+            >
+              <ShoppingBag className="w-4 h-4" />
+              <span>{t('viewCart')} ({cartCount})</span>
+            </button>
+          </div>
         </div>
       </header>
 
@@ -101,7 +134,7 @@ export default function MenuPage() {
                 <Search className="w-4 h-4 text-white/50" />
                 <input
                   type="text"
-                  placeholder="Search coffee, drinks, snacks..."
+                  placeholder={t('searchPlaceholder')}
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   className="bg-transparent text-xs text-white placeholder-white/40 focus:outline-none w-full"
@@ -115,7 +148,7 @@ export default function MenuPage() {
                 }`}
               >
                 <span className="w-2 h-2 rounded-full bg-white" />
-                Veg Only
+                {t('vegOnly')}
               </button>
             </div>
 
@@ -129,7 +162,7 @@ export default function MenuPage() {
                     : 'bg-white/5 text-white/70 hover:bg-white/10'
                 }`}
               >
-                🍽️ All Items
+                🍽️ {t('all')}
               </button>
               {categories.map((c) => (
                 <button
@@ -141,17 +174,46 @@ export default function MenuPage() {
                       : 'bg-white/5 text-white/70 hover:bg-white/10'
                   }`}
                 >
-                  {c.emoji} {c.name}
+                  {c.emoji} {t(c.slug) || c.name}
                 </button>
               ))}
             </div>
 
+            {/* Loading Skeletons */}
+            {menuLoading && (
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                {[1, 2, 3, 4].map((n) => (
+                  <div
+                    key={n}
+                    className="h-72 rounded-3xl bg-white/5 border border-white/5 p-4 flex flex-col justify-end animate-pulse"
+                  >
+                    <div className="h-4 bg-white/10 rounded-full w-3/4 mb-2" />
+                    <div className="h-3 bg-white/10 rounded-full w-1/2 mb-4" />
+                    <div className="h-8 bg-white/10 rounded-full w-full" />
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Empty State */}
+            {!menuLoading && items.length === 0 && (
+              <div className="p-12 text-center rounded-3xl bg-[#0c241b] border border-white/10">
+                <span className="text-4xl block mb-3">🔍</span>
+                <h3 className="text-base font-bold text-white mb-1">No items found</h3>
+                <p className="text-xs text-white/60 max-w-xs mx-auto">
+                  {t('noItemsFound')}
+                </p>
+              </div>
+            )}
+
             {/* Compact 210px–250px Card Grid matching user reference */}
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-              {items.map((item) => (
-                <DishCard key={item._id} item={item} onOpenDetail={setModalItem} />
-              ))}
-            </div>
+            {!menuLoading && items.length > 0 && (
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                {items.map((item) => (
+                  <DishCard key={item._id} item={item} onOpenDetail={setModalItem} />
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Right Column: Sticky Live Cart/Tracker (Desktop) */}
@@ -166,15 +228,15 @@ export default function MenuPage() {
             ) : (
               <div className="p-6 rounded-3xl bg-[#0c241b] border border-white/10 text-center">
                 <span className="text-3xl block mb-2">🧾</span>
-                <h3 className="text-base font-bold text-white mb-1">Your Order Table {table}</h3>
+                <h3 className="text-base font-bold text-white mb-1">{t('yourOrder')} Table {table}</h3>
                 <p className="text-xs text-white/60 mb-4">
-                  {cartCount > 0 ? `${cartCount} items in cart ready for checkout` : 'Select items from the menu to start order'}
+                  {cartCount > 0 ? `${cartCount} ${t('itemsInCart')}` : t('cartEmpty')}
                 </p>
                 <button
                   onClick={() => setCartOpen(true)}
                   className="w-full py-2.5 rounded-full bg-mintGreen text-[#0c2f21] font-extrabold text-xs shadow-md hover:bg-emerald-400 transition"
                 >
-                  {cartCount > 0 ? `Review & Checkout (${cartCount})` : 'Open Cart'}
+                  {cartCount > 0 ? `${t('reviewCheckout')} (${cartCount})` : t('openCart')}
                 </button>
               </div>
             )}
