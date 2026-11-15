@@ -1,22 +1,43 @@
 const User = require('../models/User');
 const generateToken = require('../utils/generateToken');
 
+const setTokenCookie = (res, token) => {
+  const isProd = process.env.NODE_ENV === 'production';
+  res.cookie('emerald_token', token, {
+    httpOnly: true,
+    secure: isProd,
+    sameSite: isProd ? 'none' : 'lax',
+    maxAge: 30 * 24 * 60 * 60 * 1000 // 30 days
+  });
+};
+
 const login = async (req, res, next) => {
   try {
     const { email, password } = req.body;
-    if (!email || !password) {
-      return res.status(400).json({ success: false, message: 'Please provide email and password' });
-    }
-
     const user = await User.findOne({ email });
     if (!user) {
-      return res.status(401).json({ success: false, message: 'Invalid credentials' });
+      return res.status(401).json({ success: false, message: 'Invalid email or password' });
+    }
+
+    if (User.isLocked(user)) {
+      const waitMinutes = Math.ceil((new Date(user.lockUntil).getTime() - Date.now()) / 60000);
+      return res.status(423).json({
+        success: false,
+        message: `Account is temporarily locked due to excessive failed attempts. Try again in ${waitMinutes} minute(s).`
+      });
     }
 
     const isMatch = await User.comparePassword(password, user.passwordHash);
     if (!isMatch) {
-      return res.status(401).json({ success: false, message: 'Invalid credentials' });
+      await User.registerFailedAttempt(user._id);
+      return res.status(401).json({ success: false, message: 'Invalid email or password' });
     }
+
+    // Reset lockout counters on success
+    await User.resetFailedAttempts(user._id);
+
+    const token = generateToken(user._id, user.role);
+    setTokenCookie(res, token);
 
     res.json({
       success: true,
@@ -25,7 +46,7 @@ const login = async (req, res, next) => {
         name: user.name,
         email: user.email,
         role: user.role,
-        token: generateToken(user._id, user.role)
+        token
       }
     });
   } catch (error) {
@@ -42,6 +63,9 @@ const register = async (req, res, next) => {
     }
 
     const newUser = await User.create({ name, email, password, role });
+    const token = generateToken(newUser._id, newUser.role);
+    setTokenCookie(res, token);
+
     res.status(201).json({
       success: true,
       data: {
@@ -49,7 +73,7 @@ const register = async (req, res, next) => {
         name: newUser.name,
         email: newUser.email,
         role: newUser.role,
-        token: generateToken(newUser._id, newUser.role)
+        token
       }
     });
   } catch (error) {
@@ -57,5 +81,25 @@ const register = async (req, res, next) => {
   }
 };
 
-module.exports = { login, register };
+const logout = async (req, res) => {
+  res.clearCookie('emerald_token', {
+    httpOnly: true,
+    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+    secure: process.env.NODE_ENV === 'production'
+  });
+  res.json({ success: true, message: 'Logged out successfully' });
+};
 
+const getMe = async (req, res) => {
+  res.json({
+    success: true,
+    data: {
+      _id: req.user._id,
+      name: req.user.name,
+      email: req.user.email,
+      role: req.user.role
+    }
+  });
+};
+
+module.exports = { login, register, logout, getMe };

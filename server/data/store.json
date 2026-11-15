@@ -6,6 +6,16 @@
       "email": "admin@cafeemerald.com",
       "passwordHash": "$2a$10$p0RZIJRE3apQv5IGn8ETQeQ1m7WfXBDxv/V1EbafMT.vURD.Z6cS.",
       "role": "admin"
+    },
+    {
+      "_id": "usr_1794761036671",
+      "name": "Lockout Tester",
+      "email": "lockout_test@cafeemerald.com",
+      "passwordHash": "$2a$10$rE10By/LTNwWYLci.n40jOyPTi/hWcoaXvAwjQ0WGhceuhzXeTXzu",
+      "role": "staff",
+      "failedLoginAttempts": 0,
+      "lockUntil": null,
+      "createdAt": "2026-11-15T16:43:56.753Z"
     }
   ],
   "categories": [
@@ -161,6 +171,78 @@
     }
   ],
   "orders": [
+    {
+      "_id": "ord_1794761070451_814e412a",
+      "orderToken": "0ec541b74a5f8d5c25ffd38ed9a4bb6a",
+      "idempotencyKey": "test_idemp_1794761070444",
+      "orderNumber": 1046,
+      "table": 5,
+      "tableSig": "373af7c42ce25b4ef3a231cc26b3a4ad",
+      "items": [
+        {
+          "itemId": "item_cake_1",
+          "name": "Strawberry Chocolate Cake",
+          "price": 260,
+          "size": "",
+          "qty": 2,
+          "lineTotal": 520
+        }
+      ],
+      "subtotal": 520,
+      "tax": 26,
+      "cgst": 13,
+      "sgst": 13,
+      "total": 546,
+      "note": "",
+      "paymentMethod": "counter",
+      "paymentStatus": "pending",
+      "status": "new",
+      "statusHistory": [
+        {
+          "status": "new",
+          "timestamp": "2026-11-15T16:44:30.451Z",
+          "note": "Order placed"
+        }
+      ],
+      "createdAt": "2026-11-15T16:44:30.451Z",
+      "updatedAt": "2026-11-15T16:44:30.451Z"
+    },
+    {
+      "_id": "ord_1794761036786_762ff85f",
+      "orderToken": "8f2ffc872a63fcda105d85837780bb5b",
+      "idempotencyKey": "test_idemp_1794761036783",
+      "orderNumber": 1045,
+      "table": 5,
+      "tableSig": "373af7c42ce25b4e",
+      "items": [
+        {
+          "itemId": "item_cake_1",
+          "name": "Strawberry Chocolate Cake",
+          "price": 260,
+          "size": "",
+          "qty": 2,
+          "lineTotal": 520
+        }
+      ],
+      "subtotal": 520,
+      "tax": 26,
+      "cgst": 13,
+      "sgst": 13,
+      "total": 546,
+      "note": "",
+      "paymentMethod": "counter",
+      "paymentStatus": "pending",
+      "status": "new",
+      "statusHistory": [
+        {
+          "status": "new",
+          "timestamp": "2026-11-15T16:43:56.786Z",
+          "note": "Order placed"
+        }
+      ],
+      "createdAt": "2026-11-15T16:43:56.786Z",
+      "updatedAt": "2026-11-15T16:43:56.786Z"
+    },
     {
       "_id": "ord_1794658064276",
       "orderNumber": 1044,

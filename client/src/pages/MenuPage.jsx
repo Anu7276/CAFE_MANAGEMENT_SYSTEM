@@ -16,7 +16,32 @@ export default function MenuPage() {
   const [search, setSearch] = useState('');
   const [modalItem, setModalItem] = useState(null);
   const [cartOpen, setCartOpen] = useState(false);
-  const [activeOrderId, setActiveOrderId] = useState(null);
+  const [activeOrder, setActiveOrder] = useState(() => {
+    try {
+      const saved = sessionStorage.getItem('emerald_active_order');
+      return saved ? JSON.parse(saved) : null;
+    } catch {
+      return null;
+    }
+  });
+  const [activeOrderId, setActiveOrderId] = useState(() => activeOrder?._id || null);
+  const [activeOrderToken, setActiveOrderToken] = useState(() => activeOrder?.orderToken || null);
+
+  const handleOrderPlaced = (order) => {
+    setActiveOrder(order);
+    setActiveOrderId(order._id);
+    setActiveOrderToken(order.orderToken);
+    try {
+      sessionStorage.setItem('emerald_active_order', JSON.stringify(order));
+    } catch (e) {}
+  };
+
+  const handleOrderMore = () => {
+    setActiveOrder(null);
+    setActiveOrderId(null);
+    setActiveOrderToken(null);
+    sessionStorage.removeItem('emerald_active_order');
+  };
 
   useEffect(() => {
     const fetchMenu = async () => {
@@ -131,8 +156,13 @@ export default function MenuPage() {
 
           {/* Right Column: Sticky Live Cart/Tracker (Desktop) */}
           <div className="hidden lg:block sticky top-24">
-            {activeOrderId ? (
-              <LiveTracker orderId={activeOrderId} onOrderMore={() => setActiveOrderId(null)} />
+            {activeOrder || activeOrderId ? (
+              <LiveTracker
+                orderId={activeOrderId}
+                orderToken={activeOrderToken}
+                initialOrder={activeOrder}
+                onOrderMore={handleOrderMore}
+              />
             ) : (
               <div className="p-6 rounded-3xl bg-[#0c241b] border border-white/10 text-center">
                 <span className="text-3xl block mb-2">🧾</span>
@@ -174,7 +204,7 @@ export default function MenuPage() {
       <CartDrawer
         isOpen={cartOpen}
         onClose={() => setCartOpen(false)}
-        onOrderPlaced={(order) => setActiveOrderId(order._id)}
+        onOrderPlaced={handleOrderPlaced}
       />
     </div>
   );

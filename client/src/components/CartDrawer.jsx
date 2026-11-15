@@ -1,32 +1,44 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { X, Plus, Minus, ArrowRight } from 'lucide-react';
+import { X, Plus, Minus, ArrowRight, ShieldCheck } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import api from '../api/client';
 
 export default function CartDrawer({ isOpen, onClose, onOrderPlaced }) {
-  const { cart, table, updateQty, clearCart, subtotal, tax, total } = useCart();
+  const { cart, table, tableSig, updateQty, clearCart, subtotal, tax, total } = useCart();
   const [note, setNote] = useState('');
   const [paymentMethod, setPaymentMethod] = useState('counter');
   const [loading, setLoading] = useState(false);
 
   const handleCheckout = async () => {
-    if (!cart.length) return;
+    if (!cart.length || loading) return;
     setLoading(true);
 
     try {
-      const res = await api.post('/orders', {
-        table,
-        items: cart.map((c) => ({
-          itemId: c.id,
-          name: c.name,
-          price: c.price,
-          size: c.size,
-          qty: c.qty
-        })),
-        note,
-        paymentMethod
-      });
+      // Generate a unique idempotency key for this checkout attempt
+      const idempotencyKey = 'idemp_' + Date.now() + '_' + Math.random().toString(36).slice(2, 10);
+
+      const res = await api.post(
+        '/orders',
+        {
+          table,
+          tableSig,
+          items: cart.map((c) => ({
+            itemId: c.id,
+            name: c.name,
+            size: c.size,
+            qty: c.qty
+          })),
+          note,
+          paymentMethod
+        },
+        {
+          headers: {
+            'Idempotency-Key': idempotencyKey,
+            ...(tableSig ? { 'X-Table-Sig': tableSig } : {})
+          }
+        }
+      );
 
       if (res.data.success) {
         clearCart();
@@ -56,7 +68,14 @@ export default function CartDrawer({ isOpen, onClose, onOrderPlaced }) {
           <div className="flex items-center justify-between pb-4 border-b border-white/10">
             <div>
               <h2 className="text-xl font-extrabold text-white">Your Order</h2>
-              <span className="text-xs text-mintGreen font-semibold">Table {table}</span>
+              <div className="flex items-center gap-1.5 mt-0.5">
+                <span className="text-xs text-mintGreen font-semibold">Table {table}</span>
+                {tableSig && (
+                  <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-emeraldDark/80 text-mintGreen border border-mintGreen/30">
+                    <ShieldCheck className="w-3 h-3" /> Verified QR
+                  </span>
+                )}
+              </div>
             </div>
             <button
               onClick={onClose}
@@ -105,69 +124,62 @@ export default function CartDrawer({ isOpen, onClose, onOrderPlaced }) {
               ))
             )}
           </div>
+
+          {/* Kitchen / Barista Note */}
+          {cart.length > 0 && (
+            <div className="mt-4">
+              <label className="text-[11px] font-bold text-white/60 uppercase tracking-wider block mb-1">
+                Special Note for Barista
+              </label>
+              <input
+                type="text"
+                placeholder="e.g. Oat milk, extra hot, less sugar..."
+                value={note}
+                onChange={(e) => setNote(e.target.value)}
+                maxLength={300}
+                className="w-full bg-black/40 border border-white/10 rounded-xl px-3 py-2 text-xs text-white placeholder-white/30 focus:outline-none focus:border-mintGreen"
+              />
+            </div>
+          )}
         </div>
 
-        {/* Footer Checkout Actions */}
+        {/* Footer & Checkout */}
         <div className="pt-4 border-t border-white/10">
-          <textarea
-            value={note}
-            onChange={(e) => setNote(e.target.value)}
-            rows={2}
-            placeholder="Kitchen notes: e.g. Less sugar, extra hot..."
-            className="w-full bg-black/40 border border-white/15 rounded-xl p-2.5 text-xs text-white placeholder-white/40 focus:outline-none focus:border-mintGreen mb-3"
-          />
-
-          {/* Payment Method Toggle */}
-          <div className="flex gap-2 mb-4">
-            <button
-              onClick={() => setPaymentMethod('counter')}
-              className={`flex-1 py-2 text-xs font-bold rounded-xl border transition ${
-                paymentMethod === 'counter'
-                  ? 'bg-mintGreen text-emeraldDark border-mintGreen'
-                  : 'bg-black/30 text-white border-white/15'
-              }`}
-            >
-              💵 Pay at Counter
-            </button>
-            <button
-              onClick={() => setPaymentMethod('upi')}
-              className={`flex-1 py-2 text-xs font-bold rounded-xl border transition ${
-                paymentMethod === 'upi'
-                  ? 'bg-mintGreen text-emeraldDark border-mintGreen'
-                  : 'bg-black/30 text-white border-white/15'
-              }`}
-            >
-              📱 UPI / QR
-            </button>
-          </div>
-
-          {/* Price Breakdown */}
-          <div className="space-y-1.5 text-xs text-white/70 mb-4">
-            <div className="flex justify-between">
+          <div className="space-y-1 mb-4 text-xs">
+            <div className="flex justify-between text-white/60">
               <span>Subtotal</span>
-              <span className="font-semibold text-white">₹{subtotal}</span>
+              <span>₹{subtotal}</span>
             </div>
-            <div className="flex justify-between">
-              <span>Taxes (5%)</span>
-              <span className="font-semibold text-white">₹{tax}</span>
+            <div className="flex justify-between text-white/60">
+              <span>GST (5% split 2.5% CGST + 2.5% SGST)</span>
+              <span>₹{tax}</span>
             </div>
-            <div className="flex justify-between text-base font-extrabold text-white pt-2 border-t border-white/10">
-              <span>Total</span>
-              <span className="text-mintGreen font-extrabold">₹{total}</span>
+            <div className="flex justify-between text-sm font-bold text-white pt-1 border-t border-white/5">
+              <span>Total Payable</span>
+              <span className="text-mintGreen text-base">₹{total}</span>
             </div>
           </div>
 
           <button
             disabled={!cart.length || loading}
             onClick={handleCheckout}
-            className="w-full h-12 rounded-full bg-white text-emeraldDark font-extrabold text-sm flex items-center justify-center gap-2 hover:bg-slate-100 disabled:opacity-50 transition shadow-lg active:scale-[0.98]"
+            className={`w-full h-12 rounded-full font-bold flex items-center justify-center gap-2 transition ${
+              cart.length && !loading
+                ? 'bg-mintGreen text-emeraldDark hover:bg-[#88e7bd] shadow-lg shadow-mintGreen/20'
+                : 'bg-white/10 text-white/30 cursor-not-allowed'
+            }`}
           >
-            {loading ? 'Submitting...' : `Place Order · ₹${total}`}
-            <ArrowRight className="w-4 h-4" />
+            {loading ? (
+              <span className="animate-pulse">Securing & Placing Order...</span>
+            ) : (
+              <>
+                <span>Place Order · ₹{total}</span>
+                <ArrowRight className="w-4 h-4" />
+              </>
+            )}
           </button>
         </div>
       </motion.div>
     </div>
   );
 }
-

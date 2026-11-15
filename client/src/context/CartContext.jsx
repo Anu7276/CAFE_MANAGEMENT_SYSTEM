@@ -14,7 +14,23 @@ export const CartProvider = ({ children }) => {
 
   const [table, setTable] = useState(() => {
     const params = new URLSearchParams(window.location.search);
-    return params.get('table') ? Number(params.get('table')) : 1;
+    const tableParam = params.get('table');
+    if (tableParam) {
+      localStorage.setItem('emerald_table', tableParam);
+      return Number(tableParam);
+    }
+    const saved = localStorage.getItem('emerald_table');
+    return saved ? Number(saved) : 1;
+  });
+
+  const [tableSig, setTableSig] = useState(() => {
+    const params = new URLSearchParams(window.location.search);
+    const sigParam = params.get('sig');
+    if (sigParam) {
+      localStorage.setItem('emerald_table_sig', sigParam);
+      return sigParam;
+    }
+    return localStorage.getItem('emerald_table_sig') || '';
   });
 
   useEffect(() => {
@@ -73,6 +89,8 @@ export const CartProvider = ({ children }) => {
         cart,
         table,
         setTable,
+        tableSig,
+        setTableSig,
         addToCart,
         updateQty,
         clearCart,
@@ -88,4 +106,3 @@ export const CartProvider = ({ children }) => {
 };
 
 export const useCart = () => useContext(CartContext);
-
