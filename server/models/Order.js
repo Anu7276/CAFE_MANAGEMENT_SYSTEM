@@ -74,10 +74,10 @@ class Order {
       note: data.note ? String(data.note).slice(0, 500) : '',
       paymentMethod: data.paymentMethod || 'counter',
       paymentStatus: data.paymentStatus || 'pending',
-      status: 'new',
+      status: data.status || 'new',
       isTest: Boolean(data.isTest),
-      statusHistory: [
-        { status: 'new', timestamp: new Date().toISOString(), note: 'Order placed' }
+      statusHistory: data.statusHistory || [
+        { status: data.status || 'new', timestamp: new Date().toISOString(), note: 'Order placed' }
       ],
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()

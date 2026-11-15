@@ -13,6 +13,8 @@ const DEFAULT_SETTINGS = {
   cgstRate: 2.5,
   sgstRate: 2.5,
   totalTables: 20,
+  maxOpenOrdersPerTable: 3,
+  requirePaymentBeforeKds: false,
   updatedAt: new Date().toISOString()
 };
 

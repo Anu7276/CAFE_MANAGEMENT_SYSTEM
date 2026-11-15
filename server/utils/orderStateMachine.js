@@ -9,6 +9,7 @@
  */
 
 const VALID_TRANSITIONS = {
+  payment_pending: ['new', 'rejected'],
   new: ['preparing', 'rejected'],
   preparing: ['ready', 'rejected'],
   ready: ['served'],

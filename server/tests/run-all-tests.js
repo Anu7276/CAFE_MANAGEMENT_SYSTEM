@@ -14,6 +14,7 @@ const testSuites = [
   { name: 'Production Unit: Cookie Domain & Subdomains', file: path.resolve(__dirname, 'unit/cookie-domain.test.js') },
   { name: 'Production Unit: Smoke Test Guard & isTest Exclusions', file: path.resolve(__dirname, 'unit/smoke-test-guard.test.js') },
   { name: 'Production Unit: PWA Automated Cache Version', file: path.resolve(__dirname, 'unit/pwa-build-hash.test.js') },
+  { name: 'Production Unit: QR Abuse & Payment Gate', file: path.resolve(__dirname, 'unit/qr-abuse.test.js') },
   { name: 'Phase 5: Supertest REST API Integration', file: path.resolve(__dirname, 'api/supertest.test.js') }
 ];
 

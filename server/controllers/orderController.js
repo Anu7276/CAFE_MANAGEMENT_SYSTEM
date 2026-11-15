@@ -53,6 +53,20 @@ const createOrder = async (req, res, next) => {
       });
     }
 
+    // 2b. Table Abuse Prevention: Per-table open order cap check
+    const maxOpenOrders = Number(settings.maxOpenOrdersPerTable) || 3;
+    const tableOrders = await Order.find({ table: tableNumber });
+    const activeTableOrders = tableOrders.filter(
+      o => ['new', 'preparing', 'payment_pending'].includes(o.status) && !o.isDeleted
+    );
+
+    if (activeTableOrders.length >= maxOpenOrders) {
+      return res.status(429).json({
+        success: false,
+        message: `Table ${tableNumber} has reached the maximum allowed limit of ${maxOpenOrders} open orders. Please wait for current orders to be served.`
+      });
+    }
+
     if (!items || !Array.isArray(items) || items.length === 0) {
       return res.status(400).json({ success: false, message: 'Cart cannot be empty' });
     }
@@ -119,6 +133,11 @@ const createOrder = async (req, res, next) => {
     // Generate unguessable random token for public customer status tracking
     const orderToken = crypto.randomBytes(16).toString('hex');
 
+    // UPI Payment Gate: If enabled, orders stay in payment_pending until Razorpay verification
+    const isUpiOrder = (paymentMethod || 'counter') === 'upi';
+    const requirePrePayment = Boolean(settings.requirePaymentBeforeKds) && isUpiOrder;
+    const initialStatus = requirePrePayment ? 'payment_pending' : 'new';
+
     const order = await Order.create({
       orderToken,
       idempotencyKey,
@@ -133,14 +152,17 @@ const createOrder = async (req, res, next) => {
       note: note ? String(note).slice(0, 300) : '',
       paymentMethod: paymentMethod || 'counter',
       paymentStatus: 'pending',
+      status: initialStatus,
       isTest: Boolean(req.body.isTest)
     });
 
     // 4. Scoped Socket.IO room broadcast (No global leaks)
     const io = req.app.get('io');
     if (io) {
-      // Send to authenticated admin / kitchen display room
-      io.to('admin_kds').emit('order:created', order);
+      // Only emit to kitchen KDS if payment is not gated
+      if (!requirePrePayment) {
+        io.to('admin_kds').emit('order:created', order);
+      }
       // Emit to customer's private room
       io.to(`order_${order.orderToken}`).emit('order:created', order);
     }
@@ -355,15 +377,30 @@ const markOrderPaid = async (req, res, next) => {
       return res.status(404).json({ success: false, message: 'Order not found' });
     }
 
-    const updated = await Order.findByIdAndUpdate(req.params.id, {
+    const isNewlyDispatched = order.status === 'payment_pending';
+    const updates = {
       paymentStatus: 'paid',
       paymentMethod,
       paidAt: new Date().toISOString()
-    });
+    };
+
+    if (isNewlyDispatched) {
+      updates.status = 'new';
+      updates.statusHistory = [
+        ...(order.statusHistory || []),
+        { status: 'new', timestamp: new Date().toISOString(), note: 'Paid at counter; dispatched to kitchen' }
+      ];
+    }
+
+    const updated = await Order.findByIdAndUpdate(req.params.id, updates);
 
     const io = req.app.get('io');
     if (io) {
-      io.to('admin_kds').emit('order:updated', updated);
+      if (isNewlyDispatched) {
+        io.to('admin_kds').emit('order:created', updated);
+      } else {
+        io.to('admin_kds').emit('order:updated', updated);
+      }
       io.to(`order_${order.orderToken}`).emit('order:status', {
         orderNumber: order.orderNumber,
         orderToken: order.orderToken,

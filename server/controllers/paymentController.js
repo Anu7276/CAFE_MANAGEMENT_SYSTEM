@@ -90,16 +90,32 @@ const verifyPayment = async (req, res, next) => {
       return res.status(404).json({ success: false, message: 'Matching order not found' });
     }
 
-    const updated = await Order.findByIdAndUpdate(order._id, {
+    const updatePayload = {
       paymentStatus: 'paid',
       paymentMethod: 'upi',
       razorpayPaymentId,
       paidAt: new Date().toISOString()
-    });
+    };
+
+    const isNewlyDispatched = order.status === 'payment_pending';
+    if (isNewlyDispatched) {
+      updatePayload.status = 'new';
+      updatePayload.statusHistory = [
+        ...(order.statusHistory || []),
+        { status: 'new', timestamp: new Date().toISOString(), note: 'UPI payment confirmed; dispatched to kitchen' }
+      ];
+    }
+
+    const updated = await Order.findByIdAndUpdate(order._id, updatePayload);
 
     const io = req.app.get('io');
     if (io) {
-      io.to('admin_kds').emit('order:updated', updated);
+      if (isNewlyDispatched) {
+        // Dispatched to kitchen for the first time
+        io.to('admin_kds').emit('order:created', updated);
+      } else {
+        io.to('admin_kds').emit('order:updated', updated);
+      }
       io.to(`order_${order.orderToken}`).emit('order:status', {
         orderNumber: order.orderNumber,
         orderToken: order.orderToken,
