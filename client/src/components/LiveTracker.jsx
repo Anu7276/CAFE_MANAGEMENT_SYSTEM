@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { CheckCircle2, Clock, Utensils, Smile, ShieldCheck, QrCode, CreditCard, Receipt } from 'lucide-react';
-import { useSocket } from '../context/SocketContext';
+import { CheckCircle2, Clock, Utensils, Smile, ShieldCheck, QrCode, CreditCard, Receipt, Wifi, WifiOff } from 'lucide-react';
+import { useSocketState } from '../context/SocketContext';
 import api from '../api/client';
 
 const STEPS = [
@@ -12,32 +12,52 @@ const STEPS = [
 ];
 
 export default function LiveTracker({ orderId, orderToken, initialOrder, onOrderMore }) {
-  const socket = useSocket();
+  const { socket, isConnected, onReconnect } = useSocketState();
   const [order, setOrder] = useState(initialOrder || null);
   const [paying, setPaying] = useState(false);
   const [upiModal, setUpiModal] = useState(false);
   const [paymentData, setPaymentData] = useState(null);
   const token = orderToken || initialOrder?.orderToken || orderId;
 
-  useEffect(() => {
-    const fetchOrder = async () => {
-      try {
-        if (orderToken) {
-          const res = await api.get(`/orders/track/${orderToken}`);
-          setOrder(res.data.data);
-        } else if (orderId) {
-          const res = await api.get(`/orders/${orderId}`);
-          setOrder(res.data.data);
-        }
-      } catch (err) {
-        console.error('Failed to load order status:', err);
+  const fetchOrder = async () => {
+    try {
+      if (orderToken) {
+        const res = await api.get(`/orders/track/${orderToken}`);
+        setOrder(res.data.data);
+      } else if (orderId) {
+        const res = await api.get(`/orders/${orderId}`);
+        setOrder(res.data.data);
       }
-    };
+    } catch (err) {
+      console.error('Failed to load order status:', err);
+    }
+  };
 
+  useEffect(() => {
     if (token && !order) {
       fetchOrder();
     }
   }, [token]);
+
+  // Auto-refetch on socket reconnection
+  useEffect(() => {
+    if (!onReconnect) return;
+    const unsubscribe = onReconnect(() => {
+      fetchOrder();
+    });
+    return unsubscribe;
+  }, [onReconnect, token]);
+
+  // Polling fallback when WebSocket disconnected
+  useEffect(() => {
+    if (isConnected || !token) return;
+    if (order && (order.status === 'served' || order.status === 'rejected')) return;
+
+    const interval = setInterval(() => {
+      fetchOrder();
+    }, 8000);
+    return () => clearInterval(interval);
+  }, [isConnected, token, order?.status]);
 
   useEffect(() => {
     if (!socket || !token) return;

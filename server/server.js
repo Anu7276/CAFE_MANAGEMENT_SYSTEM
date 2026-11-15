@@ -12,6 +12,7 @@ const jwt = require('jsonwebtoken');
 require('dotenv').config();
 
 const { connectDB } = require('./config/db');
+const { setupRedisAdapter } = require('./config/redis');
 const { errorHandler } = require('./middleware/error');
 const { apiLimiter } = require('./middleware/rateLimiter');
 
@@ -65,6 +66,7 @@ const io = new Server(server, {
   }
 });
 app.set('io', io);
+setupRedisAdapter(io);
 
 // Security & Parsing Middlewares
 app.use(helmet({

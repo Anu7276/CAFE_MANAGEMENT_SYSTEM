@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { useSocket } from '../context/SocketContext';
+import { useSocketState } from '../context/SocketContext';
+import { playOrderChime, unlockAudio } from '../utils/audioChime';
 import api from '../api/client';
 import {
   Clock,
@@ -22,7 +23,11 @@ import {
   ShoppingBag,
   ExternalLink,
   ShieldCheck,
-  Power
+  Power,
+  Volume2,
+  VolumeX,
+  Wifi,
+  WifiOff
 } from 'lucide-react';
 
 const TABS = [
@@ -35,7 +40,12 @@ const TABS = [
 ];
 
 export default function AdminDashboardPage() {
-  const socket = useSocket();
+  const { socket, isConnected, isReconnecting, onReconnect } = useSocketState();
+
+  // Audio chime state
+  const [soundEnabled, setSoundEnabled] = useState(() => {
+    return localStorage.getItem('emerald_sound_enabled') !== 'false';
+  });
 
   // Auth state
   const [currentUser, setCurrentUser] = useState(null);
@@ -118,12 +128,15 @@ export default function AdminDashboardPage() {
     if (activeTab === 'settings') fetchSettings();
   }, [currentUser, activeTab]);
 
-  // 3. Socket real-time event listeners
+  // 3. Socket real-time event listeners with chime and reconnect auto-refetch
   useEffect(() => {
     if (!socket || !currentUser) return;
 
     socket.on('order:created', (newOrder) => {
       setOrders((prev) => [newOrder, ...prev]);
+      if (soundEnabled) {
+        playOrderChime();
+      }
     });
 
     socket.on('order:updated', (updatedOrder) => {
@@ -139,7 +152,29 @@ export default function AdminDashboardPage() {
       socket.off('order:updated');
       socket.off('settings:updated');
     };
-  }, [socket, currentUser]);
+  }, [socket, currentUser, soundEnabled]);
+
+  // 4. Auto-refetch current orders when connection drops and reconnects
+  useEffect(() => {
+    if (!onReconnect || !currentUser) return;
+    const unsubscribe = onReconnect(() => {
+      console.log('[KDS] Real-time connection restored: auto-refetching orders...');
+      fetchOrders();
+      if (activeTab === 'menu') fetchMenuItems();
+      if (activeTab === 'reports') fetchReports();
+    });
+    return unsubscribe;
+  }, [onReconnect, currentUser, activeTab]);
+
+  // 5. Polling fallback when WebSocket disconnected
+  useEffect(() => {
+    if (isConnected || !currentUser) return;
+    console.log('[KDS] WebSocket disconnected: activating 8s polling fallback');
+    const interval = setInterval(() => {
+      fetchOrders();
+    }, 8000);
+    return () => clearInterval(interval);
+  }, [isConnected, currentUser]);
 
   // API Call Handlers
   const handleLogin = async (e) => {
@@ -423,6 +458,43 @@ export default function AdminDashboardPage() {
         </div>
 
         <div className="flex items-center gap-3">
+          {/* Realtime WebSocket Connection Pill */}
+          <div
+            className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold border transition ${
+              isConnected
+                ? 'bg-emerald-500/15 border-emerald-500/30 text-mintGreen'
+                : isReconnecting
+                ? 'bg-amber-500/15 border-amber-500/30 text-amber-300 animate-pulse'
+                : 'bg-red-500/15 border-red-500/30 text-coralRed'
+            }`}
+            title={isConnected ? 'Live WebSocket Connected' : 'Polling Fallback Active'}
+          >
+            {isConnected ? <Wifi className="w-3 h-3" /> : <WifiOff className="w-3 h-3" />}
+            <span className="hidden sm:inline">
+              {isConnected ? 'Live WS' : isReconnecting ? 'Reconnecting (Polling)' : 'Offline (Polling)'}
+            </span>
+          </div>
+
+          {/* Sound Alert Toggle */}
+          <button
+            onClick={() => {
+              unlockAudio();
+              const next = !soundEnabled;
+              setSoundEnabled(next);
+              localStorage.setItem('emerald_sound_enabled', String(next));
+              if (next) playOrderChime();
+            }}
+            className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold border transition ${
+              soundEnabled
+                ? 'bg-mintGreen/15 border-mintGreen/30 text-mintGreen hover:bg-mintGreen/25'
+                : 'bg-white/5 border-white/10 text-white/40 hover:bg-white/10'
+            }`}
+            title={soundEnabled ? 'Order sound alert ON (click to mute)' : 'Order sound alert OFF (click to enable)'}
+          >
+            {soundEnabled ? <Volume2 className="w-3 h-3" /> : <VolumeX className="w-3 h-3" />}
+            <span className="hidden md:inline">{soundEnabled ? 'Chime ON' : 'Chime OFF'}</span>
+          </button>
+
           {/* Quick Master Switch Status Pill */}
           {settings && (
             <button
