@@ -4,7 +4,7 @@
       "_id": "usr_admin_1",
       "name": "Café Manager",
       "email": "admin@cafeemerald.com",
-      "passwordHash": "$2a$10$AWRRo1yiRCJ9wemoveKyJOmIEwBRKZjPz1wnDoD9C5QpagN6/KIlm",
+      "passwordHash": "$2a$10$na3.FdZeWxgJSqACo3VOyOrqgPohxSsG0rc9IRM805wVv3ZMxvj1O",
       "role": "owner",
       "failedLoginAttempts": 1,
       "lockUntil": null
@@ -51,6 +51,22 @@
     }
   ],
   "items": [
+    {
+      "_id": "item_1794773968687",
+      "name": "Artisanal Cinnamon Roll",
+      "category": "desserts",
+      "price": 150,
+      "description": "Freshly baked brioche swirled with Korintje cinnamon and cream cheese glaze.",
+      "image": "",
+      "emoji": "🥐",
+      "isVeg": true,
+      "isAvailable": true,
+      "isDeleted": true,
+      "sizes": [],
+      "createdAt": "2026-11-15T20:19:28.687Z",
+      "updatedAt": "2026-11-15T20:19:28.714Z",
+      "deletedAt": "2026-11-15T20:19:28.712Z"
+    },
     {
       "_id": "item_1794772702285",
       "name": "Artisanal Cinnamon Roll",
@@ -510,6 +526,156 @@
   ],
   "orders": [
     {
+      "_id": "ord_1794773969089_865f1859",
+      "orderToken": "97cfd95dddca7daf1ea0cefa7bab08d0",
+      "idempotencyKey": null,
+      "orderNumber": 1049,
+      "table": 4,
+      "tableSig": null,
+      "items": [
+        {
+          "itemId": "item_coldcoffee_4",
+          "name": "Cold Coffee",
+          "price": 210,
+          "qty": 2
+        }
+      ],
+      "subtotal": 420,
+      "tax": 21,
+      "cgst": 10.5,
+      "sgst": 10.5,
+      "total": 441,
+      "note": "",
+      "paymentMethod": "cash",
+      "paymentStatus": "paid",
+      "razorpayOrderId": null,
+      "razorpayPaymentId": null,
+      "paidAt": "2026-11-15T20:19:29.091Z",
+      "status": "new",
+      "isTest": false,
+      "invoiceNumber": null,
+      "statusHistory": [
+        {
+          "status": "new",
+          "timestamp": "2026-11-15T20:19:29.089Z",
+          "note": "Order placed"
+        }
+      ],
+      "createdAt": "2026-11-15T20:19:29.090Z",
+      "updatedAt": "2026-11-15T20:19:29.093Z"
+    },
+    {
+      "_id": "ord_1794773968295_2d411837",
+      "orderToken": "3a4cf7d00bdbef7815e09fafecfa6506",
+      "idempotencyKey": "test_idemp_1794773968292",
+      "orderNumber": 1048,
+      "table": 5,
+      "tableSig": "373af7c42ce25b4ef3a231cc26b3a4ad",
+      "items": [
+        {
+          "itemId": "item_cake_1",
+          "name": "Strawberry Chocolate Cake",
+          "price": 260,
+          "size": "",
+          "qty": 2,
+          "lineTotal": 520
+        }
+      ],
+      "subtotal": 520,
+      "tax": 26,
+      "cgst": 13,
+      "sgst": 13,
+      "total": 546,
+      "note": "",
+      "paymentMethod": "counter",
+      "paymentStatus": "pending",
+      "razorpayOrderId": null,
+      "razorpayPaymentId": null,
+      "paidAt": null,
+      "status": "new",
+      "isTest": false,
+      "invoiceNumber": null,
+      "statusHistory": [
+        {
+          "status": "new",
+          "timestamp": "2026-11-15T20:19:28.295Z",
+          "note": "Order placed"
+        }
+      ],
+      "createdAt": "2026-11-15T20:19:28.295Z",
+      "updatedAt": "2026-11-15T20:19:28.295Z"
+    },
+    {
+      "_id": "ord_1794773868134_b5abdaf7",
+      "orderToken": "tok_webhook_1794773868132",
+      "idempotencyKey": null,
+      "orderNumber": 1047,
+      "table": 80,
+      "tableSig": null,
+      "items": [
+        {
+          "name": "Green Tea",
+          "price": 100,
+          "qty": 1
+        }
+      ],
+      "subtotal": 100,
+      "tax": 5,
+      "cgst": 2.5,
+      "sgst": 2.5,
+      "total": 105,
+      "note": "",
+      "paymentMethod": "upi",
+      "paymentStatus": "pending",
+      "status": "payment_pending",
+      "isTest": true,
+      "invoiceNumber": null,
+      "statusHistory": [
+        {
+          "status": "payment_pending",
+          "timestamp": "2026-11-15T20:17:48.134Z",
+          "note": "Order placed"
+        }
+      ],
+      "createdAt": "2026-11-15T20:17:48.134Z",
+      "updatedAt": "2026-11-15T20:17:48.134Z"
+    },
+    {
+      "_id": "ord_1794773868116_16c6e679",
+      "orderToken": "tok_inflight_1794773868112",
+      "idempotencyKey": null,
+      "orderNumber": 1046,
+      "table": 79,
+      "tableSig": null,
+      "items": [
+        {
+          "name": "Americano",
+          "price": 140,
+          "qty": 1
+        }
+      ],
+      "subtotal": 140,
+      "tax": 7,
+      "cgst": 3.5,
+      "sgst": 3.5,
+      "total": 147,
+      "note": "",
+      "paymentMethod": "upi",
+      "paymentStatus": "pending",
+      "status": "payment_pending",
+      "isTest": true,
+      "invoiceNumber": null,
+      "statusHistory": [
+        {
+          "status": "payment_pending",
+          "timestamp": "2026-11-15T20:17:48.116Z",
+          "note": "Order placed"
+        }
+      ],
+      "createdAt": "2026-11-15T20:17:48.116Z",
+      "updatedAt": "2026-11-15T20:17:48.116Z"
+    },
+    {
       "_id": "ord_1794772702726_f00527dd",
       "orderToken": "1708d013a6890553624e7d78b4bcb0b1",
       "idempotencyKey": null,
@@ -673,11 +839,152 @@
     "cgstRate": 2.5,
     "sgstRate": 2.5,
     "totalTables": 20,
-    "updatedAt": "2026-11-15T19:58:32.944Z",
+    "updatedAt": "2026-11-15T20:19:39.924Z",
     "updatedBy": "admin",
     "onlinePaymentEnabled": true
   },
   "auditLogs": [
+    {
+      "_id": "audit_1794773985981_bbkow",
+      "userId": "usr_admin_1",
+      "userEmail": "admin@cafeemerald.com",
+      "userRole": "owner",
+      "action": "order_marked_paid",
+      "entity": "Order",
+      "entityId": "ord_1794773985918_1fe0e5ac",
+      "details": {
+        "paymentMethod": "cash",
+        "total": 546
+      },
+      "ip": "127.0.0.1",
+      "timestamp": "2026-11-15T20:19:45.981Z"
+    },
+    {
+      "_id": "audit_1794773985954_seqle",
+      "userId": "usr_admin_1",
+      "userEmail": "admin@cafeemerald.com",
+      "userRole": "owner",
+      "action": "order_status_updated",
+      "entity": "Order",
+      "entityId": "ord_1794773985918_1fe0e5ac",
+      "details": {
+        "from": "new",
+        "to": "preparing",
+        "orderNumber": 1050
+      },
+      "ip": "127.0.0.1",
+      "timestamp": "2026-11-15T20:19:45.954Z"
+    },
+    {
+      "_id": "audit_1794773979880_qolss",
+      "userId": "razorpay_webhook",
+      "userEmail": "webhook@razorpay.com",
+      "userRole": "webhook",
+      "action": "order_paid_webhook",
+      "entity": "Order",
+      "entityId": "ord_1794773979866_84a0ad43",
+      "details": {
+        "razorpayOrderId": "order_sim_webhook_1794773979862",
+        "razorpayPaymentId": "pay_sim_wh_1794773979862",
+        "amount": 105
+      },
+      "ip": "127.0.0.1",
+      "timestamp": "2026-11-15T20:19:39.880Z"
+    },
+    {
+      "_id": "audit_1794773979842_6zjp4",
+      "userId": "customer",
+      "userEmail": "customer@table",
+      "userRole": "customer",
+      "action": "order_paid_upi",
+      "entity": "Order",
+      "entityId": "ord_1794773979828_69a8d6ed",
+      "details": {
+        "razorpayOrderId": "order_sim_inflight_1794773979826",
+        "razorpayPaymentId": "pay_sim_success_1794773979831",
+        "amount": 147
+      },
+      "ip": "127.0.0.1",
+      "timestamp": "2026-11-15T20:19:39.842Z"
+    },
+    {
+      "_id": "audit_1794773968852_wlqak",
+      "userId": "usr_admin_1",
+      "userEmail": "admin@cafeemerald.com",
+      "userRole": "owner",
+      "action": "item_created",
+      "entity": "Item",
+      "entityId": "item_1794773968687",
+      "details": {
+        "name": "Artisanal Cinnamon Roll"
+      },
+      "ip": "",
+      "timestamp": "2026-11-15T20:19:28.852Z"
+    },
+    {
+      "_id": "audit_1794773959797_w3olg",
+      "userId": "razorpay_webhook",
+      "userEmail": "webhook@razorpay.com",
+      "userRole": "webhook",
+      "action": "order_paid_webhook",
+      "entity": "Order",
+      "entityId": "ord_1794773959783_798a18cb",
+      "details": {
+        "razorpayOrderId": "order_sim_webhook_1794773959779",
+        "razorpayPaymentId": "pay_sim_wh_1794773959779",
+        "amount": 105
+      },
+      "ip": "127.0.0.1",
+      "timestamp": "2026-11-15T20:19:19.797Z"
+    },
+    {
+      "_id": "audit_1794773959765_w9cw1",
+      "userId": "customer",
+      "userEmail": "customer@table",
+      "userRole": "customer",
+      "action": "order_paid_upi",
+      "entity": "Order",
+      "entityId": "ord_1794773959755_87686e4e",
+      "details": {
+        "razorpayOrderId": "order_sim_inflight_1794773959752",
+        "razorpayPaymentId": "pay_sim_success_1794773959758",
+        "amount": 147
+      },
+      "ip": "127.0.0.1",
+      "timestamp": "2026-11-15T20:19:19.765Z"
+    },
+    {
+      "_id": "audit_1794773903645_wusu0",
+      "userId": "razorpay_webhook",
+      "userEmail": "webhook@razorpay.com",
+      "userRole": "webhook",
+      "action": "order_paid_webhook",
+      "entity": "Order",
+      "entityId": "ord_1794773903636_35b915e0",
+      "details": {
+        "razorpayOrderId": "order_sim_webhook_1794773903632",
+        "razorpayPaymentId": "pay_sim_wh_1794773903632",
+        "amount": 105
+      },
+      "ip": "127.0.0.1",
+      "timestamp": "2026-11-15T20:18:23.645Z"
+    },
+    {
+      "_id": "audit_1794773903620_k84vi",
+      "userId": "customer",
+      "userEmail": "customer@table",
+      "userRole": "customer",
+      "action": "order_paid_upi",
+      "entity": "Order",
+      "entityId": "ord_1794773903610_2766cd02",
+      "details": {
+        "razorpayOrderId": "order_sim_inflight_1794773903607",
+        "razorpayPaymentId": "pay_sim_success_1794773903612",
+        "amount": 147
+      },
+      "ip": "127.0.0.1",
+      "timestamp": "2026-11-15T20:18:23.620Z"
+    },
     {
       "_id": "audit_1794772718707_nwe0p",
       "userId": "usr_admin_1",
@@ -1532,6 +1839,6 @@
     }
   ],
   "invoiceSequences": {
-    "2026-27": 221
+    "2026-27": 246
   }
 }

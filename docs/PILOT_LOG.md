@@ -84,7 +84,7 @@ Copy and paste this template block for every active day of the pilot run.
 ## 📝 Active Pilot Live Shift Logs
 
 > [!TIP]
-> **Pilot Mode Pre-KYC Tip:** If operating an on-site pilot before Razorpay merchant live activation, set **"Online payment enabled" to OFF** in Admin Settings (`onlinePaymentEnabled: false`). This cleanly restricts customer checkouts to **Cash at Counter** and prevents failed UPI attempts.
+> **Pilot Mode Pre-KYC Tip:** If operating an on-site pilot before Razorpay merchant live activation, set **"Online payment enabled" to OFF** in Admin Settings (`onlinePaymentEnabled: false`). This cleanly restricts customer checkouts to **Cash at Counter** and prevents failed UPI attempts. Switching online payment off does not cancel payments already in progress.
 
 ### 📆 Real Pilot Log — Day 1
 
