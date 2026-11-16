@@ -169,10 +169,10 @@ stateDiagram-v2
 - **Razorpay UPI:** Orders generate precise paise-denominated checkout sessions (`POST /api/payments/razorpay/create-order`). Payment signatures are verified using HMAC-SHA256.
 - **Cash "Mark Paid":** Kitchen operators settle counter orders with one click (`PATCH /api/orders/:id/mark-paid`), broadcasting status changes live to the customer.
 - **Indian GST Compliance:**
-  - **GSTIN:** `27AAAAA0000A1Z5`
-  - **FSSAI License:** `11522018000452`
+  - **GSTIN:** Configured per café via Settings (`gstin` field in Admin Panel)
+  - **FSSAI License:** Configured per café via Settings (`fssai` field in Admin Panel)
   - **SAC Code:** `996331` (Restaurant and food delivery services)
-  - **Tax Split:** 2.5% CGST + 2.5% SGST (5% Total GST)
+  - **Tax Split:** 2.5% CGST + 2.5% SGST (5% Total GST, configurable in Settings)
 - **Thermal Printing (80mm):**
   - Customer Bill: `GET /api/orders/:id/print/bill`
   - Kitchen Order Ticket (KOT): `GET /api/orders/:id/print/kot`
@@ -237,37 +237,62 @@ stateDiagram-v2
 
 ---
 
-## 8. Automated Test Suite (Phases 1–5)
+## 8. Automated Test Suite (Phases 1–5 & Production Suites)
 
-To run all 6 test suites across all phases with a single command:
+To execute all 15 automated test suites with a single command:
 ```bash
 npm test --prefix server
 ```
 
-### Individual Test Runners:
+### Complete Test Suite Manifest (15 Suites / 122+ Checks):
 ```bash
-# Phase 1: Security Hardening Suite (15 checks)
+# Phase 1: Security Hardening Suite (15 checks: HMAC tokens, DB pricing, brute-force lockout, idempotency)
 node server/test-phase1-security.js
 
-# Phase 2: Admin Management Suite (16 checks)
+# Phase 2: Admin Management Suite (16 checks: Item CRUD, soft delete, sold-out toggle, QR generator, audit logs)
 node server/test-phase2-admin.js
 
-# Phase 3: Payments & GST Bill Suite (21 checks)
+# Phase 3: Payments & GST Bill Suite (21 checks: State machine, Razorpay paise session, cash settlement, 80mm KOT)
 node server/test-phase3-payments.js
 
-# Phase 4: Realtime Reliability Suite (6 checks)
+# Phase 4: Realtime Reliability Suite (6 checks: Redis pub/sub fallback, reconnect refetch, room segregation)
 node server/test-phase4-realtime.js
 
-# Phase 5: Unit Tests - Pricing & State Machine (16 checks)
+# Phase 5: Unit Tests - Pricing & State Machine (16 checks: Price calculation, modifiers, illegal state jumps)
 npm run test:unit --prefix server
 
-# Phase 5: Supertest REST API Integration (13 checks)
+# Production Unit: Cookie Domain & Sibling Subdomains (5 checks: .yourcafe.com scoping, Secure + SameSite=Lax)
+node server/tests/unit/cookie-domain.test.js
+
+# Production Unit: Smoke Test Guard & isTest Exclusions (5 checks: --allow-prod enforcement, cleanup lifecycle)
+node server/tests/unit/smoke-test-guard.test.js
+
+# Production Unit: PWA Automated Cache Version (4 checks: Git SHA build-hash derivation, update prompt trigger)
+node server/tests/unit/pwa-build-hash.test.js
+
+# Production Unit: QR Abuse, Table Cap & Payment Gate (5 checks: Max open orders, IP rate limiting, UPI pre-gate)
+node server/tests/unit/qr-abuse.test.js
+
+# Production Unit: GST Invoice Sequence & Concurrency (5 checks: Atomic fiscal year sequence, zero gaps/duplicates)
+node server/tests/unit/invoice-sequence.test.js
+
+# Production Unit: Legal Policy Pages for Razorpay (3 checks: Privacy, Terms, and Refund & Cancellation disclosures)
+node server/tests/unit/policy-pages.test.js
+
+# Production Unit: Deploy Telemetry & Launch Checklist (3 checks: /api/version SHA, staging checklist, pre-launch runbook)
+node server/tests/unit/deploy-check.test.js
+
+# Production Unit: Online Payment Setting & Pilot Gate (5 checks: In-flight payment preservation, duplicate webhook idempotent)
+node server/tests/unit/online-payment-toggle.test.js
+
+# Production Unit: Atomic Payment Confirmation & Webhook Concurrency (3 checks: Promise.all race, single KDS emission)
+node server/tests/unit/atomic-payment-confirmation.test.js
+
+# Phase 5: Supertest REST API Integration (13 checks: End-to-end HTTP pipeline, CSP, rate limiting, auth RBAC)
 npm run test:api --prefix server
 
-# Phase 5: Playwright End-to-End Test Suite
+# End-to-End & Load Testing:
 npx playwright test
-
-# Phase 5: k6 Load Test (50 Concurrent Tables)
 k6 run load-tests/k6-50-tables.js
 ```
 
@@ -300,8 +325,7 @@ The client runs on **`http://localhost:5173`**.
 
 - **Customer QR Menu**: [http://localhost:5173/t/1?sig=...](http://localhost:5173)
 - **Admin & Kitchen KDS**: [http://localhost:5173/admin](http://localhost:5173/admin)
-  - **Email:** `ADMIN_EMAIL` (default: `admin@cafeemerald.com`)
-  - **Password:** `ADMIN_PASSWORD` (default: `DevAdmin@Emerald2026` in dev, strictly set in prod)
+  - **Credentials:** Set `ADMIN_EMAIL` and `ADMIN_PASSWORD` yourself in your `.env` file before running the seed script or starting the server. Production startup strictly refuses to run without explicit, strong administrator credentials.
 
 ---
 
@@ -330,28 +354,17 @@ flowchart LR
         P2["Pull Request"]
     end
 
-    subgraph CI ["GitHub Actions Workflow (.github/workflows/ci.yml)"]
+    subgraph CI ["GitHub Actions CI (.github/workflows/ci.yml)"]
         direction TB
-        LINT["Static Analysis & Code Verification"]
-        TEST["Test Suites (Unit + Supertest API)"]
-        BUILD["Vite Frontend Production Build"]
-        DOCKER["Docker Multi-Stage Build & Lint"]
-    end
-
-    subgraph Registry ["Target Platforms"]
-        VERCEL["Vercel Edge (Frontend SPA)"]
-        RENDER["Render / Railway / ECS (Node.js Server)"]
-        ATLAS[("MongoDB Atlas Database")]
-        UPSTASH[("Upstash Redis PubSub")]
+        LINT["Mermaid Docs & Lint Verification"]
+        CLIENT["Vite Client Production Build"]
+        TEST["Server Test Suite (15 Automated Suites)"]
+        DOCKER["Docker Multi-Stage Build Check (Client + Server)"]
     end
 
     P1 --> LINT
     P2 --> LINT
-    LINT --> TEST --> BUILD --> DOCKER
-    DOCKER -->|"Continuous Deploy"| VERCEL
-    DOCKER -->|"Continuous Deploy"| RENDER
-    RENDER --> ATLAS
-    RENDER --> UPSTASH
+    LINT --> CLIENT --> TEST --> DOCKER
 ```
 
 ### Health & Readiness Probes
@@ -370,7 +383,7 @@ flowchart TD
     subgraph Browser ["Client Device / Kitchen Tablet"]
         UI["React Application View"]
         SW["Service Worker (sw.js)"]
-        CACHE[("Cache Storage CacheFirst v1.0.0")]
+        CACHE[("Cache Storage CacheFirst (Build-Hash)")]
         NET["Network Fetch"]
     end
 
@@ -390,7 +403,9 @@ flowchart TD
 ```
 
 - **PWA Features**: Standalone display mode, dark emerald theme color (`#071a12`), installable on Android/iOS/iPad kitchen tablets.
-- **Offline Resilience**: Static assets, fonts, icons, and shell layouts are stored in Cache Storage (`CacheFirst` policy). Dynamic `/api` and `/socket.io` traffic bypasses the cache to ensure zero stale data.
+- **Automated Build-Hash Cache Versioning**: The service worker cache identifier is automatically derived from the Vite build hash (`cafe-emerald-${BUILD_HASH}`) based on Git commit SHA or build timestamp.
+- **Automatic Deployment Updates**: When a new version is deployed, the updated service worker activates and immediately alerts the browser. The kitchen tablet and customer UI display an `Update available` notification that reloads into the latest code without manual browser cache clearing.
+- **Offline Resilience**: Static assets, fonts, icons, and shell layouts are stored in Cache Storage (`CacheFirst` policy). Dynamic `/api` and `/socket.io` traffic strictly bypasses the cache to ensure zero stale operational data.
 
 ---
 
