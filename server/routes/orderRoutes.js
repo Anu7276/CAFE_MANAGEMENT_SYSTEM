@@ -12,7 +12,7 @@ const {
   printKot,
   deleteOrder
 } = require('../controllers/orderController');
-const { protect, requireRole } = require('../middleware/auth');
+const { protect, requireRole, requireOwner } = require('../middleware/auth');
 const { orderLimiter } = require('../middleware/rateLimiter');
 const { validateBody, createOrderSchema, updateOrderStatusSchema } = require('../middleware/validate');
 
@@ -30,6 +30,6 @@ router.patch('/:id/mark-paid', protect, requireRole(['owner', 'staff']), markOrd
 router.get('/:id/invoice', protect, requireRole(['owner', 'staff']), getInvoiceData);
 router.get('/:id/print/bill', protect, requireRole(['owner', 'staff']), printBill);
 router.get('/:id/print/kot', protect, requireRole(['owner', 'staff']), printKot);
-router.delete('/:id', protect, requireRole(['owner', 'staff']), deleteOrder);
+router.delete('/:id', protect, requireOwner, deleteOrder);
 
 module.exports = router;

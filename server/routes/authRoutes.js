@@ -18,8 +18,8 @@ router.post('/register', validateBody(registerSchema), register);
 router.post('/logout', logout);
 router.get('/me', protect, getMe);
 
-// Staff management endpoints
-router.get('/staff', protect, requireRole(['owner', 'staff']), listStaff);
+// Staff management endpoints (strictly owner-only)
+router.get('/staff', protect, requireOwner, listStaff);
 router.post('/staff', protect, requireOwner, createStaff);
 router.delete('/staff/:id', protect, requireOwner, deleteStaff);
 

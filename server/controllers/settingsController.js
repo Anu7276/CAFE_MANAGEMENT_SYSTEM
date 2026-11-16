@@ -12,7 +12,35 @@ const getSettings = async (req, res, next) => {
 
 const updateSettings = async (req, res, next) => {
   try {
-    const updated = await Settings.update(req.body, req.user || {});
+    const userRole = req.user?.role === 'admin' ? 'owner' : (req.user?.role || 'staff');
+
+    // Granular field permission enforcement:
+    // Staff may ONLY toggle `acceptingOrders`.
+    // All other fields require owner role.
+    if (userRole !== 'owner') {
+      const allowedStaffFields = ['acceptingOrders'];
+      const attemptedFields = Object.keys(req.body).filter(k => !allowedStaffFields.includes(k));
+
+      if (attemptedFields.length > 0) {
+        return res.status(403).json({
+          success: false,
+          message: `Forbidden: Only the café owner can modify ${attemptedFields.join(', ')}. Staff may only toggle acceptingOrders.`
+        });
+      }
+    }
+
+    // Support businessName alias for cafeName
+    const payload = { ...req.body };
+    if (payload.businessName && !payload.cafeName) {
+      payload.cafeName = payload.businessName;
+    }
+    // Support total taxRate alias (split into equal cgstRate and sgstRate)
+    if (typeof payload.taxRate === 'number') {
+      payload.cgstRate = payload.taxRate / 2;
+      payload.sgstRate = payload.taxRate / 2;
+    }
+
+    const updated = await Settings.update(payload, req.user || {});
 
     // Broadcast updated settings to all clients (e.g. acceptingOrders toggle)
     const io = req.app.get('io');

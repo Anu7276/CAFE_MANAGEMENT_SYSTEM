@@ -572,7 +572,12 @@ export default function AdminDashboardPage() {
 
       {/* Navigation Sub-header Tabs */}
       <div className="bg-[#0b241a] border-b border-white/10 px-6 overflow-x-auto flex gap-1">
-        {TABS.map((tab) => {
+        {TABS.filter((tab) => {
+          if (tab.id === 'staff' || tab.id === 'reports') {
+            return currentUser?.role === 'owner' || currentUser?.role === 'admin';
+          }
+          return true;
+        }).map((tab) => {
           const Icon = tab.icon;
           const isActive = activeTab === tab.id;
           return (
@@ -1128,26 +1133,37 @@ export default function AdminDashboardPage() {
               </button>
             </div>
 
-            <div className="p-4 rounded-2xl bg-black/40 border border-white/10 flex items-center justify-between">
-              <div>
-                <h4 className="font-bold text-white text-sm">Online Payment Enabled</h4>
-                <p className="text-xs text-white/50">
-                  Toggle Razorpay online UPI/card payments. Turn OFF during an on-site pilot to restrict customer checkout to Cash at Counter.
+            {(currentUser?.role === 'owner' || currentUser?.role === 'admin') ? (
+              <div className="p-4 rounded-2xl bg-black/40 border border-white/10 flex items-center justify-between">
+                <div>
+                  <h4 className="font-bold text-white text-sm">Online Payment Enabled</h4>
+                  <p className="text-xs text-white/50">
+                    Toggle Razorpay online UPI/card payments. Turn OFF during an on-site pilot to restrict customer checkout to Cash at Counter.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={handleToggleOnlinePayment}
+                  className={`px-4 py-2 rounded-full font-bold text-xs transition ${
+                    settings.onlinePaymentEnabled !== false
+                      ? 'bg-mintGreen text-[#071a12] hover:bg-[#88e7bd]'
+                      : 'bg-amber-500 text-[#071a12] hover:bg-amber-400'
+                  }`}
+                >
+                  {settings.onlinePaymentEnabled !== false ? 'Online UPI Active' : 'Cash-Only (Pilot)'}
+                </button>
+              </div>
+            ) : (
+              <div className="p-4 rounded-2xl bg-white/5 border border-white/10 space-y-2">
+                <span className="text-xs font-bold text-mintGreen uppercase tracking-wider block">Staff Role Controls</span>
+                <p className="text-xs text-white/70">
+                  You are authorized to toggle the master order pause switch above during kitchen rushes.
+                  Business details, GSTIN/FSSAI licensing, and payment configurations are restricted to the café owner.
                 </p>
               </div>
-              <button
-                type="button"
-                onClick={handleToggleOnlinePayment}
-                className={`px-4 py-2 rounded-full font-bold text-xs transition ${
-                  settings.onlinePaymentEnabled !== false
-                    ? 'bg-mintGreen text-[#071a12] hover:bg-[#88e7bd]'
-                    : 'bg-amber-500 text-[#071a12] hover:bg-amber-400'
-                }`}
-              >
-                {settings.onlinePaymentEnabled !== false ? 'Online UPI Active' : 'Cash-Only (Pilot)'}
-              </button>
-            </div>
+            )}
 
+            {(currentUser?.role === 'owner' || currentUser?.role === 'admin') && (
             <form onSubmit={handleSaveBusinessSettings} className="space-y-4">
               <div className="flex items-center justify-between pb-2 border-b border-white/10">
                 <h4 className="text-sm font-bold text-white">Legal & Store Information</h4>
@@ -1263,6 +1279,7 @@ export default function AdminDashboardPage() {
                 </button>
               </div>
             </form>
+            )}
           </div>
         )}
       </main>
