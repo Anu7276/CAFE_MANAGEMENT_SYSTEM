@@ -41,32 +41,32 @@
 ```mermaid
 flowchart TD
     subgraph Clients ["Client Layer"]
-        C1["Customer Mobile Web PWA<br/>(/t/:table?sig=...)"]
-        C2["Admin & Kitchen Display<br/>(/admin)"]
+        C1["Customer Mobile Web PWA"]
+        C2["Admin & Kitchen Display"]
     end
 
     subgraph Gateway ["Network & Security Layer"]
         GW["Express Gateway / Port 5000"]
         HL["Helmet CSP & Security Headers"]
-        RL["Express Rate Limiters (Login / Order / API)"]
-        MS["Mongo Sanitize (NoSQL Injection Defense)"]
+        RL["Express Rate Limiters"]
+        MS["Mongo Sanitize (NoSQL Defense)"]
         CP["Cookie Parser (httpOnly JWT)"]
     end
 
     subgraph Services ["Application & Business Logic Layer"]
-        AUTH["Auth Controller & RBAC<br/>(Owner / Staff)"]
-        ITEMS["Item Controller<br/>(CRUD + Soft Delete + Multer)"]
-        ORDERS["Order Engine & State Machine<br/>(DB Pricing + Idempotency)"]
-        PAY["Razorpay Payment Service<br/>(UPI + Webhook HMAC)"]
-        INV["GST Invoice & KOT Engine<br/>(80mm Thermal Generator)"]
+        AUTH["Auth Controller & RBAC"]
+        ITEMS["Item Controller & Catalog"]
+        ORDERS["Order Engine & State Machine"]
+        PAY["Razorpay Payment Service"]
+        INV["GST Invoice & KOT Engine"]
         REPORTS["Analytics & Reports Controller"]
     end
 
     subgraph Realtime ["Realtime Messaging Layer"]
         SIO["Socket.IO Server"]
-        REDIS["Redis Pub/Sub Adapter<br/>(Horizontal Multi-Instance)"]
-        ROOM1["Room: 'admin_kds'<br/>(Authenticated Staff)"]
-        ROOM2["Room: 'order_{orderToken}'<br/>(Private Customer Status)"]
+        REDIS["Redis Pub/Sub Adapter"]
+        ROOM1["Room: admin_kds"]
+        ROOM2["Room: order_tracking"]
     end
 
     subgraph Storage ["Persistence Layer"]
@@ -88,7 +88,8 @@ flowchart TD
 
     ORDERS --> SIO
     AUTH --> SIO
-    SIO <--> REDIS
+    SIO --> REDIS
+    REDIS --> SIO
     SIO --> ROOM1
     SIO --> ROOM2
 
@@ -105,8 +106,8 @@ flowchart TD
 ```mermaid
 sequenceDiagram
     autonumber
-    actor Customer as Customer Table 3
-    participant Client as React Client
+    actor Customer as Customer
+    participant Client as Web Client
     participant Server as Express Server
     participant DB as Database Catalog
 
@@ -142,13 +143,13 @@ stateDiagram-v2
     new --> preparing: Staff Accepts in KDS
     new --> rejected: Staff Cancels / Sold Out
     
-    preparing --> ready: Food / Beverage Prepared
+    preparing --> ready: Food Prepared
     preparing --> rejected: Kitchen Cancellation
     
     ready --> served: Delivered to Table
     
-    served --> [*]: Terminal State
-    rejected --> [*]: Terminal State
+    served --> [*]
+    rejected --> [*]
 ```
 
 ---
@@ -348,8 +349,8 @@ flowchart LR
     LINT --> TEST --> BUILD --> DOCKER
     DOCKER -->|"Continuous Deploy"| VERCEL
     DOCKER -->|"Continuous Deploy"| RENDER
-    RENDER <--> ATLAS
-    RENDER <--> UPSTASH
+    RENDER --> ATLAS
+    RENDER --> UPSTASH
 ```
 
 ### Health & Readiness Probes
@@ -384,7 +385,7 @@ flowchart TD
     NET -->|"Fetch & Cache Clone"| SW
 
     UI -->|"Dynamic Order & Payment Calls"| API
-    UI <-->|"Realtime Status & KOT Chimes"| WSS
+    UI -->|"Realtime Status & KOT Chimes"| WSS
 ```
 
 - **PWA Features**: Standalone display mode, dark emerald theme color (`#071a12`), installable on Android/iOS/iPad kitchen tablets.
@@ -401,7 +402,7 @@ The customer ordering interface supports seamless, zero-reload internationalizat
 
 ```mermaid
 flowchart LR
-    USER["Customer Selects Language (EN / हिं / ગુજ)"]
+    USER["Customer Selects Language (EN / HI / GU)"]
     CTX["I18nContext State Provider"]
     STORE[("localStorage: cafe_language")]
     VIEWS["React Components (MenuPage, CartDrawer, DishCard, LiveTracker)"]
