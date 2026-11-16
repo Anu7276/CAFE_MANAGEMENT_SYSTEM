@@ -209,21 +209,30 @@ export default function LegalPolicyPage({ defaultTab = 'privacy' }) {
               </div>
 
               <div>
-                <h3 className="text-lg font-semibold text-white mb-2">3. Refund Processing Timelines</h3>
-                <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <h3 className="text-lg font-semibold text-white mb-2">3. Refund Processing Timelines & Statutory Credit Notes</h3>
+                <div className="mt-3 grid grid-cols-1 sm:grid-cols-3 gap-4">
                   <div className="p-4 rounded-xl bg-white/5 border border-white/10">
-                    <span className="font-bold text-mintGreen text-sm block mb-1">Online UPI / Card (Razorpay)</span>
+                    <span className="font-bold text-mintGreen text-sm block mb-1">UPI (GPay/PhonePe/Paytm)</span>
                     <p className="text-xs text-white/70">
-                      Refunds are initiated via the Razorpay gateway within 24 hours and credited to your original bank account/UPI source within <strong>5 to 7 business days</strong> depending on your issuing bank.
+                      Processed directly through Razorpay: settled back to your linked VPA or bank account <strong>instantly to within 24–48 hours</strong>.
                     </p>
                   </div>
                   <div className="p-4 rounded-xl bg-white/5 border border-white/10">
-                    <span className="font-bold text-mintGreen text-sm block mb-1">Cash / Counter Settlements</span>
+                    <span className="font-bold text-mintGreen text-sm block mb-1">Credit / Debit Cards</span>
                     <p className="text-xs text-white/70">
-                      Approved cash refunds are returned immediately in cash at the counter by our duty cashier.
+                      Credited back to your issuing bank card account within <strong>5 to 7 business days</strong> depending on the card network.
+                    </p>
+                  </div>
+                  <div className="p-4 rounded-xl bg-white/5 border border-white/10">
+                    <span className="font-bold text-mintGreen text-sm block mb-1">Cash at Counter</span>
+                    <p className="text-xs text-white/70">
+                      Approved cash refunds are returned <strong>immediately in cash</strong> at the billing counter by the manager on duty.
                     </p>
                   </div>
                 </div>
+                <p className="mt-3 text-xs text-white/60">
+                  <em>Statutory Note:</em> In compliance with Indian GST regulations, every approved full or partial refund automatically issues a consecutive, gap-free GST Credit Note (formatted as <code>CE-CN/YYYY-YY/000001</code>) reflecting GST reversal under SAC 996331.
+                </p>
               </div>
             </div>
           )}

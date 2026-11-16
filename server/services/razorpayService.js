@@ -101,8 +101,42 @@ function verifyWebhookSignature(rawBody, signature) {
   }
 }
 
+/**
+ * Issue a full or partial refund via Razorpay Payments API
+ */
+async function createRazorpayRefund({ paymentId, amount, notes = {} }) {
+  const amountInPaise = Math.round(Number(amount) * 100);
+
+  if (razorpayClient && razorpayClient.payments && typeof razorpayClient.payments.refund === 'function') {
+    return await razorpayClient.payments.refund(paymentId, {
+      amount: amountInPaise,
+      notes
+    });
+  }
+
+  // Developer sandbox simulation
+  return {
+    id: 'rfnd_sim_' + Date.now() + '_' + crypto.randomBytes(4).toString('hex'),
+    entity: 'refund',
+    amount: amountInPaise,
+    currency: 'INR',
+    payment_id: paymentId,
+    notes,
+    receipt: `rcpt_rfnd_${Date.now()}`,
+    status: 'processed',
+    created_at: Math.floor(Date.now() / 1000),
+    isSimulation: true
+  };
+}
+
+function setRazorpayClient(client) {
+  razorpayClient = client;
+}
+
 module.exports = {
   createRazorpayOrder,
   verifyPaymentSignature,
-  verifyWebhookSignature
+  verifyWebhookSignature,
+  createRazorpayRefund,
+  setRazorpayClient
 };

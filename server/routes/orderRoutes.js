@@ -10,7 +10,8 @@ const {
   getInvoiceData,
   printBill,
   printKot,
-  deleteOrder
+  deleteOrder,
+  refundOrder
 } = require('../controllers/orderController');
 const { protect, requireRole, requireOwner } = require('../middleware/auth');
 const { orderLimiter } = require('../middleware/rateLimiter');
@@ -31,5 +32,6 @@ router.get('/:id/invoice', protect, requireRole(['owner', 'staff']), getInvoiceD
 router.get('/:id/print/bill', protect, requireRole(['owner', 'staff']), printBill);
 router.get('/:id/print/kot', protect, requireRole(['owner', 'staff']), printKot);
 router.delete('/:id', protect, requireOwner, deleteOrder);
+router.post('/:id/refund', protect, requireOwner, refundOrder);
 
 module.exports = router;

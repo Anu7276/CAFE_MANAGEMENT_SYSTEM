@@ -8,6 +8,7 @@ const IdempotencyKey = require('../models/IdempotencyKey');
 const { verifyTableSig } = require('../utils/tableToken');
 const { validateStatusTransition } = require('../utils/orderStateMachine');
 const { generateBillHtml, generateKotHtml } = require('../utils/invoiceGenerator');
+const { createRazorpayRefund } = require('../services/razorpayService');
 
 /**
  * Server-side price calculation and order creation with idempotency and signed table token verification.
@@ -605,6 +606,140 @@ const deleteOrder = async (req, res, next) => {
   }
 };
 
+/**
+ * Owner-only refund endpoint (full or partial amount)
+ */
+const refundOrder = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const { amount, reason } = req.body || {};
+
+    const order = await Order.findById(id);
+    if (!order) {
+      return res.status(404).json({ success: false, message: 'Order not found' });
+    }
+
+    if (order.paymentStatus !== 'paid') {
+      return res.status(400).json({ success: false, message: 'Cannot refund an unpaid order' });
+    }
+
+    const previouslyRefunded = Number(order.refundedAmount || 0);
+    const maxRefundable = Math.max(0, Number(order.total) - previouslyRefunded);
+
+    if (maxRefundable <= 0) {
+      return res.status(400).json({ success: false, message: 'Order has already been fully refunded' });
+    }
+
+    // Default to full remaining balance if amount not specified
+    const refundAmount = amount !== undefined && amount !== null ? Number(amount) : maxRefundable;
+
+    if (isNaN(refundAmount) || refundAmount <= 0) {
+      return res.status(400).json({ success: false, message: 'Refund amount must be a positive number' });
+    }
+
+    if (refundAmount > maxRefundable) {
+      return res.status(400).json({
+        success: false,
+        message: `Refund amount (₹${refundAmount}) exceeds maximum refundable balance (₹${maxRefundable})`
+      });
+    }
+
+    // Generate atomic, gap-free GST Credit Note number (CE-CN/YYYY-YY/000001)
+    const creditNoteNumber = await InvoiceSequence.claimNextCreditNote();
+
+    let razorpayRefund = null;
+    if (order.razorpayPaymentId) {
+      razorpayRefund = await createRazorpayRefund({
+        paymentId: order.razorpayPaymentId,
+        amount: refundAmount,
+        notes: {
+          reason: reason || 'Customer requested refund',
+          creditNoteNumber,
+          orderId: String(order._id)
+        }
+      });
+    } else {
+      // Counter cash refund simulation
+      razorpayRefund = {
+        id: 'rfnd_cash_' + Date.now(),
+        status: 'processed',
+        amount: Math.round(refundAmount * 100)
+      };
+    }
+
+    const newRefundedTotal = previouslyRefunded + refundAmount;
+    const isFullRefund = newRefundedTotal >= Number(order.total);
+    const refundStatus = isFullRefund ? 'full' : 'partial';
+
+    const refundEntry = {
+      refundId: razorpayRefund.id,
+      amount: refundAmount,
+      reason: reason || 'Customer requested refund',
+      creditNoteNumber,
+      status: razorpayRefund.status || 'processed',
+      createdAt: new Date().toISOString()
+    };
+
+    const updatedOrder = await Order.findByIdAndUpdate(
+      order._id,
+      {
+        $set: {
+          refundStatus,
+          refundedAmount: newRefundedTotal,
+          creditNoteNumber
+        },
+        $push: {
+          refunds: refundEntry,
+          statusHistory: {
+            status: isFullRefund ? 'refunded' : order.status,
+            note: `Refund of ₹${refundAmount} processed (${refundStatus}). Credit Note: ${creditNoteNumber}. Reason: ${reason || 'N/A'}`
+          }
+        }
+      },
+      { new: true }
+    );
+
+    // Audit Log entry
+    await AuditLog.logAction({
+      userId: req.user?._id || 'owner',
+      userEmail: req.user?.email || 'owner',
+      userRole: req.user?.role || 'owner',
+      action: 'ORDER_REFUNDED',
+      entity: 'Order',
+      entityId: order._id,
+      details: {
+        refundId: razorpayRefund.id,
+        amount: refundAmount,
+        previouslyRefunded,
+        newRefundedTotal,
+        refundStatus,
+        creditNoteNumber,
+        reason: reason || 'Customer requested refund'
+      },
+      ip: req.ip
+    });
+
+    // Realtime notification
+    const io = req.app.get('io');
+    if (io) {
+      io.to('admin_kds').emit('order:refunded', updatedOrder);
+      io.to(`order_${order.orderToken}`).emit('order:refunded', updatedOrder);
+    }
+
+    res.status(200).json({
+      success: true,
+      message: `Refund of ₹${refundAmount} processed successfully. Credit Note: ${creditNoteNumber}`,
+      data: {
+        order: updatedOrder,
+        refund: refundEntry,
+        creditNoteNumber
+      }
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   createOrder,
   trackOrder,
@@ -615,5 +750,6 @@ module.exports = {
   getInvoiceData,
   printBill,
   printKot,
-  deleteOrder
+  deleteOrder,
+  refundOrder
 };

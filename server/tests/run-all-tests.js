@@ -22,6 +22,7 @@ const testSuites = [
   { name: 'Production Unit: Atomic Payment Confirmation & Webhook Concurrency', file: path.resolve(__dirname, 'unit/atomic-payment-confirmation.test.js') },
   { name: 'Production Unit: RBAC Permissions & Field-Level Gate', file: path.resolve(__dirname, 'unit/permissions-role-matrix.test.js') },
   { name: 'Production Unit: Shared State & Multi-Instance Concurrency', file: path.resolve(__dirname, 'unit/shared-state-concurrency.test.js') },
+  { name: 'Production Unit: Owner Refunds & Statutory GST Credit Notes', file: path.resolve(__dirname, 'unit/refunds.test.js') },
   { name: 'Phase 5: Supertest REST API Integration', file: path.resolve(__dirname, 'api/supertest.test.js') }
 ];
 

@@ -70,3 +70,39 @@ mongorestore --uri="$MONGO_URI" --archive="emerald_backup_20261115.gz" --gzip --
    - If internet is lost, customer devices connected to café Wi-Fi continue ordering locally via local zero-config JSON store or local MongoDB container.
 2. **Manual Kitchen KOTs:**
    - Thermal receipt printer connected directly via USB prints KOT tickets independently of cloud connectivity.
+
+---
+
+## 5. Customer Refunds & Statutory GST Credit Notes Procedure
+
+### 5.1 Refund Authorization & Endpoints
+- Only users with the **`owner`** role may authorize customer refunds. Staff attempts will receive `403 Forbidden`.
+- **Endpoint:** `POST /api/orders/:id/refund`
+  - Headers: `Authorization: Bearer <owner_jwt_token>`
+  - Request Body:
+    ```json
+    {
+      "amount": 250,
+      "reason": "Customer cancellation / item unavailable"
+    }
+    ```
+  - If `amount` is omitted, the API defaults to the remaining refundable order balance (full refund).
+
+### 5.2 Razorpay Gateway Integration & Settlement Timelines
+1. **Digital Payments (Razorpay):**
+   - Calls Razorpay Payments Refund API (`payments.refund(paymentId, { amount: amountInPaise, notes })`).
+   - **UPI Payments (Google Pay, PhonePe, Paytm, BHIM):** Settles back to customer's linked VPA/bank account **instantly to within 24–48 hours**.
+   - **Credit / Debit Cards & Netbanking:** Settles back to customer's issuing bank account within **5 to 7 bank business days**.
+2. **Counter Cash Payments:**
+   - Disbursed immediately in cash at the billing counter with a printed Credit Note voucher signed by the customer.
+
+### 5.3 Webhook Handling & Idempotency
+- Razorpay sends asynchronous `refund.processed` and `refund.failed` webhook events.
+- The webhook receiver (`POST /api/payments/webhook`) validates signatures with `RAZORPAY_WEBHOOK_SECRET`.
+- The system processes events **idempotently**: duplicate webhook deliveries are safely acknowledged with `{ status: "ok", alreadyProcessed: true }` without double-crediting or creating orphan sequences.
+
+### 5.4 Statutory GST Compliance (SAC Code 996331)
+- Under the Central Goods and Services Tax (CGST) Act, 2017:
+  1. **Atomic Credit Note Numbering:** Every refund atomically claims a consecutive, gap-free credit note number per Indian Financial Year (e.g. `CE-CN/2026-27/000001`).
+  2. **Output Tax Liability Adjustment:** Credit notes must be reported in monthly **GSTR-1** (Table 9B - Credit/Debit Notes) to reverse the 5% GST (2.5% CGST + 2.5% SGST) liability under SAC 996331.
+  3. **Audit Trail & Mandatory Record Retention:** All refund records, linked original invoices, and credit notes are written to MongoDB and the immutable `audit_logs` collection. Under Section 36 of the CGST Act, these records must be retained for at least **72 months (6 years)** from the due date of filing the annual return.

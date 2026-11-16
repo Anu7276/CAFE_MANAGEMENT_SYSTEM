@@ -37,7 +37,18 @@ const orderSchema = new mongoose.Schema({
     note: { type: String }
   }],
   isTest: { type: Boolean, default: false },
-  invoiceNumber: { type: String, default: null }
+  invoiceNumber: { type: String, default: null },
+  refundStatus: { type: String, enum: ['none', 'partial', 'full'], default: 'none' },
+  refundedAmount: { type: Number, default: 0 },
+  creditNoteNumber: { type: String, default: null },
+  refunds: [{
+    refundId: { type: String },
+    amount: { type: Number },
+    reason: { type: String },
+    creditNoteNumber: { type: String },
+    status: { type: String, default: 'processed' },
+    createdAt: { type: String, default: () => new Date().toISOString() }
+  }]
 }, {
   timestamps: true,
   _id: false
@@ -250,6 +261,10 @@ class Order {
       status: data.status || 'new',
       isTest: Boolean(data.isTest),
       invoiceNumber: data.invoiceNumber || null,
+      refundStatus: data.refundStatus || 'none',
+      refundedAmount: Number(data.refundedAmount || 0),
+      creditNoteNumber: data.creditNoteNumber || null,
+      refunds: data.refunds || [],
       statusHistory: data.statusHistory || [
         { status: data.status || 'new', timestamp: new Date().toISOString(), note: 'Order placed' }
       ],
@@ -330,9 +345,24 @@ class Order {
       });
     }
 
+    const fieldsToSet = updates.$set ? { ...updates, ...updates.$set } : { ...updates };
+    delete fieldsToSet.$set;
+    delete fieldsToSet.$push;
+
+    let refunds = fieldsToSet.refunds || (existing.refunds ? [...existing.refunds] : []);
+    if (updates.$push) {
+      if (updates.$push.refunds) {
+        refunds.push(updates.$push.refunds);
+      }
+      if (updates.$push.statusHistory) {
+        updatedStatusHistory.push(updates.$push.statusHistory);
+      }
+    }
+
     store.orders[index] = {
       ...existing,
-      ...updates,
+      ...fieldsToSet,
+      refunds,
       statusHistory: updatedStatusHistory,
       updatedAt: new Date().toISOString()
     };

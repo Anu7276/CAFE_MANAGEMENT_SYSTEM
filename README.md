@@ -187,7 +187,7 @@ stateDiagram-v2
 | `POST` | `/api/auth/login` | Public | Staff/Owner login with rate limiting & lockout. Returns JWT & sets `httpOnly` cookie. |
 | `POST` | `/api/auth/logout` | Public | Clears `httpOnly` authentication cookie. |
 | `GET` | `/api/auth/me` | Staff / Owner | Returns currently authenticated user session. |
-| `GET` | `/api/auth/staff` | Staff / Owner | Lists all staff accounts and active/lockout states. |
+| `GET` | `/api/auth/staff` | Owner Only | Lists all staff accounts and active/lockout states. |
 | `POST` | `/api/auth/staff` | Owner Only | Provisions a new staff or co-owner account. |
 | `DELETE` | `/api/auth/staff/:id` | Owner Only | Removes staff account (owner account protected). |
 
@@ -196,11 +196,11 @@ stateDiagram-v2
 | :--- | :--- | :--- | :--- |
 | `GET` | `/api/items` | Public | Returns active menu items (excludes soft-deleted items). |
 | `GET` | `/api/items/:id` | Public | Returns single item details. |
-| `POST` | `/api/items` | Staff / Owner | Create item with Multer file upload or URL. |
-| `PUT` | `/api/items/:id` | Staff / Owner | Update item details, prices, or modifiers. |
+| `POST` | `/api/items` | Owner Only | Create item with Multer file upload or URL. |
+| `PUT` | `/api/items/:id` | Owner Only | Update item details, prices, or modifiers. |
 | `PATCH` | `/api/items/:id/availability` | Staff / Owner | Toggle sold-out switch; broadcasts live WebSocket event. |
-| `DELETE` | `/api/items/:id` | Staff / Owner | Soft-delete item (`isDeleted: true`). |
-| `PATCH` | `/api/items/:id/restore` | Staff / Owner | Restore soft-deleted item. |
+| `DELETE` | `/api/items/:id` | Owner Only | Soft-delete item (`isDeleted: true`). |
+| `PATCH` | `/api/items/:id/restore` | Owner Only | Restore soft-deleted item. |
 
 ### Orders & Tracking (`/api/orders`)
 | Method | Endpoint | Access | Description |
@@ -214,6 +214,8 @@ stateDiagram-v2
 | `GET` | `/api/orders/:id/invoice` | Staff / Owner | Returns structured GST invoice data. |
 | `GET` | `/api/orders/:id/print/bill`| Staff / Owner | 80mm thermal printable customer bill. |
 | `GET` | `/api/orders/:id/print/kot` | Staff / Owner | 80mm thermal printable Kitchen Order Ticket. |
+| `DELETE` | `/api/orders/:id` | Owner Only | Permanently cancel / delete order with audit trail. |
+| `POST` | `/api/orders/:id/refund` | Owner Only | Issue full or partial refund with Razorpay integration and statutory GST credit note (`CE-CN/...`). |
 
 ### Tables & QR Codes (`/api/tables`)
 | Method | Endpoint | Access | Description |
@@ -226,25 +228,25 @@ stateDiagram-v2
 | :--- | :--- | :--- | :--- |
 | `POST` | `/api/payments/razorpay/create-order` | Public | Initiate Razorpay UPI / Card order. |
 | `POST` | `/api/payments/razorpay/verify` | Public | Verify customer payment signature. |
-| `POST` | `/api/payments/webhook` | Public | Razorpay webhook listener with HMAC verification. |
+| `POST` | `/api/payments/webhook` | Public | Razorpay webhook listener with HMAC verification and idempotent refund handlers. |
 
 ### Reports & Settings (`/api/reports`, `/api/settings`)
 | Method | Endpoint | Access | Description |
 | :--- | :--- | :--- | :--- |
-| `GET` | `/api/reports/summary` | Staff / Owner | Today's revenue, order counts, AOV, top 10 items, hourly trends. |
+| `GET` | `/api/reports/summary` | Owner Only | Today's revenue, order counts, AOV, top 10 items, hourly trends. |
 | `GET` | `/api/settings` | Public | Store profile and master "Accepting Orders" status. |
-| `PATCH` | `/api/settings` | Staff / Owner | Update café config and toggle master ordering switch. |
+| `PATCH` | `/api/settings` | Staff / Owner | Staff can only toggle `acceptingOrders`; Owner can edit all tax, business & security configs. |
 
 ---
 
 ## 8. Automated Test Suite (Phases 1–5 & Production Suites)
 
-To execute all 15 automated test suites with a single command:
+To execute all 18 automated test suites with a single command:
 ```bash
 npm test --prefix server
 ```
 
-### Complete Test Suite Manifest (17 Suites / 130+ Checks):
+### Complete Test Suite Manifest (18 Suites / 137+ Checks):
 ```bash
 # Phase 1: Security Hardening Suite (15 checks: HMAC tokens, DB pricing, brute-force lockout, idempotency)
 node server/test-phase1-security.js
@@ -293,6 +295,9 @@ node server/tests/unit/permissions-role-matrix.test.js
 
 # Production Unit: Shared State & Multi-Instance Concurrency (4 checks: Multi-instance Idempotency-Key race, Redis Socket.IO adapter, Redis rate limiter store)
 node server/tests/unit/shared-state-concurrency.test.js
+
+# Production Unit: Owner Refunds & Statutory GST Credit Notes (7 checks: Full/partial refund, Razorpay mock, gap-free CE-CN/YYYY-YY/000001, idempotent webhooks)
+node server/tests/unit/refunds.test.js
 
 # Phase 5: Supertest REST API Integration (13 checks: End-to-end HTTP pipeline, CSP, rate limiting, auth RBAC)
 npm run test:api --prefix server

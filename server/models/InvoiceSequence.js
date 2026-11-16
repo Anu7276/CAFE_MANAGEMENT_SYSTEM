@@ -4,6 +4,7 @@
  * Per Indian Financial Year (April 1 to March 31)
  */
 
+const mongoose = require('mongoose');
 const { readStore, writeStore } = require('./storeAdapter');
 
 /**
@@ -25,10 +26,37 @@ function getIndianFinancialYear(date = new Date()) {
   }
 }
 
-// In-process atomic lock mutex to guarantee sequential, gap-free assignment even under concurrent calls
-let sequenceMutex = Promise.resolve();
+/**
+ * Official Mongoose InvoiceSequence Schema
+ */
+const invoiceSequenceSchema = new mongoose.Schema({
+  fiscalYear: { type: String, required: true, index: true },
+  type: { type: String, default: 'invoice' },
+  seq: { type: Number, default: 0 }
+}, {
+  timestamps: true
+});
+
+invoiceSequenceSchema.index({ fiscalYear: 1, type: 1 }, { unique: true });
+
+const InvoiceSequenceModel = mongoose.models.InvoiceSequence || mongoose.model('InvoiceSequence', invoiceSequenceSchema);
+
+// In-process atomic lock mutex - DEV ONLY fallback for store.json
+let devSequenceMutex = Promise.resolve();
+
+function isMongoConnected() {
+  return mongoose.connection && mongoose.connection.readyState === 1;
+}
 
 class InvoiceSequence {
+  static get schema() {
+    return invoiceSequenceSchema;
+  }
+
+  static get mongooseModel() {
+    return InvoiceSequenceModel;
+  }
+
   /**
    * Returns current Indian Financial Year
    */
@@ -37,34 +65,65 @@ class InvoiceSequence {
   }
 
   /**
-   * Atomically claims the next sequential invoice number for the given fiscal year
+   * Atomically claims the next sequential invoice number for the given fiscal year.
+   * - In production / real MongoDB: Uses atomic $inc with upsert via Mongoose findOneAndUpdate.
+   *   Guaranteed gap-free, non-blocking, and unique across any cluster/multi-node environment.
+   * - In local dev without MongoDB: Uses dev-only in-process mutex on store.json.
    * @param {Date} date
    * @param {string} prefix (default: 'CE')
-   * @returns {Promise<string>} e.g. 'CE/2026-27/000001'
+   * @param {string} type (default: 'invoice')
+   * @returns {Promise<string>} e.g. 'CE/2026-27/000001' or 'CE-CN/2026-27/000001'
    */
-  static async claimNext(date = new Date(), prefix = 'CE') {
+  static async claimNext(date = new Date(), prefix = 'CE', type = 'invoice') {
+    const fy = getIndianFinancialYear(date);
+
+    if (isMongoConnected()) {
+      // PURE MONGOOSE ATOMIC INCREMENT - no mutex, no storeAdapter
+      const record = await InvoiceSequenceModel.findOneAndUpdate(
+        { fiscalYear: fy, type },
+        { $inc: { seq: 1 } },
+        { new: true, upsert: true }
+      );
+      return `${prefix}/${fy}/${String(record.seq).padStart(6, '0')}`;
+    }
+
+    if (process.env.NODE_ENV === 'production') {
+      throw new Error('FATAL: InvoiceSequence cannot use dev store fallback in production. MongoDB connection is required.');
+    }
+
+    // DEV ONLY fallback for store.json using in-process mutex
     const claimOperation = async () => {
-      const fy = getIndianFinancialYear(date);
       const store = readStore();
       
       if (!store.invoiceSequences) {
         store.invoiceSequences = {};
       }
 
-      const currentSeq = Number(store.invoiceSequences[fy]) || 0;
+      const seqKey = `${fy}_${type}`;
+      const currentSeq = Number(store.invoiceSequences[seqKey] || store.invoiceSequences[fy]) || 0;
       const nextSeq = currentSeq + 1;
       
-      store.invoiceSequences[fy] = nextSeq;
+      store.invoiceSequences[seqKey] = nextSeq;
       writeStore(store);
 
       const formattedNumber = `${prefix}/${fy}/${String(nextSeq).padStart(6, '0')}`;
       return formattedNumber;
     };
 
-    // Serialize access through sequenceMutex
-    const nextPromise = sequenceMutex.then(claimOperation);
-    sequenceMutex = nextPromise.catch(() => {});
+    // Serialize access through devSequenceMutex
+    const nextPromise = devSequenceMutex.then(claimOperation);
+    devSequenceMutex = nextPromise.catch(() => {});
     return nextPromise;
+  }
+
+  /**
+   * Atomically claims the next sequential Credit Note number for refunds.
+   * Format: CE-CN/YYYY-YY/000001
+   * @param {Date} date
+   * @returns {Promise<string>} e.g. 'CE-CN/2026-27/000001'
+   */
+  static async claimNextCreditNote(date = new Date()) {
+    return this.claimNext(date, 'CE-CN', 'credit_note');
   }
 
   /**

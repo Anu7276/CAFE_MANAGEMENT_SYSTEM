@@ -1,6 +1,7 @@
 const Order = require('../models/Order');
 const AuditLog = require('../models/AuditLog');
 const Settings = require('../models/Settings');
+const InvoiceSequence = require('../models/InvoiceSequence');
 const { createRazorpayOrder, verifyPaymentSignature, verifyWebhookSignature } = require('../services/razorpayService');
 
 /**
@@ -298,6 +299,104 @@ const handleWebhook = async (req, res, next) => {
 
         return res.json({ status: 'ok', processed: true });
       }
+    }
+
+    // 4. Handle refund.processed webhook idempotently
+    if (event === 'refund.processed') {
+      const refundEntity = payload?.refund?.entity;
+      const paymentId = refundEntity?.payment_id;
+      const refundId = refundEntity?.id;
+      const amountPaise = Number(refundEntity?.amount) || 0;
+      const refundAmount = amountPaise / 100;
+
+      if (!paymentId) {
+        return res.json({ status: 'ok', ignored: true, reason: 'missing payment_id' });
+      }
+
+      const order = await Order.findOne({ razorpayPaymentId: paymentId });
+      if (!order) {
+        return res.json({ status: 'ok', ignored: true, reason: 'order not found' });
+      }
+
+      // Idempotency: If this refundId is already recorded and processed, return alreadyProcessed: true
+      const existingRefund = (order.refunds || []).find((r) => r.refundId === refundId);
+      if (existingRefund && existingRefund.status === 'processed') {
+        return res.json({ status: 'ok', alreadyProcessed: true });
+      }
+
+      const creditNoteNumber = existingRefund?.creditNoteNumber || await InvoiceSequence.claimNextCreditNote();
+      const previouslyRefunded = Number(order.refundedAmount || 0);
+      const newRefundedTotal = existingRefund ? previouslyRefunded : (previouslyRefunded + refundAmount);
+      const isFullRefund = newRefundedTotal >= Number(order.total);
+      const refundStatus = isFullRefund ? 'full' : 'partial';
+
+      const updatedOrder = await Order.findByIdAndUpdate(
+        order._id,
+        {
+          $set: {
+            refundStatus,
+            refundedAmount: newRefundedTotal,
+            creditNoteNumber
+          },
+          ...(existingRefund ? {} : {
+            $push: {
+              refunds: {
+                refundId,
+                amount: refundAmount,
+                creditNoteNumber,
+                status: 'processed',
+                createdAt: new Date().toISOString()
+              },
+              statusHistory: {
+                status: isFullRefund ? 'refunded' : order.status,
+                note: `Webhook refund.processed: ₹${refundAmount} credited. Credit Note: ${creditNoteNumber}`
+              }
+            }
+          })
+        },
+        { new: true }
+      );
+
+      const io = req.app.get('io');
+      if (io) {
+        io.to('admin_kds').emit('order:refunded', updatedOrder);
+        io.to(`order_${order.orderToken}`).emit('order:refunded', updatedOrder);
+      }
+
+      await AuditLog.logAction({
+        userId: 'razorpay_webhook',
+        userEmail: 'webhook@razorpay.com',
+        userRole: 'webhook',
+        action: 'refund_processed_webhook',
+        entity: 'Order',
+        entityId: order._id,
+        details: { refundId, paymentId, amount: refundAmount, creditNoteNumber, refundStatus },
+        ip: req.ip
+      });
+
+      return res.json({ status: 'ok', processed: true });
+    }
+
+    // 5. Handle refund.failed webhook idempotently
+    if (event === 'refund.failed') {
+      const refundEntity = payload?.refund?.entity;
+      const paymentId = refundEntity?.payment_id;
+      const refundId = refundEntity?.id;
+
+      if (paymentId && refundId) {
+        const order = await Order.findOne({ razorpayPaymentId: paymentId });
+        if (order) {
+          const updatedRefunds = (order.refunds || []).map((r) => {
+            if (r.refundId === refundId) {
+              return { ...r, status: 'failed' };
+            }
+            return r;
+          });
+          await Order.findByIdAndUpdate(order._id, { refunds: updatedRefunds });
+        }
+      }
+
+      return res.json({ status: 'ok', recordedFailure: true });
     }
 
     return res.json({ status: 'ok' });
