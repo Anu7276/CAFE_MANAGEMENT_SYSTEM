@@ -677,7 +677,7 @@ export default function AdminDashboardPage() {
                       </div>
 
                       <div className="space-y-1.5 text-xs text-white/90 mb-3 max-h-36 overflow-y-auto">
-                        {order.items.map((it, idx) => (
+                        {(order.items || []).map((it, idx) => (
                           <div key={idx} className="flex justify-between items-center">
                             <span>
                               <strong>{it.qty}x</strong> {it.name} {it.size ? `(${it.size})` : ''}
@@ -1013,7 +1013,7 @@ export default function AdminDashboardPage() {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-white/5">
-                    {reports.topItems.map((item, idx) => (
+                    {(reports?.topItems || []).map((item, idx) => (
                       <tr key={idx} className="hover:bg-white/[0.02]">
                         <td className="py-3 font-bold text-mintGreen">#{idx + 1}</td>
                         <td className="py-3 font-bold text-white">

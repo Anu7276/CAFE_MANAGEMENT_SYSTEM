@@ -23,6 +23,15 @@ export default class ErrorBoundary extends React.Component {
     window.location.reload();
   };
 
+  handleReset = () => {
+    try {
+      sessionStorage.clear();
+      localStorage.removeItem('emerald_cart');
+      localStorage.removeItem('emerald_active_order');
+    } catch {}
+    window.location.href = '/';
+  };
+
   render() {
     if (this.state.hasError) {
       return (
@@ -32,16 +41,31 @@ export default class ErrorBoundary extends React.Component {
               <AlertTriangle className="w-7 h-7" />
             </div>
             <h2 className="text-xl font-extrabold text-white mb-2">Something went wrong</h2>
-            <p className="text-xs text-white/60 mb-6">
+            <p className="text-xs text-white/60 mb-4">
               An unexpected issue occurred while rendering this screen. Your cart and orders remain secure.
             </p>
-            <button
-              onClick={this.handleReload}
-              className="w-full h-11 rounded-full bg-mintGreen text-[#071a12] font-bold text-xs flex items-center justify-center gap-2 hover:bg-[#88e7bd] transition shadow-lg shadow-mintGreen/20"
-            >
-              <RefreshCw className="w-4 h-4" />
-              <span>Reload Application</span>
-            </button>
+
+            {this.state.error?.message && (
+              <div className="mb-6 p-3 rounded-xl bg-black/40 border border-white/10 text-[11px] text-coralRed/90 font-mono text-left overflow-x-auto max-h-24">
+                {this.state.error.message}
+              </div>
+            )}
+
+            <div className="space-y-2">
+              <button
+                onClick={this.handleReload}
+                className="w-full h-11 rounded-full bg-mintGreen text-[#071a12] font-bold text-xs flex items-center justify-center gap-2 hover:bg-[#88e7bd] transition shadow-lg shadow-mintGreen/20"
+              >
+                <RefreshCw className="w-4 h-4" />
+                <span>Reload Application</span>
+              </button>
+              <button
+                onClick={this.handleReset}
+                className="w-full h-9 rounded-full bg-white/10 hover:bg-white/15 text-white/70 font-semibold text-xs transition"
+              >
+                Clear Local Session & Return Home
+              </button>
+            </div>
           </div>
         </div>
       );

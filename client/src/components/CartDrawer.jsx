@@ -40,7 +40,7 @@ export default function CartDrawer({ isOpen, onClose, onOrderPlaced }) {
         {
           table,
           tableSig,
-          items: cart.map((c) => ({
+          items: (cart || []).map((c) => ({
             itemId: c.id,
             name: c.name,
             size: c.size,
@@ -104,15 +104,22 @@ export default function CartDrawer({ isOpen, onClose, onOrderPlaced }) {
 
           {/* Cart Items List */}
           <div className="mt-4 flex flex-col gap-3 max-h-[45vh] overflow-y-auto pr-1">
-            {!cart.length ? (
+            {!(cart && cart.length) ? (
               <div className="text-center py-10 text-white/50 text-sm">{t('cartEmpty')}</div>
             ) : (
-              cart.map((item, idx) => (
+              (cart || []).map((item, idx) => (
                 <div
                   key={`${item.id}-${item.size}`}
                   className="flex items-center justify-between p-3 rounded-2xl bg-black/30 border border-white/5"
                 >
-                  <img src={item.image} alt={item.name} className="w-12 h-12 rounded-xl object-cover" />
+                  {item.image ? (
+                    <img
+                      src={item.image}
+                      alt={item.name}
+                      onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                      className="w-12 h-12 rounded-xl object-cover"
+                    />
+                  ) : null}
                   <div className="flex-1 ml-3 min-w-0">
                     <h4 className="text-sm font-bold text-white truncate">{item.name}</h4>
                     <span className="text-[11px] text-white/60 block">

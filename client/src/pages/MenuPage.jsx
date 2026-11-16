@@ -54,8 +54,8 @@ export default function MenuPage() {
         const res = await api.get('/items', {
           params: { category: selectedCat, search, vegOnly }
         });
-        setItems(res.data.data);
-        setCategories(res.data.categories);
+        setItems(Array.isArray(res.data?.data) ? res.data.data : []);
+        setCategories(Array.isArray(res.data?.categories) ? res.data.categories : []);
       } catch (err) {
         console.error(err);
       } finally {
@@ -165,7 +165,7 @@ export default function MenuPage() {
               >
                 🍽️ {t('all')}
               </button>
-              {categories.map((c) => (
+              {(categories || []).map((c) => (
                 <button
                   key={c.slug}
                   onClick={() => setSelectedCat(c.slug)}
@@ -208,9 +208,9 @@ export default function MenuPage() {
             )}
 
             {/* Compact 210px–250px Card Grid matching user reference */}
-            {!menuLoading && items.length > 0 && (
+            {!menuLoading && (items || []).length > 0 && (
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-                {items.map((item) => (
+                {(items || []).map((item) => (
                   <DishCard key={item._id} item={item} onOpenDetail={setModalItem} />
                 ))}
               </div>

@@ -8,6 +8,7 @@ export default function DetailModal({ item, onClose }) {
   const [selectedSize, setSelectedSize] = useState(item.sizes?.[0]?.name || '');
   const [qty, setQty] = useState(1);
   const [liked, setLiked] = useState(false);
+  const [imgError, setImgError] = useState(false);
 
   const sizeExtra = item.sizes?.find((s) => s.name === selectedSize)?.extra || 0;
   const currentTotal = (item.price + sizeExtra) * qty;
@@ -26,10 +27,19 @@ export default function DetailModal({ item, onClose }) {
           exit={{ opacity: 0, scale: 0.95 }}
           className="relative w-full max-w-[380px] rounded-3xl overflow-hidden bg-[#0a1e16] border border-white/15 shadow-2xl flex flex-col"
         >
-          {/* Hero Image */}
-          <div className="relative h-[220px] w-full">
-            <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
-            <div className="absolute inset-0 bg-gradient-to-t from-[#0a1e16] via-transparent to-black/40" />
+          {/* Hero Image or Fallback */}
+          <div className="relative h-[220px] w-full bg-gradient-to-br from-[#0e2a1e] to-[#04110b] flex items-center justify-center">
+            {!imgError && item.image ? (
+              <img
+                src={item.image}
+                alt={item.name}
+                onError={() => setImgError(true)}
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <span className="text-6xl">{item.emoji || '🍽️'}</span>
+            )}
+            <div className="absolute inset-0 bg-gradient-to-t from-[#0a1e16] via-transparent to-black/40 pointer-events-none" />
 
             {/* Top Close & Heart */}
             <div className="absolute top-3 inset-x-3 flex items-center justify-between">
@@ -67,7 +77,7 @@ export default function DetailModal({ item, onClose }) {
                   Size Options
                 </span>
                 <div className="grid grid-cols-3 gap-2">
-                  {item.sizes.map((s) => (
+                  {(item.sizes || []).map((s) => (
                     <button
                       key={s.name}
                       onClick={() => setSelectedSize(s.name)}

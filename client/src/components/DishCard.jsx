@@ -9,6 +9,7 @@ export default function DishCard({ item, onOpenDetail }) {
   const { t } = useI18n();
   const [qty, setQty] = useState(1);
   const [isLiked, setIsLiked] = useState(false);
+  const [imgError, setImgError] = useState(false);
 
   const handleAdd = (e) => {
     e.stopPropagation();
@@ -23,13 +24,20 @@ export default function DishCard({ item, onOpenDetail }) {
       onClick={() => onOpenDetail(item)}
       className="relative w-full aspect-[1/1.44] min-h-[290px] max-h-[350px] rounded-[22px] overflow-hidden bg-[#06160f] border border-white/10 shadow-[0_10px_26px_rgba(0,0,0,0.4)] flex flex-col justify-between cursor-pointer group select-none"
     >
-      {/* 1. Full-Bleed Food Image */}
-      <img
-        src={item.image}
-        alt={item.name}
-        loading="lazy"
-        className="absolute inset-0 w-full h-full object-cover object-[center_25%] transition-transform duration-500 group-hover:scale-105 z-0"
-      />
+      {/* 1. Full-Bleed Food Image or Fallback */}
+      {!imgError && item.image ? (
+        <img
+          src={item.image}
+          alt={item.name}
+          loading="lazy"
+          onError={() => setImgError(true)}
+          className="absolute inset-0 w-full h-full object-cover object-[center_25%] transition-transform duration-500 group-hover:scale-105 z-0"
+        />
+      ) : (
+        <div className="absolute inset-0 w-full h-full bg-gradient-to-br from-[#0e2a1e] via-[#091f16] to-[#04110b] flex flex-col items-center justify-center text-5xl select-none z-0">
+          <span>{item.emoji || '🍽️'}</span>
+        </div>
+      )}
 
       {/* 2. Floating Top Header */}
       <div className="relative z-10 flex items-center justify-between p-3">

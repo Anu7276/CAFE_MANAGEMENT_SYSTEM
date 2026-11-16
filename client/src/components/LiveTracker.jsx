@@ -200,7 +200,7 @@ export default function LiveTracker({ orderId, orderToken, initialOrder, onOrder
           </div>
 
           <div className="space-y-1.5 text-xs text-white/80 mb-3">
-            {order.items.map((item, idx) => (
+            {(order.items || []).map((item, idx) => (
               <div key={idx} className="flex justify-between items-center">
                 <span>{item.qty}x {item.name} {item.size ? `(${item.size})` : ''}</span>
                 <span className="font-semibold text-white">₹{item.price * item.qty}</span>

@@ -56,11 +56,12 @@ self.addEventListener('message', (event) => {
 self.addEventListener('fetch', (event) => {
   const url = new URL(event.request.url);
 
-  // Never cache API, WebSockets, or Cloudinary uploads to avoid stale data
+  // Never cache API, WebSockets, Cloudinary, Unsplash, or Razorpay requests to avoid stale or blocked media
   if (
     url.pathname.startsWith('/api') ||
     url.pathname.startsWith('/socket.io') ||
     url.hostname.includes('cloudinary.com') ||
+    url.hostname.includes('unsplash.com') ||
     url.hostname.includes('razorpay.com')
   ) {
     return;
@@ -97,9 +98,10 @@ self.addEventListener('fetch', (event) => {
           return networkResponse;
         })
         .catch(() => {
-          // Fallback on offline asset
+          // Fallback on offline asset with valid SVG placeholder
           if (event.request.destination === 'image') {
-            return new Response('', { headers: { 'Content-Type': 'image/svg+xml' } });
+            const placeholderSvg = '<svg xmlns="http://www.w3.org/2000/svg" width="400" height="400" viewBox="0 0 400 400"><rect width="100%" height="100%" fill="#06160f"/><text x="50%" y="50%" font-size="64" text-anchor="middle" dominant-baseline="middle">☕</text></svg>';
+            return new Response(placeholderSvg, { headers: { 'Content-Type': 'image/svg+xml' } });
           }
         });
     })

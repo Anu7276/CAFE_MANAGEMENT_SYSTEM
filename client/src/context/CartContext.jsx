@@ -6,7 +6,8 @@ export const CartProvider = ({ children }) => {
   const [cart, setCart] = useState(() => {
     try {
       const saved = localStorage.getItem('emerald_cart');
-      return saved ? JSON.parse(saved) : [];
+      const parsed = saved ? JSON.parse(saved) : [];
+      return Array.isArray(parsed) ? parsed : [];
     } catch {
       return [];
     }
@@ -83,8 +84,9 @@ export const CartProvider = ({ children }) => {
 
   const clearCart = () => setCart([]);
 
-  const cartCount = cart.reduce((acc, i) => acc + i.qty, 0);
-  const subtotal = cart.reduce((acc, i) => acc + i.price * i.qty, 0);
+  const safeCart = Array.isArray(cart) ? cart : [];
+  const cartCount = safeCart.reduce((acc, i) => acc + (Number(i.qty) || 0), 0);
+  const subtotal = safeCart.reduce((acc, i) => acc + (Number(i.price) || 0) * (Number(i.qty) || 0), 0);
   const tax = Math.round(subtotal * 0.05);
   const total = subtotal + tax;
 
