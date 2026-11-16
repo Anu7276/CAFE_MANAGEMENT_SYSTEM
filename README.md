@@ -19,6 +19,7 @@
 - [12. PWA & Kitchen Display Service Worker](#12-pwa--kitchen-display-service-worker)
 - [13. Multi-Language i18n (English, Hindi, Gujarati)](#13-multi-language-i18n-english-hindi-gujarati)
 - [14. Operations Runbook & OpenAPI Specs](#14-operations-runbook--openapi-specs)
+- [15. Contributing & Documentation Standards](#15-contributing--documentation-standards)
 
 ---
 
@@ -422,3 +423,27 @@ flowchart LR
   - Secret rotation runbook for JWT keys, table HMAC secrets, and Razorpay credentials.
   - Offline internet outage and network fallback runbook for café staff.
 - **API Documentation**: Full OpenAPI 3.0 specification is available in [`docs/openapi.yaml`](docs/openapi.yaml), importable directly into Postman, Swagger UI, or Insomnia.
+
+---
+
+## 15. Contributing & Documentation Standards
+
+When contributing code, bug fixes, or documentation to Café Emerald, verify the automated check suites before submitting a pull request:
+
+```bash
+# Validate documentation Mermaid diagrams
+npm run docs:check
+
+# Run backend unit, API, and concurrency test suites
+npm test --prefix server
+
+# Run frontend production build
+npm run build --prefix client
+```
+
+### Mermaid Rules
+To guarantee compatibility with GitHub's Markdown renderer and pass the CI `scripts/check-mermaid.js` gate:
+- **No semicolons in message text**: In Mermaid sequence diagrams, `;` acts as an inline statement delimiter. Use commas or clean prose instead.
+- **No `<br/>` in node labels**: Use concise phrasing or separate nodes rather than raw HTML tags.
+- **Quote labels that contain special characters**: Always enclose node and participant labels containing punctuation, parentheses, brackets, colons, or slashes in double quotes (e.g. `["Express Gateway / Port 5000"]`).
+

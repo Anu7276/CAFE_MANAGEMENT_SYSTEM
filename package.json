@@ -1,0 +1,10 @@
+{
+  "name": "cafe-emerald",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Production QR Ordering & Kitchen Display System for Café Emerald",
+  "scripts": {
+    "docs:check": "node scripts/check-mermaid.js"
+  }
+}
