@@ -244,7 +244,7 @@ To execute all 15 automated test suites with a single command:
 npm test --prefix server
 ```
 
-### Complete Test Suite Manifest (16 Suites / 126+ Checks):
+### Complete Test Suite Manifest (17 Suites / 130+ Checks):
 ```bash
 # Phase 1: Security Hardening Suite (15 checks: HMAC tokens, DB pricing, brute-force lockout, idempotency)
 node server/test-phase1-security.js
@@ -290,6 +290,9 @@ node server/tests/unit/atomic-payment-confirmation.test.js
 
 # Production Unit: RBAC Permissions & Field-Level Gate (4 checks: Staff route lockdown, field-level 403 matrix, order & item deletion restrictions)
 node server/tests/unit/permissions-role-matrix.test.js
+
+# Production Unit: Shared State & Multi-Instance Concurrency (4 checks: Multi-instance Idempotency-Key race, Redis Socket.IO adapter, Redis rate limiter store)
+node server/tests/unit/shared-state-concurrency.test.js
 
 # Phase 5: Supertest REST API Integration (13 checks: End-to-end HTTP pipeline, CSP, rate limiting, auth RBAC)
 npm run test:api --prefix server

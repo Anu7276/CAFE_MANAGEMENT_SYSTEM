@@ -4,6 +4,7 @@ const Item = require('../models/Item');
 const Settings = require('../models/Settings');
 const AuditLog = require('../models/AuditLog');
 const InvoiceSequence = require('../models/InvoiceSequence');
+const IdempotencyKey = require('../models/IdempotencyKey');
 const { verifyTableSig } = require('../utils/tableToken');
 const { validateStatusTransition } = require('../utils/orderStateMachine');
 const { generateBillHtml, generateKotHtml } = require('../utils/invoiceGenerator');
@@ -32,7 +33,7 @@ const createOrder = async (req, res, next) => {
       });
     }
 
-    // 1. Idempotency Check
+    // 1. Idempotency Check & Atomic Reservation
     if (idempotencyKey) {
       const existing = await Order.findByIdempotencyKey(idempotencyKey);
       if (existing) {
@@ -42,6 +43,28 @@ const createOrder = async (req, res, next) => {
           data: existing,
           isIdempotentReplay: true
         });
+      }
+
+      // Atomically reserve the key across shared instances
+      const reservation = await IdempotencyKey.reserve(idempotencyKey);
+      if (!reservation.isNew) {
+        let resolvedOrder = reservation.existing?.order || await Order.findByIdempotencyKey(idempotencyKey);
+        if (!resolvedOrder) {
+          for (let i = 0; i < 30; i++) {
+            await new Promise((r) => setTimeout(r, 100));
+            resolvedOrder = await IdempotencyKey.getOrder(idempotencyKey) || await Order.findByIdempotencyKey(idempotencyKey);
+            if (resolvedOrder) break;
+          }
+        }
+
+        if (resolvedOrder) {
+          return res.status(200).json({
+            success: true,
+            message: 'Idempotent replay: Order already processed',
+            data: resolvedOrder,
+            isIdempotentReplay: true
+          });
+        }
       }
     }
 
@@ -152,24 +175,44 @@ const createOrder = async (req, res, next) => {
       ? `TEST-${Date.now().toString().slice(-6)}`
       : await InvoiceSequence.claimNext();
 
-    const order = await Order.create({
-      orderToken,
-      idempotencyKey,
-      invoiceNumber,
-      table: tableNumber,
-      tableSig: providedSig || (isSigValid ? 'valid' : 'dev_unsigned'),
-      items: validatedItems,
-      subtotal: calculatedSubtotal,
-      cgst,
-      sgst,
-      tax,
-      total,
-      note: note ? String(note).slice(0, 300) : '',
-      paymentMethod: paymentMethod || 'counter',
-      paymentStatus: 'pending',
-      status: initialStatus,
-      isTest: isTestOrder
-    });
+    let order;
+    try {
+      order = await Order.create({
+        orderToken,
+        idempotencyKey,
+        invoiceNumber,
+        table: tableNumber,
+        tableSig: providedSig || (isSigValid ? 'valid' : 'dev_unsigned'),
+        items: validatedItems,
+        subtotal: calculatedSubtotal,
+        cgst,
+        sgst,
+        tax,
+        total,
+        note: note ? String(note).slice(0, 300) : '',
+        paymentMethod: paymentMethod || 'counter',
+        paymentStatus: 'pending',
+        status: initialStatus,
+        isTest: isTestOrder
+      });
+
+      if (idempotencyKey) {
+        await IdempotencyKey.complete(idempotencyKey, order);
+      }
+    } catch (err) {
+      if (idempotencyKey && (err.code === 11000 || err.message?.includes('E11000'))) {
+        const existing = await Order.findByIdempotencyKey(idempotencyKey) || await IdempotencyKey.getOrder(idempotencyKey);
+        if (existing) {
+          return res.status(200).json({
+            success: true,
+            message: 'Idempotent replay: Order already processed',
+            data: existing,
+            isIdempotentReplay: true
+          });
+        }
+      }
+      throw err;
+    }
 
     // 4. Scoped Socket.IO room broadcast (No global leaks)
     const io = req.app.get('io');
