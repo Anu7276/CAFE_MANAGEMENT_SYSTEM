@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Heart, ShoppingBag, Plus, Minus, Coffee } from 'lucide-react';
 import { useCart } from '../context/CartContext';
@@ -18,26 +19,27 @@ export default function DetailModal({ item, onClose }) {
     onClose();
   };
 
-  return (
+  if (typeof document === 'undefined') return null;
+
+  return createPortal(
     <AnimatePresence>
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm">
+      <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/85 backdrop-blur-md">
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           exit={{ opacity: 0, scale: 0.95 }}
-          className="relative w-full max-w-[380px] rounded-3xl overflow-hidden bg-[#0a1e16] border border-white/15 shadow-2xl flex flex-col"
+          className="relative w-full max-w-[380px] rounded-3xl overflow-hidden bg-[#0a1e16] border border-white/15 shadow-[0_20px_60px_rgba(0,0,0,0.8)] flex flex-col"
         >
           {/* Hero Image or Fallback */}
-          <div className="relative h-[220px] w-full bg-gradient-to-br from-[#0e2a1e] to-[#04110b] flex items-center justify-center">
-            {!imgError && item.image ? (
+          <div className="relative h-[220px] w-full bg-gradient-to-br from-[#0e2a1e] via-[#091f16] to-[#04110b] flex items-center justify-center">
+            <span className="text-6xl select-none">{item.emoji || '🍽️'}</span>
+            {!imgError && item.image && (
               <img
                 src={item.image}
-                alt={item.name}
+                alt=""
                 onError={() => setImgError(true)}
-                className="w-full h-full object-cover"
+                className="absolute inset-0 w-full h-full object-cover"
               />
-            ) : (
-              <span className="text-6xl">{item.emoji || '🍽️'}</span>
             )}
             <div className="absolute inset-0 bg-gradient-to-t from-[#0a1e16] via-transparent to-black/40 pointer-events-none" />
 
@@ -125,7 +127,8 @@ export default function DetailModal({ item, onClose }) {
           </div>
         </motion.div>
       </div>
-    </AnimatePresence>
+    </AnimatePresence>,
+    document.body
   );
 }
 

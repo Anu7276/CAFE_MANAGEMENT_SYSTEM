@@ -1,9 +1,18 @@
 import React, { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { motion } from 'framer-motion';
 import { CheckCircle2, Clock, Utensils, Smile, ShieldCheck, QrCode, CreditCard, Receipt, Wifi, WifiOff } from 'lucide-react';
 import { useSocketState } from '../context/SocketContext';
 import { useI18n } from '../context/I18nContext';
 import api from '../api/client';
+
+const formatPrice = (val) => {
+  const num = Number(val || 0);
+  return num.toLocaleString('en-IN', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  });
+};
 
 export default function LiveTracker({ orderId, orderToken, initialOrder, onOrderMore }) {
   const { socket, isConnected, onReconnect } = useSocketState();
@@ -243,7 +252,7 @@ export default function LiveTracker({ orderId, orderToken, initialOrder, onOrder
                 <span className="font-bold text-emerald-300">
                   {t('paidSettled')} ({order.paymentMethod?.toUpperCase() || 'UPI'})
                 </span>
-                <span className="text-mintGreen font-bold">₹{order.total}</span>
+                <span className="text-mintGreen font-bold">₹{formatPrice(order.total)}</span>
               </div>
             ) : (
               <div className="space-y-2">
@@ -253,7 +262,7 @@ export default function LiveTracker({ orderId, orderToken, initialOrder, onOrder
                   className="w-full h-11 rounded-2xl bg-mintGreen text-[#071a12] font-bold text-xs flex items-center justify-center gap-2 hover:bg-[#88e7bd] transition shadow-lg shadow-mintGreen/20 disabled:opacity-50"
                 >
                   <QrCode className="w-4 h-4" />
-                  <span>{paying ? 'Connecting Gateway...' : `${t('payUpi')} (₹${order.total})`}</span>
+                  <span>{paying ? 'Connecting Gateway...' : `${t('payUpi')} (₹${formatPrice(order.total)})`}</span>
                 </button>
                 <div className="text-center text-[10px] text-white/50">
                   {t('payCounter')}
@@ -271,10 +280,10 @@ export default function LiveTracker({ orderId, orderToken, initialOrder, onOrder
         {t('orderMore')}
       </button>
 
-      {/* UPI Checkout Modal */}
-      {upiModal && paymentData && (
-        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-[#0b241a] border border-white/10 rounded-3xl p-6 text-center max-w-[340px] shadow-2xl">
+      {/* UPI Checkout Modal Portal */}
+      {upiModal && paymentData && typeof document !== 'undefined' && createPortal(
+        <div className="fixed inset-0 z-[9999] bg-black/85 backdrop-blur-md flex items-center justify-center p-4">
+          <div className="bg-[#0b241a] border border-white/20 rounded-3xl p-6 text-center w-full max-w-[340px] shadow-[0_20px_60px_rgba(0,0,0,0.8)] relative z-[10000]">
             <h3 className="text-base font-extrabold text-white mb-1">UPI Instant Checkout</h3>
             <p className="text-xs text-mintGreen font-semibold mb-4">Café Emerald Table {order.table}</p>
             
@@ -284,30 +293,31 @@ export default function LiveTracker({ orderId, orderToken, initialOrder, onOrder
                 <span className="text-3xl mb-1">📱</span>
                 <span className="text-[10px] font-bold text-gray-800 uppercase tracking-wider">UPI / GPay / Paytm</span>
                 <span className="text-[9px] text-gray-500 font-mono mt-1">emeraldcafe@upi</span>
-                <div className="mt-2 text-xs font-extrabold text-[#071a12]">₹{order.total}.00</div>
+                <div className="mt-2 text-sm font-extrabold text-[#071a12]">₹{formatPrice(order.total)}</div>
               </div>
             </div>
 
             <div className="text-xs text-white/70 mb-4">
-              Razorpay Order ID: <code className="font-mono text-[10px]">{paymentData.razorpayOrderId.slice(0, 15)}...</code>
+              Razorpay Order ID: <code className="font-mono text-[10px] text-mintGreen">{paymentData.razorpayOrderId.slice(0, 15)}...</code>
             </div>
 
             <div className="flex gap-2">
               <button
                 onClick={handleConfirmUpiPaid}
-                className="flex-1 py-2.5 rounded-xl bg-mintGreen text-[#071a12] font-bold text-xs"
+                className="flex-1 py-3 rounded-xl bg-mintGreen text-[#071a12] font-bold text-xs hover:bg-[#88e7bd] transition shadow-lg shadow-mintGreen/20 active:scale-95"
               >
                 Simulate Successful Pay
               </button>
               <button
                 onClick={() => setUpiModal(false)}
-                className="px-3 py-2.5 rounded-xl bg-white/10 text-white font-bold text-xs"
+                className="px-4 py-3 rounded-xl bg-white/10 text-white font-bold text-xs hover:bg-white/20 transition active:scale-95"
               >
                 Cancel
               </button>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </motion.div>
   );

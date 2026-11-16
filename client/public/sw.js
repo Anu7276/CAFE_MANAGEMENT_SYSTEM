@@ -22,7 +22,7 @@ self.addEventListener('install', (event) => {
       return cache.addAll(ASSETS_TO_PRECACHE);
     })
   );
-  // Do not automatically skip waiting; wait for user confirmation or SKIP_WAITING message
+  self.skipWaiting();
 });
 
 // Activate Event - Purge outdated caches from previous deployments

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { motion } from 'framer-motion';
 import { X, Plus, Minus, ArrowRight, ShieldCheck, Banknote, Smartphone } from 'lucide-react';
 import { useCart } from '../context/CartContext';
@@ -69,10 +70,10 @@ export default function CartDrawer({ isOpen, onClose, onOrderPlaced }) {
     }
   };
 
-  if (!isOpen) return null;
+  if (!isOpen || typeof document === 'undefined') return null;
 
-  return (
-    <div className="fixed inset-0 z-50 flex justify-end bg-black/60 backdrop-blur-sm">
+  return createPortal(
+    <div className="fixed inset-0 z-[9999] flex justify-end bg-black/75 backdrop-blur-md">
       <motion.div
         initial={{ x: '100%' }}
         animate={{ x: 0 }}
@@ -243,6 +244,7 @@ export default function CartDrawer({ isOpen, onClose, onOrderPlaced }) {
           </button>
         </div>
       </motion.div>
-    </div>
+    </div>,
+    document.body
   );
 }

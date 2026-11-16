@@ -793,7 +793,7 @@ export default function AdminDashboardPage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-white/5 text-white/80">
-                  {menuItems.map((item) => (
+                  {(menuItems || []).map((item) => (
                     <tr key={item._id} className={item.isDeleted ? 'opacity-40 bg-black/20' : 'hover:bg-white/[0.02]'}>
                       <td className="p-4 flex items-center gap-3">
                         <img
@@ -906,7 +906,7 @@ export default function AdminDashboardPage() {
             </div>
 
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-              {tables.map((tbl) => (
+              {(tables || []).map((tbl) => (
                 <div
                   key={tbl.tableNumber}
                   className="bg-[#0b241a] border border-white/10 rounded-3xl p-5 text-center flex flex-col items-center justify-between shadow-lg"
@@ -1061,7 +1061,7 @@ export default function AdminDashboardPage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-white/5 text-white/80">
-                  {staffList.map((member) => (
+                  {(staffList || []).map((member) => (
                     <tr key={member._id} className="hover:bg-white/[0.02]">
                       <td className="p-4 font-bold text-white">{member.name}</td>
                       <td className="p-4 text-white/60">{member.email}</td>
